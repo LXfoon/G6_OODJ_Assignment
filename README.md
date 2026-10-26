@@ -38,7 +38,3 @@ The system supports **six** distinct user roles, each with its own dedicated men
 - Filterable and searchable reports (staff, revenue, stock, attendance).
 - Input validation on all user entries to prevent logical errors.
 - Additional features beyond the mandatory requirements (extra marks).
-
----
-
-Feel free to trim this down if you want a shorter "About" blurb (GitHub only shows the first ~350 characters), but the top few paragraphs work well as the repo description and README intro.
