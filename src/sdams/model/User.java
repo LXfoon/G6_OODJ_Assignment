@@ -9,15 +9,18 @@ package sdams.model;
  * @author Foon
  */
 public abstract class User {    
-    private String id, name, email, password;
-    private long phoneNum;
+    private String id, name, email, password, role;
+    private String phoneNum;
     
-    public User(String id, String name, String email, String password, long phoneNum){
+    public User(){};
+    
+    public User(String id, String name, String email, String password, String phoneNum, String role){
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.phoneNum = phoneNum;
+        this.role = role;
     }
     
     public String getId(){
@@ -36,8 +39,12 @@ public abstract class User {
         return this.password;
     }
     
-    public long getPhoneNum(){
+    public String getPhoneNum(){
         return this.phoneNum;
+    }
+    
+    public String getRole(){
+        return this.role;
     }
     
     public void setId(String id){
@@ -56,11 +63,15 @@ public abstract class User {
         this.password = password;
     }
     
-    public void setPhoneNum(long phoneNum){
+    public void setPhoneNum(String phoneNum){
         this.phoneNum = phoneNum;
     }
     
+    public void setRole(String role){
+        this.role = role;
+    }
+    
     public String toLine(){
-        return this.id + "|" + this.name + "|" + this.email + "|" + this.password + "|" + this.phoneNum;
+        return this.id + "|" + this.name + "|" + this.email + "|" + this.password + "|" + this.phoneNum+ "|" + this.role;
     }
 }
