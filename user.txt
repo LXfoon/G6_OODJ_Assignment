@@ -1,2 +1,7 @@
-003|lsdai|eors|asiod|12345
-004|lsdai|eors|asiod|12345
+1|Adam|asd@gmail.com|abc123|123456789|Manager
+2|Ali|addd@gmail.com|abc123|123456789|Attendance
+3|May|may@gmail.com|abc123|123456789|Admin
+4|Lee|lee@gmail.com|abc123|123456789|Admin
+5|Liam Lian|liamll@gmail.com|0987|0144567888|Admin
+6|Adrian Tan|adrain@gmail.com|(mQmO0+R|0198874432|Admin
+7|asda|po@|^*(rKrKt|0196634443|Admin
