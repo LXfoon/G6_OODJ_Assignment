@@ -62,6 +62,11 @@ public class ManagerHome extends javax.swing.JFrame {
         });
 
         staffReportBtn.setText("Staff Report");
+        staffReportBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                staffReportBtnActionPerformed(evt);
+            }
+        });
 
         revenueReportBtn.setText("Revenue Report");
 
@@ -128,6 +133,12 @@ public class ManagerHome extends javax.swing.JFrame {
         manage.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_manageAdminBtnActionPerformed
+
+    private void staffReportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_staffReportBtnActionPerformed
+        StaffReport staffReport = new StaffReport();
+        staffReport.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_staffReportBtnActionPerformed
 
     /**
      * @param args the command line arguments

@@ -15,6 +15,8 @@ public class AttendanceHome extends javax.swing.JFrame {
      */
     public AttendanceHome() {
         initComponents();
+        setLocationRelativeTo(null);
+        usernameTxt.setText(LoggedIn.getUsername());
     }
 
     /**
@@ -27,30 +29,116 @@ public class AttendanceHome extends javax.swing.JFrame {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        usernameTxt = new javax.swing.JLabel();
+        manageAttBtn = new javax.swing.JButton();
+        attRecordBtn = new javax.swing.JButton();
+        attReportBtn = new javax.swing.JButton();
+        exitBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setText("Attendance");
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel1.setText("Attendance Officer Main Menu");
+
+        jLabel2.setText("Welcome");
+
+        usernameTxt.setText("myUsername");
+
+        manageAttBtn.setText("Manage Class Attendance");
+        manageAttBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                manageAttBtnActionPerformed(evt);
+            }
+        });
+
+        attRecordBtn.setText("Attendance Records");
+        attRecordBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                attRecordBtnActionPerformed(evt);
+            }
+        });
+
+        attReportBtn.setText("Attendance Report");
+        attReportBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                attReportBtnActionPerformed(evt);
+            }
+        });
+
+        exitBtn.setText("Logout");
+        exitBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitBtnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(139, 139, 139)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(141, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(exitBtn))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(71, 71, 71)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(attReportBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(attRecordBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(manageAttBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(188, 188, 188)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(usernameTxt)))
+                .addContainerGap(79, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(71, 71, 71)
+                .addContainerGap(26, Short.MAX_VALUE)
                 .addComponent(jLabel1)
-                .addContainerGap(213, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(usernameTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(manageAttBtn)
+                .addGap(18, 18, 18)
+                .addComponent(attRecordBtn)
+                .addGap(18, 18, 18)
+                .addComponent(attReportBtn)
+                .addGap(50, 50, 50)
+                .addComponent(exitBtn)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void manageAttBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_manageAttBtnActionPerformed
+        ManageAtt manageAtt = new ManageAtt();
+        manageAtt.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_manageAttBtnActionPerformed
+
+    private void attRecordBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attRecordBtnActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_attRecordBtnActionPerformed
+
+    private void attReportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attReportBtnActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_attReportBtnActionPerformed
+
+    private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
+        LoggedIn.setUsername("");
+        Login login = new Login();
+        login.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_exitBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -88,6 +176,12 @@ public class AttendanceHome extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton attRecordBtn;
+    private javax.swing.JButton attReportBtn;
+    private javax.swing.JButton exitBtn;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JButton manageAttBtn;
+    private javax.swing.JLabel usernameTxt;
     // End of variables declaration//GEN-END:variables
 }

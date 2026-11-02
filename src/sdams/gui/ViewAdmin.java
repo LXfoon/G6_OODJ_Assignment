@@ -19,6 +19,7 @@ public class ViewAdmin extends javax.swing.JFrame {
     ArrayList<Admin> allAdmin = new ArrayList<>();
     Admin selectedAdmin = new Admin();
     String id = SelectedAdmin.getId();
+    ManageAdmin manage = new ManageAdmin();
     /**
      * Creates new form ViewAdmin
      */
@@ -72,6 +73,11 @@ public class ViewAdmin extends javax.swing.JFrame {
         jLabel2.setText("ID");
 
         deleteBtn.setText("Delete Admin");
+        deleteBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteBtnActionPerformed(evt);
+            }
+        });
 
         backBtn.setText("Back to Manage Admin");
         backBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -200,10 +206,31 @@ public class ViewAdmin extends javax.swing.JFrame {
             FileUtil.write("user.txt", allAdmin, Admin::toLine);
             
             JOptionPane.showMessageDialog(null, "Admin edited successfully!");
+            manage.refreshTable();
         }catch (ValidationException v){
             JOptionPane.showMessageDialog(null, v.getMessage());
         }
     }//GEN-LAST:event_updateBtnActionPerformed
+
+    private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
+        int confirm = JOptionPane.showConfirmDialog(
+                null,
+                "Are you sure you want to delete this admin?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION
+        );
+        
+        if(confirm == JOptionPane.YES_OPTION){
+            allAdmin.remove(selectedAdmin);
+            
+            FileUtil.write("user.txt", allAdmin, Admin::toLine);
+            JOptionPane.showMessageDialog(null, "Admin deleted successfully!");
+
+            manage.setVisible(true);
+            manage.refreshTable();
+            this.dispose();
+        }
+    }//GEN-LAST:event_deleteBtnActionPerformed
 
     /**
      * @param args the command line arguments

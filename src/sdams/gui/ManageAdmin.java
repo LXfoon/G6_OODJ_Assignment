@@ -21,7 +21,13 @@ public class ManageAdmin extends javax.swing.JFrame {
      */
     public ManageAdmin() {
         initComponents();
+        searchTxt.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override public void insertUpdate(javax.swing.event.DocumentEvent e) { searchAdmin(); }
+            @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { searchAdmin(); }
+            @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { searchAdmin(); }
+        });
         setLocationRelativeTo(null);
+        refreshTable();
         
         try{
             FileUtil.read("user.txt", allAdmin, Admin::fromLine);
@@ -44,7 +50,52 @@ public class ManageAdmin extends javax.swing.JFrame {
             System.out.println("Error: "+e.getMessage());
         }
     }
-
+    
+    public void refreshTable() {
+        FileUtil.read("user.txt", allAdmin, Admin::fromLine);
+        DefaultTableModel model = (DefaultTableModel) adminTable.getModel();
+        model.setRowCount(0);
+        for(Admin a : allAdmin){
+                if(a.getId() == null){
+                    continue;
+                }else if(a.getRole().equalsIgnoreCase("Admin")){
+                    model.addRow(new Object[]{
+                       a.getId(),
+                       a.getName(),
+                       a.getEmail()
+                    });
+                }
+            }
+    }
+    
+    public void searchAdmin(){
+        String query = searchTxt.getText().trim().toLowerCase();
+        DefaultTableModel model = (DefaultTableModel) adminTable.getModel();
+        model.setRowCount(0);
+        
+        try{
+            ArrayList<Admin> newList = new ArrayList<>();
+            FileUtil.read("user.txt", newList, Admin::fromLine);
+            
+            for(Admin a : newList){
+                if(a.getId() == null || a.getRole() == null) continue;
+                if(!a.getRole().equalsIgnoreCase("Admin")) continue;
+                
+                String name = a.getName() == null ? "" : a.getName().toLowerCase();
+                
+                if(query.isEmpty() || name.contains(query)){
+                    model.addRow(new Object[]{
+                        a.getId(),
+                        a.getName(),
+                        a.getEmail()
+                    });
+                }
+            }
+        }catch(Exception e){
+            System.out.println("Error: "+e.getMessage());
+        }
+    }
+   
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -85,12 +136,18 @@ public class ManageAdmin extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        adminTable.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         adminTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 adminTableMouseClicked(evt);
             }
         });
         jScrollPane1.setViewportView(adminTable);
+        if (adminTable.getColumnModel().getColumnCount() > 0) {
+            adminTable.getColumnModel().getColumn(0).setResizable(false);
+            adminTable.getColumnModel().getColumn(1).setResizable(false);
+            adminTable.getColumnModel().getColumn(2).setResizable(false);
+        }
 
         backBtn.setText("Back to Main Page");
         backBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -99,7 +156,7 @@ public class ManageAdmin extends javax.swing.JFrame {
             }
         });
 
-        searchTxt.setToolTipText("Search Admin...");
+        searchTxt.setToolTipText("Search by name...");
 
         addAdminBtn.setText("Add Admin");
         addAdminBtn.addActionListener(new java.awt.event.ActionListener() {

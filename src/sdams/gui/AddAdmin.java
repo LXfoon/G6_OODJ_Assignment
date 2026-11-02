@@ -161,6 +161,7 @@ public class AddAdmin extends javax.swing.JFrame {
             ArrayList<User> allUser = new ArrayList<>();
         
             String id = idGenerator();
+            String id = idGenerator("");
             String password = passwordGenerator();
             String name = nameTxt.getText();
             String email = emailTxt.getText();
