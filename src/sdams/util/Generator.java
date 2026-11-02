@@ -13,9 +13,10 @@ import java.security.SecureRandom;
  * @author Foon
  */
 public class Generator {
-    public static String idGenerator(){
-        String userId="";
+    public static String idGenerator(String prefix){
+        String newId="";
         int maxId = 0;
+        int padLength = 3;
         
         try{
            FileReader fr = new FileReader("user.txt");
@@ -26,19 +27,23 @@ public class Generator {
                 String parts[] = line.split("\\|");
                 if (parts.length == 0 || parts[0].trim().isEmpty()) continue;
                 
+                String rawId = parts[0].trim();
+                if(!rawId.startsWith(prefix)) continue;
+                
+                String numberId = rawId.substring(prefix.length());
                 int current = Integer.parseInt(parts[0]);
                 if(current > maxId) maxId = current;
             }
             
             maxId += 1;
-            userId = Integer.toString(maxId);
-            System.out.println(userId);
+            newId = prefix + String.format("%0" + padLength + "d", maxId);
+            System.out.println(newId);
             
         }catch (Exception e){
             System.out.println(e.getMessage());
         }
         
-        return userId;
+        return newId;
     }
     
     public static String passwordGenerator(){
