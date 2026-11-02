@@ -160,7 +160,6 @@ public class AddAdmin extends javax.swing.JFrame {
         try{
             ArrayList<User> allUser = new ArrayList<>();
         
-            String id = idGenerator();
             String id = idGenerator("");
             String password = passwordGenerator();
             String name = nameTxt.getText();
