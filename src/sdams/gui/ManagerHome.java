@@ -69,6 +69,11 @@ public class ManagerHome extends javax.swing.JFrame {
         });
 
         revenueReportBtn.setText("Revenue Report");
+        revenueReportBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                revenueReportBtnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -139,6 +144,12 @@ public class ManagerHome extends javax.swing.JFrame {
         staffReport.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_staffReportBtnActionPerformed
+
+    private void revenueReportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_revenueReportBtnActionPerformed
+        RevenueReport revenueReport = new RevenueReport();
+        revenueReport.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_revenueReportBtnActionPerformed
 
     /**
      * @param args the command line arguments

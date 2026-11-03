@@ -1,0 +1,355 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
+package sdams.gui;
+
+import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.TreeSet;
+import javax.swing.table.DefaultTableModel;
+import sdams.model.Payment;
+import sdams.util.FileUtil;
+
+/**
+ *
+ * @author Foon
+ */
+public class RevenueReport extends javax.swing.JFrame {
+    ArrayList<Payment> allPayment = new ArrayList<>();
+    TreeSet<Integer> paymentYears = new TreeSet<>();
+    DecimalFormat df = new DecimalFormat("#0.00");
+    /**
+     * Creates new form RevenueReport
+     */
+    public RevenueReport() {
+        initComponents();
+        setLocationRelativeTo(null);
+        yearlyDropdown.removeAllItems();
+        int classCounter = 0;
+        double totalRevenue = 0.0;
+        
+        monthlyDropdown.addActionListener(e -> {
+            Object selection = monthlyDropdown.getSelectedItem();
+            if (selection != null) applyFilter();
+        });
+        
+        applyFilter();
+        
+        try{
+            FileUtil.read("payment.txt", allPayment, Payment::fromLine);
+            DefaultTableModel model = (DefaultTableModel) revenueTable.getModel();
+            model.setRowCount(0);
+            
+            for(Payment p : allPayment){
+                if(p.getPaymentId() == null) continue;
+                if(p.getStatus().equalsIgnoreCase("Refunded")) continue;
+                
+                LocalDate paymentDate = p.getPaymentDate();
+                paymentYears.add(paymentDate.getYear());
+                
+                addRow(model, p);
+                classCounter += 1;
+                totalRevenue += p.getAmount();
+            }
+            
+            yearlyDropdown.addItem("All");
+            for(int year : paymentYears){
+                yearlyDropdown.addItem(String.valueOf(year));
+            }
+            
+            classCountTxt.setText(String.valueOf(classCounter));
+            revenueCountTxt.setText(String.valueOf(df.format(totalRevenue)));
+            
+        }catch (Exception e){
+            System.out.println("Error: "+e.getMessage());
+        }
+        
+        yearlyDropdown.addActionListener(e -> {
+            Object selection = yearlyDropdown.getSelectedItem();
+            if (selection != null) applyFilter();
+        });
+        
+        applyFilter();
+        
+    }
+
+    public String getMonthStr(int monthInt){
+        String monthStr;
+        monthStr = switch (monthInt) {
+            case 1 -> "Jan";
+            case 2 -> "Feb";
+            case 3 -> "Mar";
+            case 4 -> "Apr";
+            case 5 -> "May";
+            case 6 -> "Jun";
+            case 7 -> "Jul";
+            case 8 -> "Aug";
+            case 9 -> "Sep";
+            case 10 -> "Oct";
+            case 11 -> "Nov";
+            case 12 -> "Dec";
+            default -> null;
+        };
+        return monthStr;
+    }
+    
+    private void addRow (DefaultTableModel model, Payment p){
+        model.addRow(new Object[]{
+                   p.getPaymentId(),
+                   p.getPaymentDate(),
+                   p.getAmount(),
+                   p.getStatus()
+                });
+    }
+    
+    public void applyFilter(){
+        int count = 0;
+        double total = 0.00;
+        DefaultTableModel model = (DefaultTableModel) revenueTable.getModel();
+        model.setRowCount(0);
+        
+        Object monthSel = monthlyDropdown.getSelectedItem();
+        String monthFilter = monthSel == null ? "All" : monthSel.toString();
+        
+        Object yearSel = yearlyDropdown.getSelectedItem();
+        String yearFilter = yearSel == null ? "All" : yearSel.toString();
+        
+        try{
+            ArrayList<Payment> newList = new ArrayList<>();
+            FileUtil.read("payment.txt", newList, Payment::fromLine);
+            
+            for(Payment p : newList){
+                LocalDate dateVal = p.getPaymentDate();
+                String monthVal = getMonthStr(dateVal.getMonthValue());
+                String yearVal = String.valueOf(dateVal.getYear());
+                
+                if(p.getPaymentId() == null) continue;
+                if(p.getStatus().equalsIgnoreCase("Refunded")) continue;
+                
+                boolean matchMonth = monthFilter.equals("All") || monthVal.equalsIgnoreCase(monthFilter);
+                boolean matchYear = yearFilter.equals("All") || yearVal.equalsIgnoreCase(yearFilter);
+                
+                if(matchMonth && matchYear){
+                    addRow(model, p);
+                    count += 1;
+                    total += p.getAmount();
+                }
+            }
+            
+            classCountTxt.setText(String.valueOf(count));
+            revenueCountTxt.setText(df.format(total));
+        }catch(Exception e){
+            System.out.println("Error: "+e.getMessage());
+        }
+    }
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jLabel1 = new javax.swing.JLabel();
+        backBtn = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        revenueTable = new javax.swing.JTable();
+        yearlyDropdown = new javax.swing.JComboBox<>();
+        monthlyDropdown = new javax.swing.JComboBox<>();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        classCountTxt = new javax.swing.JLabel();
+        revenueCountTxt = new javax.swing.JLabel();
+        resetBtn = new javax.swing.JButton();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel1.setText("Revenue Report");
+
+        backBtn.setText("Back to Home");
+        backBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                backBtnActionPerformed(evt);
+            }
+        });
+
+        revenueTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "Date", "Amount (RM)", "Status"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(revenueTable);
+        if (revenueTable.getColumnModel().getColumnCount() > 0) {
+            revenueTable.getColumnModel().getColumn(0).setResizable(false);
+            revenueTable.getColumnModel().getColumn(1).setResizable(false);
+            revenueTable.getColumnModel().getColumn(2).setResizable(false);
+            revenueTable.getColumnModel().getColumn(3).setResizable(false);
+        }
+
+        yearlyDropdown.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        monthlyDropdown.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" }));
+        monthlyDropdown.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                monthlyDropdownActionPerformed(evt);
+            }
+        });
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
+        jLabel2.setText("Total Classes:");
+
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
+        jLabel3.setText("Total Revenue:");
+
+        classCountTxt.setText("XXX");
+
+        revenueCountTxt.setText("XXX");
+
+        resetBtn.setText("Reset");
+        resetBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetBtnActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(resetBtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(monthlyDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(yearlyDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(169, 169, 169)
+                        .addComponent(jLabel1)
+                        .addGap(0, 189, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(backBtn)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(classCountTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(revenueCountTxt)))
+                        .addGap(12, 12, 12)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1)
+                .addGap(2, 2, 2)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(yearlyDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(monthlyDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(resetBtn))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel2)
+                            .addComponent(classCountTxt))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel3)
+                            .addComponent(revenueCountTxt))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(backBtn))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
+        ManagerHome home = new ManagerHome();
+        home.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_backBtnActionPerformed
+
+    private void monthlyDropdownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_monthlyDropdownActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_monthlyDropdownActionPerformed
+
+    private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetBtnActionPerformed
+        monthlyDropdown.setSelectedItem("All");
+        yearlyDropdown.setSelectedItem("All");
+    }//GEN-LAST:event_resetBtnActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(RevenueReport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(RevenueReport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(RevenueReport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(RevenueReport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new RevenueReport().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton backBtn;
+    private javax.swing.JLabel classCountTxt;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JComboBox<String> monthlyDropdown;
+    private javax.swing.JButton resetBtn;
+    private javax.swing.JLabel revenueCountTxt;
+    private javax.swing.JTable revenueTable;
+    private javax.swing.JComboBox<String> yearlyDropdown;
+    // End of variables declaration//GEN-END:variables
+}

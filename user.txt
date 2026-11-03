@@ -1,7 +1,9 @@
-1|Adam|asd@gmail.com|abc123|123456789|Manager
-2|Ali|addd@gmail.com|abc123|123456789|Attendance
-3|May|may@gmail.com|abc123|123456789|Admin
-4|Lee|lee@gmail.com|abc123|123456789|Admin
-5|Liam Lian|liamll@gmail.com|0987|0144567888|Admin
-6|Adrian Tan|adrain@gmail.com|(mQmO0+R|0198874432|Admin
-7|asda|po@|^*(rKrKt|0196634443|Admin
+001|Adam|asd@gmail.com|abc123|123456789|Manager
+002|Ali|addd@gmail.com|abc123|123456789|Attendance
+003|May|may@gmail.com|abc123|123456789|Admin
+005|Liam Lian|liamll@gmail.com|0987|0144567888|Facilities
+006|Ariana Tan|ariana@gmail.com|123|0187736654|Instructor
+007|Gan|gan@gmail.com|anbd213|0193325321|Instructor
+008|Jane|jane@yahoo.com|E!0@#ih9|0176654321|Admin
+009|William|ww@gmail.com|AWh9x)l_|01644322198|Admin
+010|Aiman Hakim|aiman.hakim@email.com|aiman123|0123456789|Student

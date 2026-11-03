@@ -82,4 +82,8 @@ public class Booking {
         
         return new Booking(bookingId, studentId, classId, status, bookingDate);    
     }
+    
+    public String toLine(){
+        return this.bookingId + "|" + this.studentId + "|" + this.classId + "|" + this.status + "|" + this.bookingDate;
+    }
 }

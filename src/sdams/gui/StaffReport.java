@@ -20,37 +20,35 @@ public class StaffReport extends javax.swing.JFrame {
      * Creates new form StaffReport
      */
     public StaffReport() {
+        int adminCount = 0, instructorCount = 0, attCount = 0, facCount = 0;
         initComponents();
         setLocationRelativeTo(null);
         searchTxt.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            @Override public void insertUpdate(javax.swing.event.DocumentEvent e) { searchStaff(); }
-            @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { searchStaff(); }
-            @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { searchStaff(); }
+            @Override public void insertUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
+            @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
+            @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
         });
         staffTable.getColumnModel().getColumn(0).setPreferredWidth(10);
         staffTable.getColumnModel().getColumn(3).setPreferredWidth(40);
         
         roleDropdown.addActionListener(e -> {
             Object selection = roleDropdown.getSelectedItem();
-            if (selection != null) searchByRole(selection.toString());
+            if (selection != null) applyFilter();
         });
         
-        searchByRole(roleDropdown.getSelectedItem().toString());
+        applyFilter();
         
         try{
-            int adminCount = 0;
-            int instructorCount = 0;
-            int attCount = 0;
-            int facCount = 0;
             FileUtil.read("user.txt", allStaff, Admin::fromLine);
             DefaultTableModel model = (DefaultTableModel) staffTable.getModel();
             model.setRowCount(0);
             
             //table display
             for(Admin a : allStaff){
+                String role = a.getRole();
                 if(a.getId() == null){
                     continue;
-                }else if(a.getRole().equalsIgnoreCase("Admin") || a.getRole().equalsIgnoreCase("Instructor") || a.getRole().equalsIgnoreCase("Attendance") || a.getRole().equalsIgnoreCase("Facilities")){
+                }else if(role.equalsIgnoreCase("Admin") || role.equalsIgnoreCase("Instructor") || role.equalsIgnoreCase("Attendance") || role.equalsIgnoreCase("Facilities")){
                     model.addRow(new Object[]{
                        a.getId(),
                        a.getName(),
@@ -58,60 +56,31 @@ public class StaffReport extends javax.swing.JFrame {
                        a.getRole()
                     });
                 }
+                
+                if (role.equalsIgnoreCase("Admin"))    adminCount++;
+                else if (role.equalsIgnoreCase("Instructor"))  instructorCount++;
+                else if (role.equalsIgnoreCase("Attendance"))  attCount++;
+                else if (role.equalsIgnoreCase("Facilities"))  facCount++;
             }
             
-        //role counter
-        for(Admin a : allStaff){
-            if(a.getId() == null){
-                continue;
-            } else if (a.getRole().equalsIgnoreCase("Admin")){
-                adminCount +=1;
-            } else if (a.getRole().equalsIgnoreCase("Instructor")){
-                instructorCount +=1;
-            } else if (a.getRole().equalsIgnoreCase("Attendance")){
-                attCount +=1;
-            } else if (a.getRole().equalsIgnoreCase("Facilities")){
-                facCount +=1;
-            }
+        }catch(Exception e){
+            System.out.println("Error: "+e.getMessage());
         }
         
         adminCountTxt.setText(String.valueOf(adminCount));
         instructorCountTxt.setText(String.valueOf(instructorCount));
         attCountTxt.setText(String.valueOf(attCount));
         facCountTxt.setText(String.valueOf(facCount));
-            
-        }catch(Exception e){
-            System.out.println("Error: "+e.getMessage());
-        }
     }
     
-    public void searchStaff(){
-        String query = searchTxt.getText().trim().toLowerCase();
+    public void applyFilter(){
         DefaultTableModel model = (DefaultTableModel) staffTable.getModel();
         model.setRowCount(0);
+        int adminCount = 0, instructorCount = 0, attCount = 0, facCount = 0;
         
-        try{
-            ArrayList<Admin> newList = new ArrayList<>();
-            FileUtil.read("user.txt", newList, Admin::fromLine);
-            
-            for(Admin a : newList){
-                if(a.getId() == null || a.getRole() == null) continue;
-                if(a.getRole().equalsIgnoreCase("Student") || a.getRole().equalsIgnoreCase("Manager")) continue;
-                
-                String name = a.getName() == null ? "" : a.getName().toLowerCase();
-                
-                if(query.isEmpty() || name.contains(query)){
-                    addRow(model, a);
-                }
-            }
-        }catch(Exception e){
-            System.out.println("Error: "+e.getMessage());
-        }
-    }
-    
-    public void searchByRole (String selectedValue) {
-        DefaultTableModel model = (DefaultTableModel) staffTable.getModel();
-        model.setRowCount(0);
+        String search = searchTxt.getText().trim().toLowerCase();
+        Object selection = roleDropdown.getSelectedItem();
+        String roleFilter = selection == null ? "All" : selection.toString();
         
         try{
             ArrayList<Admin> newList = new ArrayList<>();
@@ -119,23 +88,30 @@ public class StaffReport extends javax.swing.JFrame {
             
             for(Admin a : newList){
                 String role = a.getRole();
-
                 if(a.getId() == null || a.getRole() == null) continue;
-                if(role.equalsIgnoreCase("Student") || role.equalsIgnoreCase("Manager")) continue;
+                if(a.getRole().equalsIgnoreCase("Student") || a.getRole().equalsIgnoreCase("Manager")) continue;
                 
-                if(selectedValue.equals("All")){
-                    addRow(model, a);
-                    continue;
-                }
+                String name = a.getName() == null ? "" : a.getName().toLowerCase();
                 
-                if(role.equals(selectedValue)){
+                boolean matchSearch = search.isEmpty() || name.contains(search);
+                boolean matchRole = roleFilter.equals("All") || role.equalsIgnoreCase(roleFilter);
+                
+                if(matchSearch && matchRole){
                     addRow(model, a);
+                    if (role.equalsIgnoreCase("Admin"))            adminCount++;
+                    else if (role.equalsIgnoreCase("Instructor"))  instructorCount++;
+                    else if (role.equalsIgnoreCase("Attendance"))  attCount++;
+                    else if (role.equalsIgnoreCase("Facilities"))  facCount++;
                 }
             }
         }catch(Exception e){
             System.out.println("Error: "+e.getMessage());
         }
         
+        adminCountTxt.setText(String.valueOf(adminCount));
+        instructorCountTxt.setText(String.valueOf(instructorCount));
+        attCountTxt.setText(String.valueOf(attCount));
+        facCountTxt.setText(String.valueOf(facCount));
     }
     
     private void addRow(DefaultTableModel model, Admin a) {
@@ -146,8 +122,6 @@ public class StaffReport extends javax.swing.JFrame {
             a.getRole()
         });
     }
-    
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -172,6 +146,7 @@ public class StaffReport extends javax.swing.JFrame {
         attCountTxt = new javax.swing.JLabel();
         facCountTxt = new javax.swing.JLabel();
         backBtn = new javax.swing.JButton();
+        resetBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -203,13 +178,13 @@ public class StaffReport extends javax.swing.JFrame {
         jScrollPane1.setViewportView(staffTable);
 
         roleDropdown.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Admin", "Instructor", "Attendance", "Facilities" }));
-
-        searchTxt.setToolTipText("Search by name...");
-        searchTxt.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                searchTxtFocusLost(evt);
+        roleDropdown.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                roleDropdownActionPerformed(evt);
             }
         });
+
+        searchTxt.setToolTipText("Search by name...");
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         jLabel4.setText("Total Staff Count:");
@@ -236,6 +211,13 @@ public class StaffReport extends javax.swing.JFrame {
             }
         });
 
+        resetBtn.setText("Reset");
+        resetBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -245,46 +227,46 @@ public class StaffReport extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel6)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(attCountTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel7)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(facCountTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                        .addComponent(jLabel5)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(instructorCountTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                        .addComponent(jLabel2)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(adminCountTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel4)
+                            .addComponent(backBtn))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(resetBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(searchTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(roleDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jLabel6)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(attCountTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jLabel7)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(facCountTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                        .addGap(0, 0, Short.MAX_VALUE))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                                .addComponent(jLabel5)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(instructorCountTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                                .addComponent(jLabel2)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(adminCountTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                            .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel4)
-                                    .addComponent(backBtn))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -295,7 +277,8 @@ public class StaffReport extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(roleDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(searchTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(searchTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(resetBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
@@ -317,7 +300,7 @@ public class StaffReport extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel7)
                             .addComponent(facCountTxt))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 76, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
                         .addComponent(backBtn)))
                 .addContainerGap())
         );
@@ -325,15 +308,20 @@ public class StaffReport extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void searchTxtFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_searchTxtFocusLost
-        searchTxt.setText("");
-    }//GEN-LAST:event_searchTxtFocusLost
-
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         ManagerHome home = new ManagerHome();
         home.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_backBtnActionPerformed
+
+    private void roleDropdownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_roleDropdownActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_roleDropdownActionPerformed
+
+    private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetBtnActionPerformed
+        searchTxt.setText("");
+        roleDropdown.setSelectedItem("All");
+    }//GEN-LAST:event_resetBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -383,6 +371,7 @@ public class StaffReport extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JButton resetBtn;
     private javax.swing.JComboBox<String> roleDropdown;
     private javax.swing.JTextField searchTxt;
     private javax.swing.JTable staffTable;

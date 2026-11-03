@@ -149,7 +149,7 @@ public class ManageAdmin extends javax.swing.JFrame {
             adminTable.getColumnModel().getColumn(2).setResizable(false);
         }
 
-        backBtn.setText("Back to Main Page");
+        backBtn.setText("Back to Home");
         backBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 backBtnActionPerformed(evt);

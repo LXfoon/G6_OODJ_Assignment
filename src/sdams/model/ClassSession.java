@@ -20,7 +20,7 @@ public class ClassSession {
     private LocalTime startTime, endTime;
     private double fee;
 
-    private ClassSession(String classId, String className, String discipline, String instructorId, LocalDate date, LocalTime startTime, LocalTime endTime, double fee, String status) {
+    public ClassSession(String classId, String className, String discipline, String instructorId, LocalDate date, LocalTime startTime, LocalTime endTime, double fee, String status) {
         this.classId = classId;
         this.className = className;
         this.discipline = discipline;
@@ -126,5 +126,9 @@ public class ClassSession {
         String status = parts[8].trim();
         
         return new ClassSession(classId, className, discipline, instructorId, date, startTime, endTime, fee, status);    
+    }
+    
+    public String toLine(){
+        return this.classId + "|" + this.className + "|" + this.discipline + "|" + this.instructorId + "|" + this.date+ "|" + this.startTime+ "|" + this.endTime+ "|" + this.fee+ "|" + this.status;
     }
 }
