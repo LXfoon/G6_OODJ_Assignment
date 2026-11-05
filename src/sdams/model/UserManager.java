@@ -12,6 +12,6 @@ import java.util.ArrayList;
  */
 public interface UserManager {
     void addUser(String name, String email, String phoneNum);
-    void updateUser(String name, String email, String password, String phoneNum, String id, Admin selectedAdmin, ArrayList<Admin> adminList);
-    void deleteUser(ArrayList<Admin> adminList, Admin selectedAdmin);
+    void updateUser(String name, String email, String password, String phoneNum, String id, Admin selectedUser, ArrayList<Admin> userList);
+    void deleteUser(ArrayList<Admin> userList, Admin selectedUser);
 }

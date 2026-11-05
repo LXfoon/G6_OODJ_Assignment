@@ -8,19 +8,19 @@ import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
 import sdams.model.Admin;
 import sdams.util.FileUtil;
+import sdams.util.ReportGenerator;
 
 /**
  *
  * @author Foon
  */
-public class StaffReport extends javax.swing.JFrame {
+public class StaffReport extends javax.swing.JFrame implements ReportGenerator<Admin>{
     ArrayList<Admin> allStaff = new ArrayList<>();
 
     /**
      * Creates new form StaffReport
      */
     public StaffReport() {
-        int adminCount = 0, instructorCount = 0, attCount = 0, facCount = 0;
         initComponents();
         setLocationRelativeTo(null);
         searchTxt.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -31,89 +31,15 @@ public class StaffReport extends javax.swing.JFrame {
         staffTable.getColumnModel().getColumn(0).setPreferredWidth(10);
         staffTable.getColumnModel().getColumn(3).setPreferredWidth(40);
         
-        roleDropdown.addActionListener(e -> {
+        roleDropdown.addActionListener(e ->{
             Object selection = roleDropdown.getSelectedItem();
             if (selection != null) applyFilter();
         });
         
+        loadData();
         applyFilter();
-        
-        try{
-            FileUtil.read("user.txt", allStaff, Admin::fromLine);
-            DefaultTableModel model = (DefaultTableModel) staffTable.getModel();
-            model.setRowCount(0);
-            
-            //table display
-            for(Admin a : allStaff){
-                String role = a.getRole();
-                if(a.getId() == null){
-                    continue;
-                }else if(role.equalsIgnoreCase("Admin") || role.equalsIgnoreCase("Instructor") || role.equalsIgnoreCase("Attendance") || role.equalsIgnoreCase("Facilities")){
-                    model.addRow(new Object[]{
-                       a.getId(),
-                       a.getName(),
-                       a.getEmail(),
-                       a.getRole()
-                    });
-                }
-                
-                if (role.equalsIgnoreCase("Admin"))    adminCount++;
-                else if (role.equalsIgnoreCase("Instructor"))  instructorCount++;
-                else if (role.equalsIgnoreCase("Attendance"))  attCount++;
-                else if (role.equalsIgnoreCase("Facilities"))  facCount++;
-            }
-            
-        }catch(Exception e){
-            System.out.println("Error: "+e.getMessage());
-        }
-        
-        adminCountTxt.setText(String.valueOf(adminCount));
-        instructorCountTxt.setText(String.valueOf(instructorCount));
-        attCountTxt.setText(String.valueOf(attCount));
-        facCountTxt.setText(String.valueOf(facCount));
     }
-    
-    public void applyFilter(){
-        DefaultTableModel model = (DefaultTableModel) staffTable.getModel();
-        model.setRowCount(0);
-        int adminCount = 0, instructorCount = 0, attCount = 0, facCount = 0;
         
-        String search = searchTxt.getText().trim().toLowerCase();
-        Object selection = roleDropdown.getSelectedItem();
-        String roleFilter = selection == null ? "All" : selection.toString();
-        
-        try{
-            ArrayList<Admin> newList = new ArrayList<>();
-            FileUtil.read("user.txt", newList, Admin::fromLine);
-            
-            for(Admin a : newList){
-                String role = a.getRole();
-                if(a.getId() == null || a.getRole() == null) continue;
-                if(a.getRole().equalsIgnoreCase("Student") || a.getRole().equalsIgnoreCase("Manager")) continue;
-                
-                String name = a.getName() == null ? "" : a.getName().toLowerCase();
-                
-                boolean matchSearch = search.isEmpty() || name.contains(search);
-                boolean matchRole = roleFilter.equals("All") || role.equalsIgnoreCase(roleFilter);
-                
-                if(matchSearch && matchRole){
-                    addRow(model, a);
-                    if (role.equalsIgnoreCase("Admin"))            adminCount++;
-                    else if (role.equalsIgnoreCase("Instructor"))  instructorCount++;
-                    else if (role.equalsIgnoreCase("Attendance"))  attCount++;
-                    else if (role.equalsIgnoreCase("Facilities"))  facCount++;
-                }
-            }
-        }catch(Exception e){
-            System.out.println("Error: "+e.getMessage());
-        }
-        
-        adminCountTxt.setText(String.valueOf(adminCount));
-        instructorCountTxt.setText(String.valueOf(instructorCount));
-        attCountTxt.setText(String.valueOf(attCount));
-        facCountTxt.setText(String.valueOf(facCount));
-    }
-    
     private void addRow(DefaultTableModel model, Admin a) {
         model.addRow(new Object[]{
             a.getId(),
@@ -319,8 +245,7 @@ public class StaffReport extends javax.swing.JFrame {
     }//GEN-LAST:event_roleDropdownActionPerformed
 
     private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetBtnActionPerformed
-        searchTxt.setText("");
-        roleDropdown.setSelectedItem("All");
+        resetFilters();
     }//GEN-LAST:event_resetBtnActionPerformed
 
     /**
@@ -376,4 +301,65 @@ public class StaffReport extends javax.swing.JFrame {
     private javax.swing.JTextField searchTxt;
     private javax.swing.JTable staffTable;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void loadData() {
+        allStaff.clear();
+        FileUtil.read("user.txt", allStaff, Admin::fromLine);
+    }
+    
+    @Override
+    public void applyFilter(){
+        DefaultTableModel model = (DefaultTableModel) staffTable.getModel();
+        model.setRowCount(0);
+        
+        String search = searchTxt.getText().trim().toLowerCase();
+        Object selection = roleDropdown.getSelectedItem();
+        String roleFilter = selection == null ? "All" : selection.toString();
+        
+        for(Admin a : allStaff){
+            String role = a.getRole();
+            if(a.getId() == null || a.getRole() == null) continue;
+            if(a.getRole().equalsIgnoreCase("Student") || a.getRole().equalsIgnoreCase("Manager")) continue;
+
+            String name = a.getName() == null ? "" : a.getName().toLowerCase();
+
+            boolean matchSearch = search.isEmpty() || name.contains(search);
+            boolean matchRole = roleFilter.equals("All") || role.equalsIgnoreCase(roleFilter);
+
+            if(matchSearch && matchRole){
+                addRow(model, a);
+                updateSummary(model);
+            }
+        }
+        
+        updateSummary(model);
+    }
+
+    @Override
+    public void resetFilters() {
+        searchTxt.setText("");
+        roleDropdown.setSelectedItem("All");
+    }
+
+    @Override
+    public void populateFilters() {} //dropdown items are static
+
+    @Override
+    public void updateSummary(DefaultTableModel model) {
+        int adminCount = 0, instructorCount = 0, attCount = 0, facCount = 0;
+        
+        for (int i = 0; i < model.getRowCount(); i++){
+            String role = String.valueOf(model.getValueAt(i, 3));
+            if (role.equalsIgnoreCase("Admin"))            adminCount++;
+            else if (role.equalsIgnoreCase("Instructor"))  instructorCount++;
+            else if (role.equalsIgnoreCase("Attendance"))  attCount++;
+            else if (role.equalsIgnoreCase("Facilities"))  facCount++;
+        }
+        
+        adminCountTxt.setText(String.valueOf(adminCount));
+        instructorCountTxt.setText(String.valueOf(instructorCount));
+        attCountTxt.setText(String.valueOf(attCount));
+        facCountTxt.setText(String.valueOf(facCount));
+    }
 }
