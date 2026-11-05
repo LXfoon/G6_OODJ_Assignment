@@ -11,12 +11,13 @@ import java.util.TreeSet;
 import javax.swing.table.DefaultTableModel;
 import sdams.model.Payment;
 import sdams.util.FileUtil;
+import sdams.util.ReportGenerator;
 
 /**
  *
  * @author Foon
  */
-public class RevenueReport extends javax.swing.JFrame {
+public class RevenueReport extends javax.swing.JFrame implements ReportGenerator<Payment>{
     ArrayList<Payment> allPayment = new ArrayList<>();
     TreeSet<Integer> paymentYears = new TreeSet<>();
     DecimalFormat df = new DecimalFormat("#0.00");
@@ -26,45 +27,15 @@ public class RevenueReport extends javax.swing.JFrame {
     public RevenueReport() {
         initComponents();
         setLocationRelativeTo(null);
-        yearlyDropdown.removeAllItems();
-        int classCounter = 0;
-        double totalRevenue = 0.0;
         
         monthlyDropdown.addActionListener(e -> {
             Object selection = monthlyDropdown.getSelectedItem();
             if (selection != null) applyFilter();
         });
         
+        loadData();
+        populateFilters();
         applyFilter();
-        
-        try{
-            FileUtil.read("payment.txt", allPayment, Payment::fromLine);
-            DefaultTableModel model = (DefaultTableModel) revenueTable.getModel();
-            model.setRowCount(0);
-            
-            for(Payment p : allPayment){
-                if(p.getPaymentId() == null) continue;
-                if(p.getStatus().equalsIgnoreCase("Refunded")) continue;
-                
-                LocalDate paymentDate = p.getPaymentDate();
-                paymentYears.add(paymentDate.getYear());
-                
-                addRow(model, p);
-                classCounter += 1;
-                totalRevenue += p.getAmount();
-            }
-            
-            yearlyDropdown.addItem("All");
-            for(int year : paymentYears){
-                yearlyDropdown.addItem(String.valueOf(year));
-            }
-            
-            classCountTxt.setText(String.valueOf(classCounter));
-            revenueCountTxt.setText(String.valueOf(df.format(totalRevenue)));
-            
-        }catch (Exception e){
-            System.out.println("Error: "+e.getMessage());
-        }
         
         yearlyDropdown.addActionListener(e -> {
             Object selection = yearlyDropdown.getSelectedItem();
@@ -72,7 +43,6 @@ public class RevenueReport extends javax.swing.JFrame {
         });
         
         applyFilter();
-        
     }
 
     public String getMonthStr(int monthInt){
@@ -104,46 +74,6 @@ public class RevenueReport extends javax.swing.JFrame {
                 });
     }
     
-    public void applyFilter(){
-        int count = 0;
-        double total = 0.00;
-        DefaultTableModel model = (DefaultTableModel) revenueTable.getModel();
-        model.setRowCount(0);
-        
-        Object monthSel = monthlyDropdown.getSelectedItem();
-        String monthFilter = monthSel == null ? "All" : monthSel.toString();
-        
-        Object yearSel = yearlyDropdown.getSelectedItem();
-        String yearFilter = yearSel == null ? "All" : yearSel.toString();
-        
-        try{
-            ArrayList<Payment> newList = new ArrayList<>();
-            FileUtil.read("payment.txt", newList, Payment::fromLine);
-            
-            for(Payment p : newList){
-                LocalDate dateVal = p.getPaymentDate();
-                String monthVal = getMonthStr(dateVal.getMonthValue());
-                String yearVal = String.valueOf(dateVal.getYear());
-                
-                if(p.getPaymentId() == null) continue;
-                if(p.getStatus().equalsIgnoreCase("Refunded")) continue;
-                
-                boolean matchMonth = monthFilter.equals("All") || monthVal.equalsIgnoreCase(monthFilter);
-                boolean matchYear = yearFilter.equals("All") || yearVal.equalsIgnoreCase(yearFilter);
-                
-                if(matchMonth && matchYear){
-                    addRow(model, p);
-                    count += 1;
-                    total += p.getAmount();
-                }
-            }
-            
-            classCountTxt.setText(String.valueOf(count));
-            revenueCountTxt.setText(df.format(total));
-        }catch(Exception e){
-            System.out.println("Error: "+e.getMessage());
-        }
-    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -300,8 +230,7 @@ public class RevenueReport extends javax.swing.JFrame {
     }//GEN-LAST:event_monthlyDropdownActionPerformed
 
     private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetBtnActionPerformed
-        monthlyDropdown.setSelectedItem("All");
-        yearlyDropdown.setSelectedItem("All");
+        resetFilters();
     }//GEN-LAST:event_resetBtnActionPerformed
 
     /**
@@ -352,4 +281,83 @@ public class RevenueReport extends javax.swing.JFrame {
     private javax.swing.JTable revenueTable;
     private javax.swing.JComboBox<String> yearlyDropdown;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void loadData() {
+        allPayment.clear();
+        FileUtil.read("payment.txt", allPayment, Payment::fromLine);
+    }
+
+    @Override
+    public void applyFilter(){
+        DefaultTableModel model = (DefaultTableModel) revenueTable.getModel();
+        model.setRowCount(0);
+        
+        Object monthSel = monthlyDropdown.getSelectedItem();
+        String monthFilter = monthSel == null ? "All" : monthSel.toString();
+        
+        Object yearSel = yearlyDropdown.getSelectedItem();
+        String yearFilter = yearSel == null ? "All" : yearSel.toString();
+        
+            
+        for(Payment p : allPayment){
+            LocalDate dateVal = p.getPaymentDate();
+            String monthVal = getMonthStr(dateVal.getMonthValue());
+            String yearVal = String.valueOf(dateVal.getYear());
+
+            if(p.getPaymentId() == null) continue;
+            if(p.getStatus().equalsIgnoreCase("Refunded")) continue;
+
+            boolean matchMonth = monthFilter.equals("All") || monthVal.equalsIgnoreCase(monthFilter);
+            boolean matchYear = yearFilter.equals("All") || yearVal.equalsIgnoreCase(yearFilter);
+
+            if(matchMonth && matchYear){
+                addRow(model, p);
+                updateSummary(model);
+            }
+        }
+            
+        updateSummary(model);
+    }
+    
+    @Override
+    public void resetFilters() {
+        monthlyDropdown.setSelectedItem("All");
+        yearlyDropdown.setSelectedItem("All");
+    }
+
+    @Override
+    public void populateFilters() {
+        paymentYears.clear();
+        yearlyDropdown.removeAllItems();
+        yearlyDropdown.addItem("All");
+        
+        for(Payment p : allPayment){
+            if(p.getPaymentId() == null) continue;
+            if(p.getStatus().equalsIgnoreCase("Refunded")) continue;
+
+            LocalDate paymentDate = p.getPaymentDate();
+            paymentYears.add(paymentDate.getYear());
+        }
+        
+        for(int year : paymentYears){
+            yearlyDropdown.addItem(String.valueOf(year));
+        }
+    }
+
+    @Override
+    public void updateSummary(DefaultTableModel model) {
+        int count = 0;
+        double total = 0.00;
+        
+        for (int i = 0; i < model.getRowCount(); i++){
+            Object value = model.getValueAt(i, 2);
+            if (value == null) continue;
+            count += 1;
+            total += ((Number) value).doubleValue();
+        }
+        
+        classCountTxt.setText(String.valueOf(count));
+        revenueCountTxt.setText(df.format(total));
+    }
 }

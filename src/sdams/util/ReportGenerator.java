@@ -3,10 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
 package sdams.util;
-
-import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
-import sdams.model.Admin;
 
 /**
  *
