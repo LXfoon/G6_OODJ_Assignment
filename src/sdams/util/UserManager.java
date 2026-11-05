@@ -2,16 +2,15 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
-package sdams.model;
-
-import java.util.ArrayList;
+package sdams.util;
 
 /**
  *
  * @author Foon
  */
 public interface UserManager {
+    void loadUser();
     void addUser(String name, String email, String phoneNum);
-    void updateUser(String name, String email, String password, String phoneNum, String id, Admin selectedUser, ArrayList<Admin> userList);
-    void deleteUser(ArrayList<Admin> userList, Admin selectedUser);
+    void updateUser(String id, String name, String email, String password, String phoneNum);
+    void deleteUser(String id);
 }

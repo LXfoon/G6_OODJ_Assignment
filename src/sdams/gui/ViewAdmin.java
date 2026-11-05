@@ -196,7 +196,7 @@ public class ViewAdmin extends javax.swing.JFrame {
             selectedAdmin.setPassword(password);
             selectedAdmin.setPhoneNum(phoneNum);
             
-            manageAd.updateUser(name, email, password, phoneNum, id, selectedAdmin, allAdmin);
+            manageAd.updateUser(id, name, email, password, phoneNum);
             manage.refreshTable();
         }catch (ValidationException v){
             JOptionPane.showMessageDialog(null, v.getMessage());
@@ -212,7 +212,7 @@ public class ViewAdmin extends javax.swing.JFrame {
         );
         
         if(confirm == JOptionPane.YES_OPTION){
-            manageAd.deleteUser(allAdmin, selectedAdmin);
+            manageAd.deleteUser(id);
             manage.setVisible(true);
             manage.refreshTable();
             this.dispose();

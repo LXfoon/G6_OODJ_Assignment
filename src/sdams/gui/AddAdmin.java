@@ -13,7 +13,7 @@ import sdams.model.ManageAdminServices;
  * @author Foon
  */
 public class AddAdmin extends javax.swing.JFrame {
-
+    ManageAdminServices admService = new ManageAdminServices();
     /**
      * Creates new form AddAdmin
      */
@@ -151,7 +151,6 @@ public class AddAdmin extends javax.swing.JFrame {
 
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
         try{
-            ManageAdminServices admService = new ManageAdminServices();
             admService.addUser(nameTxt.getText(), emailTxt.getText(), phoneNumTxt.getText());
 
             nameTxt.setText("");

@@ -4,6 +4,7 @@
  */
 package sdams.model;
 
+import sdams.util.UserManager;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import sdams.util.FileUtil;
@@ -16,47 +17,63 @@ import sdams.util.Validator;
  * @author Foon
  */
 public class ManageAdminServices implements UserManager{
+    ArrayList<Admin> allAdmin = new ArrayList<>();
+    
+    @Override
+    public void loadUser() {
+        allAdmin.clear();
+        FileUtil.read("user.txt", allAdmin, Admin::fromLine);
+    }
 
     @Override
-    public void addUser(String name, String email, String phoneNum) {
-            ArrayList<User> allUser = new ArrayList<>();
+    public void addUser(String name, String email, String phoneNum) {        
+        String id = idGenerator("");
+        String password = passwordGenerator();
+        String role = "Admin";
+
+        Validator.userValidator(name, email, password, phoneNum);
+
+        loadUser();
         
-            String id = idGenerator("");
-            String password = passwordGenerator();
-            String role = "Admin";
+        //replace with actual admin class later
+        Admin newAdmin = new Admin(id, name, email, password, phoneNum, role);
+        allAdmin.add(newAdmin);
 
-            Validator.userValidator(name, email, password, phoneNum);
-
-            FileUtil.read("user.txt", allUser, Manager::fromLine);
-            //replace with actual admin class later
-            Admin newAdmin = new Admin(id, name, email, password, phoneNum, role);
-            allUser.add(newAdmin);
-
-            FileUtil.write("user.txt", allUser, User::toLine);
-            JOptionPane.showMessageDialog(null, "Admin created successfully!");
+        FileUtil.write("user.txt", allAdmin, User::toLine);
+        JOptionPane.showMessageDialog(null, "Admin created successfully!");
     }
 
     @Override
-    public void updateUser(String name, String email, String password, String phoneNum, String id, Admin selectedAdmin, ArrayList<Admin> adminList) {
-            Validator.userValidator(name, email, password, phoneNum);
-            
-            for(int i=0; i<adminList.size(); i++){
-                if(adminList.get(i).getId().equals(id)){
-                    adminList.set(i, selectedAdmin);
-                }
+    public void updateUser(String id, String name, String email, String password, String phoneNum) {
+        loadUser();
+        Validator.userValidator(name, email, password, phoneNum);
+
+        for(Admin a : allAdmin){
+            if(a.getId().equals(id)){
+                a.setName(name);
+                a.setEmail(email);
+                a.setPassword(password);
+                a.setPhoneNum(phoneNum);
+
             }
+        }
 
-            FileUtil.write("user.txt", adminList, Admin::toLine);
-            
-            JOptionPane.showMessageDialog(null, "Admin edited successfully!");
+        FileUtil.write("user.txt", allAdmin, Admin::toLine);
+
+        JOptionPane.showMessageDialog(null, "Admin edited successfully!");
     }
 
     @Override
-    public void deleteUser(ArrayList<Admin> adminList, Admin selectedAdmin) {
-        adminList.remove(selectedAdmin);
+    public void deleteUser(String id) {
+        loadUser();
+        for(Admin a : allAdmin){
+            if(a.getId().equals(id)){
+                allAdmin.remove(a);
+                break;
+            }
+        }
             
-        FileUtil.write("user.txt", adminList, Admin::toLine);
+        FileUtil.write("user.txt", allAdmin, Admin::toLine);
         JOptionPane.showMessageDialog(null, "Admin deleted successfully!");
     }
-    
 }
