@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import sdams.exception.ValidationException;
 import sdams.model.Admin;
+import sdams.model.ManageAdminServices;
 import sdams.util.FileUtil;
-import sdams.util.Validator;
 
 /**
  *
@@ -20,6 +20,7 @@ public class ViewAdmin extends javax.swing.JFrame {
     Admin selectedAdmin = new Admin();
     String id = SelectedAdmin.getId();
     ManageAdmin manage = new ManageAdmin();
+    ManageAdminServices manageAd = new ManageAdminServices();
     /**
      * Creates new form ViewAdmin
      */
@@ -190,22 +191,12 @@ public class ViewAdmin extends javax.swing.JFrame {
             String password = String.valueOf(rawPass);
             String phoneNum = phoneNumTxt.getText();
             
-            Validator.userValidator(name, email, password, phoneNum);
-            
             selectedAdmin.setName(name);
             selectedAdmin.setEmail(email);
             selectedAdmin.setPassword(password);
             selectedAdmin.setPhoneNum(phoneNum);
             
-            for(int i=0; i<allAdmin.size(); i++){
-                if(allAdmin.get(i).getId().equals(id)){
-                    allAdmin.set(i, selectedAdmin);
-                }
-            }
-            
-            FileUtil.write("user.txt", allAdmin, Admin::toLine);
-            
-            JOptionPane.showMessageDialog(null, "Admin edited successfully!");
+            manageAd.updateUser(name, email, password, phoneNum, id, selectedAdmin, allAdmin);
             manage.refreshTable();
         }catch (ValidationException v){
             JOptionPane.showMessageDialog(null, v.getMessage());
@@ -221,11 +212,7 @@ public class ViewAdmin extends javax.swing.JFrame {
         );
         
         if(confirm == JOptionPane.YES_OPTION){
-            allAdmin.remove(selectedAdmin);
-            
-            FileUtil.write("user.txt", allAdmin, Admin::toLine);
-            JOptionPane.showMessageDialog(null, "Admin deleted successfully!");
-
+            manageAd.deleteUser(allAdmin, selectedAdmin);
             manage.setVisible(true);
             manage.refreshTable();
             this.dispose();

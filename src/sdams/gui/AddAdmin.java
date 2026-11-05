@@ -4,16 +4,9 @@
  */
 package sdams.gui;
 
-import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import sdams.exception.ValidationException;
-import sdams.model.Admin;
-import sdams.model.Manager;
-import sdams.model.User;
-import sdams.util.FileUtil;
-import static sdams.util.Generator.idGenerator;
-import static sdams.util.Generator.passwordGenerator;
-import sdams.util.Validator;
+import sdams.model.ManageAdminServices;
 
 /**
  *
@@ -158,30 +151,14 @@ public class AddAdmin extends javax.swing.JFrame {
 
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
         try{
-            ArrayList<User> allUser = new ArrayList<>();
-        
-            String id = idGenerator("");
-            String password = passwordGenerator();
-            String name = nameTxt.getText();
-            String email = emailTxt.getText();
-            String phoneNum = phoneNumTxt.getText();
-            String role = "Admin";
-
-            Validator.userValidator(name, email, password, phoneNum);
-
-            FileUtil.read("user.txt", allUser, Manager::fromLine);
-            //replace with actual admin class later
-            Admin newAdmin = new Admin(id, name, email, password, phoneNum, role);
-            allUser.add(newAdmin);
-
-            FileUtil.write("user.txt", allUser, User::toLine);
+            ManageAdminServices admService = new ManageAdminServices();
+            admService.addUser(nameTxt.getText(), emailTxt.getText(), phoneNumTxt.getText());
 
             nameTxt.setText("");
             emailTxt.setText("");
             phoneNumTxt.setText("");
-            JOptionPane.showMessageDialog(null, "Admin created successfully!");
-            
-        }catch (ValidationException v){
+
+        }catch(ValidationException v){
             JOptionPane.showMessageDialog(null, "Error: "+ v.getMessage());
         }
     }//GEN-LAST:event_addBtnActionPerformed
