@@ -5,7 +5,6 @@
 package sdams.model;
 
 import java.time.LocalDate;
-import sdams.gui.RevenueReport;
 import static sdams.model.ClassSession.formatter;
 
 /**
@@ -13,11 +12,12 @@ import static sdams.model.ClassSession.formatter;
  * @author Foon
  */
 public class Payment {
-    private String paymentId, bookingId, studentId, status;
+    private String paymentId, bookingId, studentId;
+    private PaymentStatus status;
     private double amount;
     private LocalDate paymentDate;
     
-    public Payment(String paymentId, String bookingId, String studentId, double amount, LocalDate paymentDate, String status){
+    public Payment(String paymentId, String bookingId, String studentId, double amount, LocalDate paymentDate, PaymentStatus status){
         this.paymentId = paymentId;
         this.bookingId = bookingId;
         this.studentId = studentId;
@@ -26,9 +26,19 @@ public class Payment {
         this.status = status;
     }
     
-    enum paymentStatus{
+    public enum PaymentStatus{
         Paid,
-        Refunded
+        Refunded;
+        
+        public static PaymentStatus fromString(String s){
+            if(s == null) return null;
+            
+            for(PaymentStatus payment : values()){
+                if(payment.name().equalsIgnoreCase(s.trim())) return payment;
+            }
+            
+            return null;
+        }
     }
     
     public String getPaymentId(){
@@ -51,7 +61,7 @@ public class Payment {
         return this.paymentDate;
     }
     
-    public String getStatus(){
+    public PaymentStatus getStatus(){
         return this.status;
     }
     
@@ -75,7 +85,7 @@ public class Payment {
         this.paymentDate = paymentDate;
     }
     
-    public void setStatus(String status){
+    public void setStatus(PaymentStatus status){
         this.status = status;
     }
     
@@ -88,7 +98,7 @@ public class Payment {
         String studentId = parts[2].trim();
         double amount = Double.parseDouble(parts[3].trim());
         LocalDate paymentDate = LocalDate.parse(parts[4].trim(), formatter);
-        String status = parts[5].trim();
+        PaymentStatus status = PaymentStatus.fromString(parts[5].trim());
         
         return new Payment(paymentId, bookingId, studentId, amount, paymentDate, status);
     }

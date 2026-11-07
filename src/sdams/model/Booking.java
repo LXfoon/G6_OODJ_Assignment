@@ -12,10 +12,26 @@ import static sdams.model.ClassSession.formatter;
  * @author Foon
  */
 public class Booking {
-    private String bookingId, studentId, classId, status;
+    private String bookingId, studentId, classId;
+    private BookingStatus status;
     private LocalDate bookingDate;
     
-    public Booking(String bookingId, String studentId, String classId, String status, LocalDate bookingDate){
+    public enum BookingStatus{
+        Booked,
+        Rescheduled,
+        Cancelled,
+        Completed;
+        
+        public static BookingStatus fromString(String s){
+            if(s == null) return null;
+            for(BookingStatus booking : values()){
+                if(booking.name().equalsIgnoreCase(s.trim())) return booking;
+            }
+            return null;
+        }
+    }
+    
+    public Booking(String bookingId, String studentId, String classId, BookingStatus status, LocalDate bookingDate){
         this.bookingId = bookingId;
         this.studentId = studentId;
         this.classId = classId;
@@ -35,8 +51,8 @@ public class Booking {
         return this.classId;
     }
     
-    public String getStatus(){
-        return this.status;
+    public BookingStatus getStatus(){
+        return status;
     }
     
     public LocalDate getBookingDate(){
@@ -55,19 +71,12 @@ public class Booking {
         this.classId = classId;
     }
     
-    public void setStatus(String status){
+    public void setStatus(BookingStatus status){
         this.status = status;
     }
     
     public void setBookingDate(LocalDate bookingDate){
         this.bookingDate = bookingDate;
-    }
-    
-    enum bookingStatus{
-        Booked,
-        Rescheduled,
-        Cancelled,
-        Completed
     }
     
     public static Booking fromLine(String line) {
@@ -77,7 +86,7 @@ public class Booking {
         String bookingId = parts[0].trim();
         String studentId = parts[1].trim();
         String classId = parts[2].trim();
-        String status = parts[3].trim();
+        BookingStatus status = BookingStatus.fromString(parts[3].trim());
         LocalDate bookingDate = LocalDate.parse(parts[4].trim(), formatter);
         
         return new Booking(bookingId, studentId, classId, status, bookingDate);    

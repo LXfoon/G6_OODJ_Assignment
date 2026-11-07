@@ -15,12 +15,13 @@ import java.time.format.DateTimeFormatter;
 public class ClassSession {
     public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     
-    private String classId, className, discipline, instructorId, status;
+    private String classId, className, discipline, instructorId;
+    private ClassStatus status;
     private LocalDate date;
     private LocalTime startTime, endTime;
     private double fee;
 
-    public ClassSession(String classId, String className, String discipline, String instructorId, LocalDate date, LocalTime startTime, LocalTime endTime, double fee, String status) {
+    public ClassSession(String classId, String className, String discipline, String instructorId, LocalDate date, LocalTime startTime, LocalTime endTime, double fee, ClassStatus status) {
         this.classId = classId;
         this.className = className;
         this.discipline = discipline;
@@ -32,11 +33,21 @@ public class ClassSession {
         this.status = status;
     }
     
-    enum Status{
+    public enum ClassStatus{
         Available,
         Full,
         Cancelled,
-        Completed
+        Completed;
+        
+        public static ClassStatus fromString(String s){
+            if(s == null) return null;
+            
+            for(ClassStatus classStatus : values()){
+                if(classStatus.name().equalsIgnoreCase(s.trim())) return classStatus;
+            }
+            
+            return null;
+        }
     }
     
     public String getClassId(){
@@ -71,7 +82,7 @@ public class ClassSession {
         return this.fee;
     }
     
-    public String getStatus(){
+    public ClassStatus getStatus(){
         return this.status;
     }
     
@@ -107,7 +118,7 @@ public class ClassSession {
         this.fee = fee;
     }
     
-    public void setStatus(String status){
+    public void setStatus(ClassStatus status){
         this.status = status;
     }
     
@@ -123,7 +134,7 @@ public class ClassSession {
         LocalTime startTime = LocalTime.parse(parts[5].trim());
         LocalTime endTime = LocalTime.parse(parts[6].trim());
         double fee = Double.parseDouble(parts[7].trim());
-        String status = parts[8].trim();
+        ClassStatus status = ClassStatus.fromString(parts[8].trim());
         
         return new ClassSession(classId, className, discipline, instructorId, date, startTime, endTime, fee, status);    
     }

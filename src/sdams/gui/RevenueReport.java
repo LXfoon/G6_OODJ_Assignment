@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 import javax.swing.table.DefaultTableModel;
 import sdams.model.Payment;
+import sdams.model.Payment.PaymentStatus;
 import sdams.util.FileUtil;
 import sdams.util.ReportGenerator;
 
@@ -306,7 +307,7 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
             String yearVal = String.valueOf(dateVal.getYear());
 
             if(p.getPaymentId() == null) continue;
-            if(p.getStatus().equalsIgnoreCase("Refunded")) continue;
+            if(p.getStatus() ==  PaymentStatus.Refunded) continue;
 
             boolean matchMonth = monthFilter.equals("All") || monthVal.equalsIgnoreCase(monthFilter);
             boolean matchYear = yearFilter.equals("All") || yearVal.equalsIgnoreCase(yearFilter);
@@ -334,7 +335,7 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
         
         for(Payment p : allPayment){
             if(p.getPaymentId() == null) continue;
-            if(p.getStatus().equalsIgnoreCase("Refunded")) continue;
+            if(p.getStatus() == PaymentStatus.Refunded) continue;
 
             LocalDate paymentDate = p.getPaymentDate();
             paymentYears.add(paymentDate.getYear());
