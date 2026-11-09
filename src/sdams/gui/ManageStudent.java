@@ -4,6 +4,15 @@
  */
 package sdams.gui;
 
+import java.util.regex.Pattern;
+import javax.swing.JOptionPane;
+import javax.swing.RowFilter;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+
+import sdams.model.ManageStudentServices;
+import sdams.model.Student;
+
 /**
  *
  * @author xiaow
@@ -11,12 +20,63 @@ package sdams.gui;
 public class ManageStudent extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ManageStudent.class.getName());
+    
+    private final ManageStudentServices service = new ManageStudentServices();
 
+    private DefaultTableModel tableModel;
+    private TableRowSorter<DefaultTableModel> sorter;
+    
     /**
      * Creates new form ManageStudent
      */
     public ManageStudent() {
         initComponents();
+        setLocationRelativeTo(null);
+        
+        tableModel = (DefaultTableModel) studentTable.getModel();
+        sorter = new TableRowSorter<>(tableModel);
+        studentTable.setRowSorter(sorter);
+        
+        updateBtn.setEnabled(false);
+        deleteBtn.setEnabled(false);
+        studentTable.getSelectionModel().addListSelectionListener(e -> {
+            boolean has = studentTable.getSelectedRow() >= 0;
+            updateBtn.setEnabled(has);
+            deleteBtn.setEnabled(has);
+        });
+
+        reload();
+    }
+    
+    private void reload() {
+        service.loadUser();
+        refreshTable();
+    }
+    
+    private void refreshTable() {
+        tableModel.setRowCount(0);
+        for (Student stu : service.getAllStudents()) {
+            tableModel.addRow(new Object[]{
+                stu.getId(), stu.getName(), stu.getEmail(), stu.getPhoneNum()
+            });
+        }
+        studentSummary.setText("Total Students: " + service.count());
+    }
+    
+    private String getSelectedId() {
+        int view = studentTable.getSelectedRow();
+        if (view < 0) return null;
+        int model = studentTable.convertRowIndexToModel(view);
+        return (String) tableModel.getValueAt(model, 0);
+    }
+    
+    private void applyFilter() {
+        String q = searchField.getText().trim();
+        if (q.isEmpty()) {
+            sorter.setRowFilter(null);
+        } else {
+            sorter.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(q)));
+        }
     }
 
     /**
@@ -28,21 +88,213 @@ public class ManageStudent extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        pageTitle = new javax.swing.JLabel();
+        studentSummary = new javax.swing.JLabel();
+        createBtn = new javax.swing.JButton();
+        searchLabel = new javax.swing.JLabel();
+        searchField = new javax.swing.JTextField();
+        searchBtn = new javax.swing.JButton();
+        resetBtn = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        studentTable = new javax.swing.JTable();
+        backBtn = new javax.swing.JButton();
+        updateBtn = new javax.swing.JButton();
+        deleteBtn = new javax.swing.JButton();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        pageTitle.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        pageTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        pageTitle.setText("Manage Students");
+        pageTitle.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        pageTitle.setFocusable(false);
+        pageTitle.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+
+        studentSummary.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
+        studentSummary.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        studentSummary.setText("Total Students: xx");
+
+        createBtn.setText("+Create New");
+        createBtn.setFocusable(false);
+        createBtn.addActionListener(this::createBtnActionPerformed);
+
+        searchLabel.setText("Search :");
+
+        searchBtn.setText("Search");
+        searchBtn.setFocusable(false);
+        searchBtn.addActionListener(this::searchBtnActionPerformed);
+
+        resetBtn.setText("Reset");
+        resetBtn.setFocusable(false);
+        resetBtn.addActionListener(this::resetBtnActionPerformed);
+
+        studentTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "ID", "Name", "Email", "Phone"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        studentTable.getTableHeader().setReorderingAllowed(false);
+        jScrollPane1.setViewportView(studentTable);
+
+        backBtn.setText("Back to Main Menu");
+        backBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        backBtn.setFocusable(false);
+        backBtn.addActionListener(this::backBtnActionPerformed);
+
+        updateBtn.setText("Update");
+        updateBtn.addActionListener(this::updateBtnActionPerformed);
+
+        deleteBtn.setText("Delete");
+        deleteBtn.addActionListener(this::deleteBtnActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 500, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(pageTitle, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(studentSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(19, 19, 19)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(backBtn)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(updateBtn)
+                                .addGap(18, 18, 18)
+                                .addComponent(deleteBtn)
+                                .addGap(24, 24, 24))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(createBtn)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(searchLabel)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(searchField)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(searchBtn)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(resetBtn)))
+                                .addContainerGap(23, Short.MAX_VALUE))))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(pageTitle)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(studentSummary)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(createBtn)
+                    .addComponent(searchLabel)
+                    .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(searchBtn)
+                    .addComponent(resetBtn))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(backBtn)
+                    .addComponent(updateBtn)
+                    .addComponent(deleteBtn))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void createBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createBtnActionPerformed
+        AddStudent addStudent = new AddStudent();
+        addStudent.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_createBtnActionPerformed
+
+    private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
+        applyFilter();
+        if (studentTable.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this,"No matches for \"" + searchField.getText().trim() + "\".");
+        }
+    }//GEN-LAST:event_searchBtnActionPerformed
+
+    private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetBtnActionPerformed
+        searchField.setText("");
+        sorter.setRowFilter(null);
+    }//GEN-LAST:event_resetBtnActionPerformed
+
+    private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
+        AdminHome adminHome = new AdminHome();
+        adminHome.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_backBtnActionPerformed
+
+    private void updateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateBtnActionPerformed
+        String id = getSelectedId();
+        if (id == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Select a student row first.", "No selection",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        EditStudent editStudent = new EditStudent(id); 
+        editStudent.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_updateBtnActionPerformed
+
+    private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
+        String id = getSelectedId();
+        if (id == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Select a student row first.", "No selection",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Delete student " + id + "? This cannot be undone.",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        try {
+            service.deleteUser(id);
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this,
+                    ex.getMessage() == null ? "Delete failed." : ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        reload();
+    }//GEN-LAST:event_deleteBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -70,5 +322,17 @@ public class ManageStudent extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton backBtn;
+    private javax.swing.JButton createBtn;
+    private javax.swing.JButton deleteBtn;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel pageTitle;
+    private javax.swing.JButton resetBtn;
+    private javax.swing.JButton searchBtn;
+    private javax.swing.JTextField searchField;
+    private javax.swing.JLabel searchLabel;
+    private javax.swing.JLabel studentSummary;
+    private javax.swing.JTable studentTable;
+    private javax.swing.JButton updateBtn;
     // End of variables declaration//GEN-END:variables
 }

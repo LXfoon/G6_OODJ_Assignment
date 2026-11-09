@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
 import sdams.model.Staff;
-import sdams.model.ManageStaffService;
+import sdams.model.ManageStaffServices;
 import sdams.model.AttOfficer;
 import sdams.model.FacOfficer;
 import sdams.model.Instructor;
@@ -27,7 +27,7 @@ public class ManageStaff extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ManageStaff.class.getName());
         
-    private final ManageStaffService service = new ManageStaffService();
+    private final ManageStaffServices service = new ManageStaffServices();
     private final DecimalFormat moneyFmt = new DecimalFormat("0.00");
     
     private DefaultTableModel tableModel;
@@ -79,7 +79,7 @@ public class ManageStaff extends javax.swing.JFrame {
         int facilities = service.countByType(FacOfficer.class);
         int attendance = service.countByType(AttOfficer.class);
         staffSummary.setText(String.format(
-                "Total Instructors: %d, Total Facilities Officer: %d, Total Attendance Officer: %d",
+                "Total Instructor: %d, Total Facilities Officer: %d, Total Attendance Officer: %d",
                 instructor, facilities, attendance));
     }
         
@@ -121,8 +121,9 @@ public class ManageStaff extends javax.swing.JFrame {
         backBtn.setFocusable(false);
         backBtn.addActionListener(this::backBtnActionPerformed);
 
+        staffSummary.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
         staffSummary.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        staffSummary.setText("Total Instructors: xx, Total Facilities Officer: xx, Total Attendance Officer: xx");
+        staffSummary.setText("Total Instructor: xx, Total Facilities Officer: xx, Total Attendance Officer: xx");
 
         typeFilterCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Roles", "Instructor", "Facilities Officer", "Attendance Officer" }));
         typeFilterCombo.setFocusable(false);
@@ -195,13 +196,20 @@ public class ManageStaff extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(pageTitle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
+            .addComponent(staffSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(22, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 750, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(createBtn)
+                        .addComponent(backBtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(updateBtn)
                         .addGap(18, 18, 18)
+                        .addComponent(deleteBtn))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 750, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(createBtn)
+                        .addGap(41, 41, 41)
                         .addComponent(searchLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -209,20 +217,11 @@ public class ManageStaff extends javax.swing.JFrame {
                         .addComponent(searchBtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(resetBtn)
-                        .addGap(41, 41, 41)
+                        .addGap(18, 18, 18)
                         .addComponent(filterLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(typeFilterCombo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGap(28, 28, 28))
-            .addComponent(staffSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(backBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(updateBtn)
-                .addGap(18, 18, 18)
-                .addComponent(deleteBtn)
-                .addGap(16, 16, 16))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -289,7 +288,7 @@ public class ManageStaff extends javax.swing.JFrame {
                     "Select a staff row first.", "No selection", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        UpdateStaff updateStaff = new UpdateStaff(id); 
+        EditStaff updateStaff = new EditStaff(id); 
         updateStaff.setVisible(true);
         this.dispose();
 

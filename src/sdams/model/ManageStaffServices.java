@@ -20,7 +20,7 @@ import sdams.util.FileUtil;
 import sdams.util.UserManager;
 import sdams.util.Validator;
 
-public class ManageStaffService implements UserManager {
+public class ManageStaffServices implements UserManager {
 
     private static final String USER_FILE  = "user.txt";
     private static final String STAFF_FILE = "staff.txt";
@@ -29,6 +29,9 @@ public class ManageStaffService implements UserManager {
     private final ArrayList<String> allUserLines = new ArrayList<>();
     private final LinkedHashMap<String, Double> salaryMap = new LinkedHashMap<>();
     private final DecimalFormat moneyFmt = new DecimalFormat("0.00");
+    
+    private String pendingId;
+    private String pendingPassword;
 
     @Override
     public void loadUser() {
@@ -65,11 +68,57 @@ public class ManageStaffService implements UserManager {
         String password = Generator.passwordGenerator();
         Validator.userValidator(name, email, password, phoneNum);
         String id = Generator.idGenerator("");
-        addStaff(id, password, name, email, phoneNum, "", 0.0);
-    }
 
+        this.pendingId = id;
+        this.pendingPassword = password;
+    }
+    
+    public String addStaff(String name, String email, String phone, String role, double salary) {
+        try {
+            addUser(name, email, phone);
+        } catch (RuntimeException ex) {
+            clearPending();
+            JOptionPane.showMessageDialog(null,
+                    ex.getMessage() == null ? "Validation failed." : ex.getMessage(),
+                    "Validation", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        if (salary < 0) {
+            clearPending();
+            JOptionPane.showMessageDialog(null,
+                    "Salary must be 0 or greater.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        String id = pendingId;
+        String password = pendingPassword;
+        clearPending();
+
+        loadUser();
+
+        String shortRole = normalizeRole(role);
+        Staff staff = switch (shortRole) {
+            case "Facilities" -> new FacOfficer(id, name, email, password, phone, salary);
+            case "Attendance" -> new AttOfficer(id, name, email, password, phone, salary);
+            default -> new Instructor(id, name, email, password, phone, salary);
+        };
+
+        allStaff.add(staff);
+        allUserLines.add(staff.toLine());
+        salaryMap.put(id, salary);
+
+        FileUtil.write(USER_FILE, allUserLines, s -> s);
+        writeSalaryFile();
+
+        JOptionPane.showMessageDialog(null, "Staff created successfully!\n\nID: " + id + "\nPassword: " + password);
+        return id;
+    }
+    
     @Override
     public void updateUser(String id, String name, String email, String password, String phoneNum) {
+        // role cannot be edited
         loadUser();
         Validator.userValidator(name, email, password, phoneNum);
 
@@ -83,8 +132,24 @@ public class ManageStaffService implements UserManager {
         staff.setPassword(password);
         staff.setPhoneNum(phoneNum);
 
-        replaceUserLine(id, staff.toLine()); 
+        replaceUserLine(id, staff.toLine());
         FileUtil.write(USER_FILE, allUserLines, s -> s);
+    }
+    
+    public void updateStaff(String id, String name, String email, String phoneNum, double salary) {
+        loadUser();
+        Staff staff = findById(id);
+        if (staff == null) {
+            JOptionPane.showMessageDialog(null, "Staff not found: " + id);
+            return;
+        }
+        String existingPassword = staff.getPassword();
+        
+        updateUser(id, name, email, existingPassword, phoneNum);
+        
+        salaryMap.put(id, salary);
+        writeSalaryFile();
+        
         JOptionPane.showMessageDialog(null, "Staff edited successfully!");
     }
 
@@ -102,52 +167,6 @@ public class ManageStaffService implements UserManager {
         FileUtil.write(USER_FILE, allUserLines, s -> s);
         writeSalaryFile();
         JOptionPane.showMessageDialog(null, "Staff deleted successfully!");
-    }
-
-    public String addStaff(String id, String password, String name, String email, String phoneNum, String role, double salary) {
-        loadUser();
-
-        String shortRole = normalizeRole(role);
-        Staff staff;
-        staff = switch (shortRole) {
-            case "Facilities" -> new FacOfficer(id, name, email, password, phoneNum, salary);
-            case "Attendance" -> new AttOfficer(id, name, email, password, phoneNum, salary);
-            default -> new Instructor(id, name, email, password, phoneNum, salary);
-        };
-
-        allStaff.add(staff);
-        allUserLines.add(staff.toLine());
-        salaryMap.put(id, salary);
-
-        FileUtil.write(USER_FILE, allUserLines, s -> s);
-        writeSalaryFile();
-
-        JOptionPane.showMessageDialog(null,
-                "Staff created successfully!\n\nID: " + id + "\nPassword: " + password);
-        return id;
-    }
-
-    public void updateStaff(String id, String name, String email, String phoneNum, double salary) {
-        loadUser();
-
-        Staff staff = findById(id);
-        if (staff == null) {
-            JOptionPane.showMessageDialog(null, "Staff not found: " + id);
-            return;
-        }
-        Validator.userValidator(name, email, staff.getPassword(), phoneNum);
-
-        staff.setName(name);
-        staff.setEmail(email);
-        staff.setPhoneNum(phoneNum);
-        staff.setSalary(salary);
-        replaceUserLine(id, staff.toLine());
-        
-        salaryMap.put(id, salary);
-        FileUtil.write(USER_FILE, allUserLines, s -> s);
-        writeSalaryFile();
-        
-        JOptionPane.showMessageDialog(null, "Staff edited successfully!");
     }
 
     public ArrayList<Staff> getAllStaff() {
@@ -183,6 +202,12 @@ public class ManageStaffService implements UserManager {
             default -> "Instructor";
         };
         
+    }
+    
+    
+    private void clearPending() {
+        pendingId = null;
+        pendingPassword = null;
     }
 
     private void replaceUserLine(String id, String newLine) {

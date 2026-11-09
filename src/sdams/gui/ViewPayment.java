@@ -4,6 +4,18 @@
  */
 package sdams.gui;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+import javax.swing.JOptionPane;
+import javax.swing.RowFilter;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+
+import sdams.model.Payment;
+import sdams.util.FileUtil;
+
 /**
  *
  * @author xiaow
@@ -12,11 +24,68 @@ public class ViewPayment extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ViewPayment.class.getName());
 
+    private final ArrayList<Payment> allPayment = new ArrayList<>();
+    private final DecimalFormat df = new DecimalFormat("0.00");
+    
+    private DefaultTableModel tableModel;
+    private TableRowSorter<DefaultTableModel> sorter;
+    
     /**
      * Creates new form ViewPayment
      */
     public ViewPayment() {
         initComponents();
+        setLocationRelativeTo(null);
+        
+        tableModel = (DefaultTableModel) paymentTable.getModel();
+        sorter = new TableRowSorter<>(tableModel);
+        paymentTable.setRowSorter(sorter);
+        
+        loadData();
+        applyFilter();
+    }
+    
+    private void loadData() {
+        allPayment.clear();
+        tableModel.setRowCount(0);
+
+        FileUtil.read("payment.txt", allPayment, Payment::fromLine);
+
+        for (Payment p : allPayment) {
+            if (p == null || p.getPaymentId() == null) continue;
+            if (p.getPaymentDate() == null) continue;
+
+            tableModel.addRow(new Object[]{
+                p.getPaymentId(),
+                p.getBookingId(),
+                p.getStudentId(),
+                df.format(p.getAmount()),
+                p.getPaymentDate(),
+                p.getStatus() == null ? "" : p.getStatus().name()
+            });
+        }
+    }
+    
+    private void applyFilter() {
+        List<RowFilter<Object, Object>> filters = new ArrayList<>();
+
+        String q = searchField.getText().trim();
+        if (!q.isEmpty()) {
+            filters.add(RowFilter.regexFilter("(?i)" + Pattern.quote(q)));
+        }
+
+        String status = (String) statusCombo.getSelectedItem();
+        if (status != null && !"All Payment".equals(status)) {
+            filters.add(RowFilter.regexFilter("^" + Pattern.quote(status) + "$", 5));
+        }
+
+        sorter.setRowFilter(filters.isEmpty() ? null : RowFilter.andFilter(filters));
+        updateSummary();
+    }
+    
+    private void updateSummary() {
+        int visibleRows = paymentTable.getRowCount();
+        paymentSummary.setText("Total Payment Records: " + visibleRows);
     }
 
     /**
@@ -28,22 +97,158 @@ public class ViewPayment extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        pageTitle = new javax.swing.JLabel();
+        paymentSummary = new javax.swing.JLabel();
+        searchBtn = new javax.swing.JButton();
+        resetBtn = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        paymentTable = new javax.swing.JTable();
+        backBtn = new javax.swing.JButton();
+        searchLabel = new javax.swing.JLabel();
+        searchField = new javax.swing.JTextField();
+        statusCombo = new javax.swing.JComboBox<>();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        pageTitle.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        pageTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        pageTitle.setText("View Student Payment");
+
+        paymentSummary.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
+        paymentSummary.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        paymentSummary.setText("Total Payment Records: xx");
+
+        searchBtn.setText("Search");
+        searchBtn.setFocusable(false);
+        searchBtn.addActionListener(this::searchBtnActionPerformed);
+
+        resetBtn.setText("Reset");
+        resetBtn.setFocusable(false);
+        resetBtn.addActionListener(this::resetBtnActionPerformed);
+
+        paymentTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
+            },
+            new String [] {
+                "Payment ID", "Booking ID", "Student ID", "Amount", "Date", "Status"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, true, true
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        paymentTable.getTableHeader().setReorderingAllowed(false);
+        jScrollPane1.setViewportView(paymentTable);
+
+        backBtn.setText("Back to Main Menu");
+        backBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        backBtn.setFocusable(false);
+        backBtn.addActionListener(this::backBtnActionPerformed);
+
+        searchLabel.setText("Search :");
+
+        statusCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Payment", "Paid", "Refunded" }));
+        statusCombo.addActionListener(this::statusComboActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 500, Short.MAX_VALUE)
+            .addComponent(pageTitle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(23, 23, 23)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(backBtn)
+                                .addGap(321, 321, 321))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(searchLabel)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(searchBtn)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(resetBtn)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(statusCombo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(176, 176, 176)
+                        .addComponent(paymentSummary)))
+                .addGap(0, 25, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(pageTitle)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(paymentSummary)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(searchLabel)
+                    .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(searchBtn)
+                    .addComponent(resetBtn)
+                    .addComponent(statusCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(backBtn)
+                .addContainerGap(14, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
+        applyFilter();
+        if (paymentTable.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this,
+                    "No matches for \"" + searchField.getText().trim() + "\".",
+                    "No results", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }//GEN-LAST:event_searchBtnActionPerformed
+
+    private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetBtnActionPerformed
+        searchField.setText("");
+        statusCombo.setSelectedIndex(0);
+        sorter.setRowFilter(null);
+        updateSummary();
+    }//GEN-LAST:event_resetBtnActionPerformed
+
+    private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
+        goBack();
+    }//GEN-LAST:event_backBtnActionPerformed
+
+    private void statusComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_statusComboActionPerformed
+        applyFilter();
+    }//GEN-LAST:event_statusComboActionPerformed
+    
+    private void goBack() {
+        AdminHome adminHome = new AdminHome();
+        adminHome.setVisible(true);
+        this.dispose();
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -70,5 +275,15 @@ public class ViewPayment extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton backBtn;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel pageTitle;
+    private javax.swing.JLabel paymentSummary;
+    private javax.swing.JTable paymentTable;
+    private javax.swing.JButton resetBtn;
+    private javax.swing.JButton searchBtn;
+    private javax.swing.JTextField searchField;
+    private javax.swing.JLabel searchLabel;
+    private javax.swing.JComboBox<String> statusCombo;
     // End of variables declaration//GEN-END:variables
 }

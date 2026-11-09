@@ -11,14 +11,14 @@ package sdams.gui;
 
 import java.text.DecimalFormat;
 import javax.swing.JOptionPane;
-import sdams.model.ManageStaffService;
+import sdams.model.ManageStaffServices;
 import sdams.model.Staff;
 
-public class UpdateStaff extends javax.swing.JFrame {
+public class EditStaff extends javax.swing.JFrame {
     
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UpdateStaff.class.getName());
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(EditStaff.class.getName());
     
-    private final ManageStaffService service = new ManageStaffService();
+    private final ManageStaffServices service = new ManageStaffServices();
     private final DecimalFormat moneyFmt = new DecimalFormat("0.00");
     
     private String editingId;
@@ -30,13 +30,13 @@ public class UpdateStaff extends javax.swing.JFrame {
     /**
      * Creates new form EditStaff
      */
-    public UpdateStaff(String id) {
+    public EditStaff(String id) {
         initComponents();
         setLocationRelativeTo(null);
         if (id == null || id.trim().isEmpty()) {
             javax.swing.SwingUtilities.invokeLater(() -> {
                 JOptionPane.showMessageDialog(this,
-                        "No staff id supplied to UpdateStaff.",
+                        "No staff id supplied to EditStaff.",
                         "Error", JOptionPane.ERROR_MESSAGE);
                 goBack();
             });
@@ -102,7 +102,7 @@ public class UpdateStaff extends javax.swing.JFrame {
         phoneField = new javax.swing.JTextField();
         roleCombo = new javax.swing.JComboBox<>();
         backBtn = new javax.swing.JButton();
-        updateBtn = new javax.swing.JButton();
+        editBtn = new javax.swing.JButton();
         pageTitle = new javax.swing.JLabel();
         undoBtn = new javax.swing.JButton();
         nameLabel = new javax.swing.JLabel();
@@ -111,7 +111,12 @@ public class UpdateStaff extends javax.swing.JFrame {
         salaryField = new javax.swing.JTextField();
         phoneLabel = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         roleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         roleLabel.setText("Role:");
@@ -122,13 +127,13 @@ public class UpdateStaff extends javax.swing.JFrame {
         backBtn.setFocusable(false);
         backBtn.addActionListener(this::backBtnActionPerformed);
 
-        updateBtn.setText("Update");
-        updateBtn.setFocusable(false);
-        updateBtn.addActionListener(this::updateBtnActionPerformed);
+        editBtn.setText("Edit");
+        editBtn.setFocusable(false);
+        editBtn.addActionListener(this::editBtnActionPerformed);
 
         pageTitle.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         pageTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        pageTitle.setText("Update Staff");
+        pageTitle.setText("Edit Staff");
 
         undoBtn.setText("Undo");
         undoBtn.setFocusable(false);
@@ -155,39 +160,39 @@ public class UpdateStaff extends javax.swing.JFrame {
                 .addComponent(pageTitle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
-                .addGap(62, 62, 62)
+                .addGap(46, 46, 46)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
-                        .addComponent(backBtn)
-                        .addGap(53, 53, 53)
-                        .addComponent(updateBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(48, 48, 48)
-                        .addComponent(undoBtn)
-                        .addGap(0, 61, Short.MAX_VALUE))
+                        .addComponent(nameLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(roleLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(emailLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(nameLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(phoneLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
-                                    .addComponent(roleLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(emailLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(emailField, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(phoneField, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(salaryLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(salaryField)
-                                    .addComponent(roleCombo, 0, 250, Short.MAX_VALUE))))
-                        .addGap(88, 88, 88))))
+                                .addComponent(phoneLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(emailField, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(phoneField, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(salaryLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(salaryField)
+                            .addComponent(roleCombo, 0, 250, Short.MAX_VALUE))))
+                .addGap(88, 88, 88))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(63, 63, 63)
+                .addComponent(backBtn)
+                .addGap(53, 53, 53)
+                .addComponent(editBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(48, 48, 48)
+                .addComponent(undoBtn)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -217,7 +222,7 @@ public class UpdateStaff extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(undoBtn)
-                    .addComponent(updateBtn)
+                    .addComponent(editBtn)
                     .addComponent(backBtn))
                 .addGap(19, 19, 19))
         );
@@ -235,7 +240,7 @@ public class UpdateStaff extends javax.swing.JFrame {
         this.dispose();
     }
     
-    private void updateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateBtnActionPerformed
+    private void editBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editBtnActionPerformed
         String name  = nameField.getText().trim();
         String email = emailField.getText().trim();
         String phone = phoneField.getText().trim();
@@ -263,7 +268,7 @@ public class UpdateStaff extends javax.swing.JFrame {
         }
 
         goBack();
-    }//GEN-LAST:event_updateBtnActionPerformed
+    }//GEN-LAST:event_editBtnActionPerformed
 
     private void undoBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_undoBtnActionPerformed
         nameField.setText(oriName);
@@ -273,9 +278,14 @@ public class UpdateStaff extends javax.swing.JFrame {
         roleCombo.setSelectedItem(displayRole(oriRole));
     }//GEN-LAST:event_undoBtnActionPerformed
 
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        goBack();
+    }//GEN-LAST:event_formWindowClosing
 
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backBtn;
+    private javax.swing.JButton editBtn;
     private javax.swing.JTextField emailField;
     private javax.swing.JLabel emailLabel;
     private javax.swing.JTextField nameField;
@@ -288,6 +298,5 @@ public class UpdateStaff extends javax.swing.JFrame {
     private javax.swing.JTextField salaryField;
     private javax.swing.JLabel salaryLabel;
     private javax.swing.JButton undoBtn;
-    private javax.swing.JButton updateBtn;
     // End of variables declaration//GEN-END:variables
 }
