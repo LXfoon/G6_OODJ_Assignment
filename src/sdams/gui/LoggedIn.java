@@ -10,11 +10,20 @@ package sdams.gui;
  */
 public class LoggedIn {
     private static String username;
+    private static String id;
+    
     public static void setUsername(String username){
         LoggedIn.username = username;
     }
     
     public static String getUsername(){
         return username;
+    }
+    public static void setId(String id){
+        LoggedIn.id = id;
+    }
+    
+    public static String getId(){
+        return id;
     }
 }
