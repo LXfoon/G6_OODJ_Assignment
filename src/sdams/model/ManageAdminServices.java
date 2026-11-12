@@ -4,12 +4,12 @@
  */
 package sdams.model;
 
-import sdams.util.UserManager;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import sdams.util.FileUtil;
 import static sdams.util.Generator.idGenerator;
 import static sdams.util.Generator.passwordGenerator;
+import sdams.util.UserManager;
 import sdams.util.Validator;
 
 /**
@@ -27,7 +27,7 @@ public class ManageAdminServices implements UserManager{
 
     @Override
     public void addUser(String name, String email, String phoneNum) {        
-        String id = idGenerator("");
+        String id = idGenerator("", "user.txt");
         String password = passwordGenerator();
         String role = "Admin";
 

@@ -1,1 +1,3 @@
 C001|Beginner Karate|Karate|007|2026-11-10|18:00|19:30|50.0|Available
+C002|Intermediate Karate|Karate|008|2026-11-12|18:00|19:30|50.0|Completed
+C003|Beginner Karate|Karate|007|2026-11-10|18:00|19:30|50.0|Completed
