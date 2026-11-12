@@ -40,7 +40,7 @@ public class ManageStudentServices implements UserManager {
         
         Validator.userValidator(name, email, password, phoneNum); 
         
-        String id = Generator.idGenerator("");
+        String id = Generator.idGenerator("", USER_FILE);
                 
         loadUser();
 

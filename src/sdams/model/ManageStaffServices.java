@@ -67,7 +67,7 @@ public class ManageStaffServices implements UserManager {
     public void addUser(String name, String email, String phoneNum) {
         String password = Generator.passwordGenerator();
         Validator.userValidator(name, email, password, phoneNum);
-        String id = Generator.idGenerator("");
+        String id = Generator.idGenerator("", USER_FILE);
 
         this.pendingId = id;
         this.pendingPassword = password;
