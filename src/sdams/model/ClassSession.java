@@ -32,7 +32,7 @@ public class ClassSession {
         this.fee = fee;
         this.status = status;
     }
-    
+
     public enum ClassStatus{
         Available,
         Full,

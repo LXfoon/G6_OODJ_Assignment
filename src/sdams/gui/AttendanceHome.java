@@ -126,7 +126,9 @@ public class AttendanceHome extends javax.swing.JFrame {
     }//GEN-LAST:event_manageAttBtnActionPerformed
 
     private void attRecordBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attRecordBtnActionPerformed
-        // TODO add your handling code here:
+        ViewAtt view = new ViewAtt();
+        view.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_attRecordBtnActionPerformed
 
     private void attReportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attReportBtnActionPerformed

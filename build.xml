@@ -70,4 +70,16 @@
     nbproject/build-impl.xml file. 
 
     -->
+
+    <path id="project.classpath">
+        <!-- Add the LGoodDatePicker JAR -->
+        <pathelement location="lib/LGoodDatePicker-11.2.1.jar"/>
+    </path>
+
+    <!-- Compile task referencing the classpath -->
+    <target name="compile">
+        <javac srcdir="src" destdir="build/classes" includeantruntime="false">
+            <classpath refid="project.classpath"/>
+        </javac>
+    </target>
 </project>
