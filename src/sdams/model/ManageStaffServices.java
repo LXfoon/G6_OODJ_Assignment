@@ -9,10 +9,7 @@ package sdams.model;
  * @author xiaow
  */
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import javax.swing.JOptionPane;
 
 import sdams.util.Generator;
@@ -27,8 +24,6 @@ public class ManageStaffServices implements UserManager {
 
     private final ArrayList<Staff> allStaff = new ArrayList<>();
     private final ArrayList<String> allUserLines = new ArrayList<>();
-    private final LinkedHashMap<String, Double> salaryMap = new LinkedHashMap<>();
-    private final DecimalFormat moneyFmt = new DecimalFormat("0.00");
     
     private String pendingId;
     private String pendingPassword;
@@ -36,33 +31,17 @@ public class ManageStaffServices implements UserManager {
     @Override
     public void loadUser() {
         allStaff.clear();
-        allUserLines.clear();
-        salaryMap.clear();
+        
         ArrayList<String> salaryLines = new ArrayList<>();
         FileUtil.read(STAFF_FILE, salaryLines, s -> s);
-        for (String line : salaryLines) {
-            String[] parts = line.split("\\|", -1);
-            if (parts.length < 2) continue;
-            String id = parts[0].trim();
-            String salaryStr = parts[1].trim();
-            if (id.isEmpty()) continue;
-            try {
-                double salary = Double.parseDouble(salaryStr);
-                salaryMap.put(id, salary);
-            } catch (NumberFormatException e) {
-                salaryMap.putIfAbsent(id, 0.00);
-            }
-        }
-
+        
         FileUtil.read(USER_FILE, allUserLines, s -> s);
         for (String line : allUserLines) {
-            Staff s = Staff.fromLine(line);
-            if (s == null) continue; 
-            s.setSalary(salaryMap.getOrDefault(s.getId(), 0.0));
-            allStaff.add(s);
+            Staff s = Staff.fromLines(line, salaryLines);
+            if (s != null) allStaff.add(s);
         }
     }
-
+    
     @Override
     public void addUser(String name, String email, String phoneNum) {
         String password = Generator.passwordGenerator();
@@ -100,6 +79,7 @@ public class ManageStaffServices implements UserManager {
 
         String shortRole = normalizeRole(role);
         Staff staff = switch (shortRole) {
+            case "Instructor" ->  new Instructor(id, name, email, password, phone, salary);
             case "Facilities" -> new FacOfficer(id, name, email, password, phone, salary);
             case "Attendance" -> new AttOfficer(id, name, email, password, phone, salary);
             default -> new Instructor(id, name, email, password, phone, salary);
@@ -107,7 +87,6 @@ public class ManageStaffServices implements UserManager {
 
         allStaff.add(staff);
         allUserLines.add(staff.toLine());
-        salaryMap.put(id, salary);
 
         FileUtil.write(USER_FILE, allUserLines, s -> s);
         writeSalaryFile();
@@ -119,7 +98,7 @@ public class ManageStaffServices implements UserManager {
     @Override
     public void updateUser(String id, String name, String email, String password, String phoneNum) {
         // role cannot be edited
-        loadUser();
+        if (allStaff.isEmpty()) loadUser();
         Validator.userValidator(name, email, password, phoneNum);
 
         Staff staff = findById(id);
@@ -143,11 +122,18 @@ public class ManageStaffServices implements UserManager {
             JOptionPane.showMessageDialog(null, "Staff not found: " + id);
             return;
         }
+        
+        if (salary < 0) {
+            JOptionPane.showMessageDialog(null, "Salary must be 0 or greater.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
         String existingPassword = staff.getPassword();
         
         updateUser(id, name, email, existingPassword, phoneNum);
         
-        salaryMap.put(id, salary);
+        staff.setSalary(salary); 
         writeSalaryFile();
         
         JOptionPane.showMessageDialog(null, "Staff edited successfully!");
@@ -156,15 +142,19 @@ public class ManageStaffServices implements UserManager {
     @Override
     public void deleteUser(String id) {
         loadUser();
+        if (findById(id) == null) {
+            JOptionPane.showMessageDialog(null, "Staff not found: " + id);
+            return;
+        }
 
         allUserLines.removeIf(line -> {
             String[] parts = line.split("\\|", -1);
             return parts.length >= 1 && parts[0].trim().equals(id);
         });
         allStaff.removeIf(s -> s.getId().equals(id));
-        salaryMap.remove(id);
 
         FileUtil.write(USER_FILE, allUserLines, s -> s);
+        
         writeSalaryFile();
         JOptionPane.showMessageDialog(null, "Staff deleted successfully!");
     }
@@ -193,6 +183,7 @@ public class ManageStaffServices implements UserManager {
     }
 
     private String normalizeRole(String role) {
+        if (role == null) return "Instructor";
         String r = role.trim().toLowerCase();
         
         return switch (r) {
@@ -203,7 +194,6 @@ public class ManageStaffServices implements UserManager {
         };
         
     }
-    
     
     private void clearPending() {
         pendingId = null;
@@ -222,8 +212,8 @@ public class ManageStaffServices implements UserManager {
 
     private void writeSalaryFile() {
         ArrayList<String> lines = new ArrayList<>();
-        for (Map.Entry<String, Double> e : salaryMap.entrySet()) {
-            lines.add(e.getKey() + "|" + moneyFmt.format(e.getValue()));
+        for (Staff s : allStaff) {
+            lines.add(s.toSalaryLine());
         }
         FileUtil.write(STAFF_FILE, lines, s -> s);
     }

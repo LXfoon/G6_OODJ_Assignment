@@ -17,17 +17,4 @@ public class Instructor extends Staff {
     public Instructor(String id, String name, String email, String password,String phoneNum, double salary) {
         super(id, name, email, password, phoneNum, "Instructor", salary);
     }
-
-    public static Instructor fromLine(String line) {
-        String[] parts = line.split("\\|");
-        if (parts.length < 6) {
-            return null;
-        }
-        
-        if (!"Instructor".equalsIgnoreCase(parts[5].trim())) {
-            return null;
-        }
-        
-        return new Instructor(parts[0], parts[1], parts[2], parts[3], parts[4], 0.00);
-    }
 }
