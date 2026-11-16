@@ -55,7 +55,7 @@ public class AddAtt extends javax.swing.JFrame {
                     found = true;
                     for(Student s : allStudent){
                         if(s.getId() == null) continue;
-                        if(!s.getRole().equals("Student")) continue;
+                        if(!s.getRole().equalsIgnoreCase("Student")) continue;
 
                         if(s.getId().equalsIgnoreCase(b.getStudentId())){
                             model.addRow(new Object[]{

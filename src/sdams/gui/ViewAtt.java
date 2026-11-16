@@ -10,6 +10,7 @@ import java.util.TreeSet;
 import javax.swing.table.DefaultTableModel;
 import sdams.model.AttendanceRecord;
 import sdams.model.ClassSession;
+import sdams.model.Staff;
 import sdams.model.Student;
 import sdams.util.FileUtil;
 
@@ -19,7 +20,8 @@ import sdams.util.FileUtil;
  */
 public class ViewAtt extends javax.swing.JFrame {
 ArrayList<AttendanceRecord> allAtt = new ArrayList<>();
-ArrayList<Student> allUser = new ArrayList<>();
+ArrayList<Student> allStudent = new ArrayList<>();
+ArrayList<Staff> allStaff = new ArrayList<>();
 ArrayList<ClassSession> allClass = new ArrayList<>();
 TreeSet<String> disciplineList = new TreeSet<>();
 TreeSet<String> instructorList = new TreeSet<>();
@@ -37,7 +39,8 @@ TreeSet<String> instructorList = new TreeSet<>();
         });
         
         FileUtil.read("attendance.txt", allAtt, AttendanceRecord::fromLine);
-        FileUtil.read("user.txt", allUser, Student::fromLine);
+        FileUtil.read("user.txt", allStudent, Student::fromLine);
+        FileUtil.read("user.txt", allStaff, Staff::fromUserLine);
         FileUtil.read("class.txt", allClass, ClassSession::fromLine);
         
         populateFilters();
@@ -136,7 +139,7 @@ TreeSet<String> instructorList = new TreeSet<>();
     private String getStudentName(String studentId){
         String studentName = "";
         
-        for(Student s : allUser){
+        for(Student s : allStudent){
                 if(s.getId() == null) continue;
                 
                 if(s.getId().equalsIgnoreCase(studentId) && "Student".equalsIgnoreCase(s.getRole())){
@@ -159,14 +162,15 @@ TreeSet<String> instructorList = new TreeSet<>();
         return null;
     }
     
+    
     private String getInstructor(String instructorId){
         String instructor = "";
         
-        for(Student s : allUser){
-            if(s.getId() == null) continue;
+        for(Staff st : allStaff){
+            if(st.getId() == null) continue;
 
-            if(s.getId().equalsIgnoreCase(instructorId) && "Instructor".equalsIgnoreCase(s.getRole())){
-                instructor = s.getName();
+            if(st.getId().equalsIgnoreCase(instructorId) && "Instructor".equalsIgnoreCase(st.getRole())){
+                instructor = st.getName();
                 break;
             }
         }

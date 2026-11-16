@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import sdams.model.AttendanceRecord;
+import sdams.model.Booking;
+import sdams.model.Booking.BookingStatus;
 import sdams.model.ClassSession;
 import sdams.model.ClassSession.ClassStatus;
 import sdams.util.FileUtil;
@@ -19,6 +21,7 @@ import sdams.util.FileUtil;
 public class ManageAtt extends javax.swing.JFrame {
 ArrayList<ClassSession> allClass = new ArrayList<>();
 ArrayList<AttendanceRecord> allAtt = new ArrayList<>();
+ArrayList<Booking> allBooking = new ArrayList<>();
     /**
      * Creates new form ManageAtt
      */
@@ -33,12 +36,25 @@ ArrayList<AttendanceRecord> allAtt = new ArrayList<>();
         
         try{
             FileUtil.read("class.txt", allClass, ClassSession::fromLine);
+            FileUtil.read("booking.txt", allBooking, Booking::fromLine);
             DefaultTableModel model = (DefaultTableModel) classTable.getModel();
             model.setRowCount(0);
+            boolean isBookingCompleted = true;
             
             for(ClassSession c : allClass){
                 if(c.getClassId() == null) continue;
                 if(c.getStatus() != ClassStatus.Completed) continue;
+                
+                for(Booking b : allBooking){
+                    if(b.getBookingId() == null) continue;
+                    if(!b.getClassId().equalsIgnoreCase(c.getClassId())) continue;
+                    if(b.getStatus() != BookingStatus.Completed){
+                        isBookingCompleted = false;
+                        break;   
+                    }
+                }
+                
+                if(!isBookingCompleted) continue;
                 
                 model.addRow(new Object[] {
                     c.getClassId(),

@@ -7,6 +7,7 @@ package sdams.gui;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
 import sdams.model.Admin;
+import sdams.model.Staff;
 import sdams.util.FileUtil;
 import sdams.util.ReportGenerator;
 
@@ -15,7 +16,7 @@ import sdams.util.ReportGenerator;
  * @author Foon
  */
 public class StaffReport extends javax.swing.JFrame implements ReportGenerator<Admin>{
-    ArrayList<Admin> allStaff = new ArrayList<>();
+    ArrayList<Staff> allStaff = new ArrayList<>();
 
     /**
      * Creates new form StaffReport
@@ -40,12 +41,12 @@ public class StaffReport extends javax.swing.JFrame implements ReportGenerator<A
         applyFilter();
     }
         
-    private void addRow(DefaultTableModel model, Admin a) {
+    private void addRow(DefaultTableModel model, Staff st) {
         model.addRow(new Object[]{
-            a.getId(),
-            a.getName(),
-            a.getEmail(),
-            a.getRole()
+            st.getId(),
+            st.getName(),
+            st.getEmail(),
+            st.getRole()
         });
     }
     /**
@@ -305,7 +306,7 @@ public class StaffReport extends javax.swing.JFrame implements ReportGenerator<A
     @Override
     public void loadData() {
         allStaff.clear();
-        FileUtil.read("user.txt", allStaff, Admin::fromLine);
+        FileUtil.read("user.txt", allStaff, Staff::fromUserLine);
     }
     
     @Override
@@ -317,18 +318,18 @@ public class StaffReport extends javax.swing.JFrame implements ReportGenerator<A
         Object selection = roleDropdown.getSelectedItem();
         String roleFilter = selection == null ? "All" : selection.toString();
         
-        for(Admin a : allStaff){
-            String role = a.getRole();
-            if(a.getId() == null || a.getRole() == null) continue;
-            if(a.getRole().equalsIgnoreCase("Student") || a.getRole().equalsIgnoreCase("Manager")) continue;
+        for(Staff st : allStaff){
+            String role = st.getRole();
+            if(st.getId() == null || st.getRole() == null) continue;
+            if(st.getRole().equalsIgnoreCase("Student") || st.getRole().equalsIgnoreCase("Manager")) continue;
 
-            String name = a.getName() == null ? "" : a.getName().toLowerCase();
+            String name = st.getName() == null ? "" : st.getName().toLowerCase();
 
             boolean matchSearch = search.isEmpty() || name.contains(search);
             boolean matchRole = roleFilter.equals("All") || role.equalsIgnoreCase(roleFilter);
 
             if(matchSearch && matchRole){
-                addRow(model, a);
+                addRow(model, st);
                 updateSummary(model);
             }
         }
