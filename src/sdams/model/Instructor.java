@@ -6,24 +6,15 @@ package sdams.model;
 
 /**
  *
- * @author Foon
+ * @author xiaow
  */
-public class Instructor extends User{
-    public Instructor(String id, String name, String email, String password, String phoneNum, String role) {
-        super(id, name, email, password, phoneNum, role);
+public class Instructor extends Staff {
+    
+    public Instructor() { 
+        super(); 
     }
- 
-    public static Instructor fromLine(String line) {
-        String parts[] = line.split("\\|");
-        if(parts.length < 6) return null;
-        
-        String id = parts[0].trim();
-        String name = parts[1].trim();
-        String email = parts[2].trim();
-        String password = parts[3].trim();
-        String phoneNum = parts[4].trim();
-        String role = parts[5].trim();
-        
-        return new Instructor(id, name, email, password, phoneNum, role);    
+    
+    public Instructor(String id, String name, String email, String password,String phoneNum, double salary) {
+        super(id, name, email, password, phoneNum, "Instructor", salary);
     }
 }
