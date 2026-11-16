@@ -127,6 +127,7 @@ public class ManagerHome extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
+        LoggedIn.setId("");
         LoggedIn.setUsername("");
         Login login = new Login();
         login.setVisible(true);

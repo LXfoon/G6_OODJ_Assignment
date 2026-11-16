@@ -132,10 +132,13 @@ public class AttendanceHome extends javax.swing.JFrame {
     }//GEN-LAST:event_attRecordBtnActionPerformed
 
     private void attReportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attReportBtnActionPerformed
-        // TODO add your handling code here:
+        AttReport attReport = new AttReport();
+        attReport.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_attReportBtnActionPerformed
 
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
+        LoggedIn.setId("");
         LoggedIn.setUsername("");
         Login login = new Login();
         login.setVisible(true);

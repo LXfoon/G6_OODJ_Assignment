@@ -6,7 +6,6 @@ package sdams.gui;
 
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
-import sdams.model.Admin;
 import sdams.model.Staff;
 import sdams.util.FileUtil;
 import sdams.util.ReportGenerator;
@@ -15,7 +14,7 @@ import sdams.util.ReportGenerator;
  *
  * @author Foon
  */
-public class StaffReport extends javax.swing.JFrame implements ReportGenerator<Admin>{
+public class StaffReport extends javax.swing.JFrame implements ReportGenerator<Staff>{
     ArrayList<Staff> allStaff = new ArrayList<>();
 
     /**
