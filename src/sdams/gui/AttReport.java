@@ -41,23 +41,23 @@ TreeMap<String, int[]> classes = new TreeMap<>();
         populateFilters();
         applyFilter();
         
-        classDropdown.addActionListener((ActionEvent e) -> {
+        classDropdown.addActionListener(e -> {
             Object selection = classDropdown.getSelectedItem();
             if(classDropdown.getSelectedItem().equals("All")){
-                studentDropdown.enable();
+                studentDropdown.setEnabled(true);
             } else {
-                studentDropdown.disable();
+                studentDropdown.setEnabled(false);
             }
             if (selection != null) applyFilter();
         });
         
-        studentDropdown.addActionListener((ActionEvent e) -> {
+        studentDropdown.addActionListener(e -> {
             Object selection = studentDropdown.getSelectedItem();
             if (selection != null) applyFilter();
             if(studentDropdown.getSelectedItem().equals("All")){
-                classDropdown.enable();
+                classDropdown.setEnabled(true);
             }else{
-                classDropdown.disable();
+                classDropdown.setEnabled(false);
             }
         });
     }
@@ -475,6 +475,8 @@ TreeMap<String, int[]> classes = new TreeMap<>();
     public void resetFilters() {
         studentDropdown.setSelectedItem("All");
         classDropdown.setSelectedItem("All");
+        studentDropdown.setEnabled(true);
+        classDropdown.setEnabled(true);
     }
 
     @Override
