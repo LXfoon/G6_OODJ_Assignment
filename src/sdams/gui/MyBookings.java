@@ -47,7 +47,7 @@ public class MyBookings extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel1.setText("My Bookings");
 
-        jLabel2.setText("Total Bookings: xx   Paid: xx   Unpaid: xx");
+        jLabel2.setText("Total Bookings: xx");
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Status", "Booked", "Completed", "Cancelled" }));
 
@@ -89,7 +89,7 @@ public class MyBookings extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel2)
-                .addGap(295, 295, 295))
+                .addGap(352, 352, 352))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
