@@ -120,8 +120,8 @@ public class AttendanceHome extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void manageAttBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_manageAttBtnActionPerformed
-        ManageAtt manageAtt = new ManageAtt();
-        manageAtt.setVisible(true);
+        ManageAtt manage = new ManageAtt();
+        manage.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_manageAttBtnActionPerformed
 
