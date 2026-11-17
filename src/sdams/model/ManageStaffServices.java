@@ -36,10 +36,12 @@ public class ManageStaffServices implements UserManager {
         FileUtil.read(STAFF_FILE, salaryLines, s -> s);
         
         FileUtil.read(USER_FILE, allUserLines, s -> s);
+        
         for (String line : allUserLines) {
             Staff s = Staff.fromLines(line, salaryLines);
-            if (s != null) allStaff.add(s);
+            if (s != null && !(s instanceof Admin)) allStaff.add(s);   // exclude Admin
         }
+        
     }
     
     @Override
@@ -190,6 +192,7 @@ public class ManageStaffServices implements UserManager {
             case "instructor" -> "Instructor";
             case "facilities" -> "Facilities";
             case "attendance" -> "Attendance";
+            case "admin" -> "Admin";
             default -> "Instructor";
         };
         
