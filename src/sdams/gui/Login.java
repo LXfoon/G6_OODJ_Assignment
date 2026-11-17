@@ -138,14 +138,10 @@ public class Login extends javax.swing.JFrame {
             if(!found){
                 JOptionPane.showMessageDialog(null, "Invalid Login");
             } else {
-                if(role.equalsIgnoreCase("Manager")){
-                    ManagerHome mHome = new ManagerHome();
+                if(role.equalsIgnoreCase("Facilies Officer")){
+                    FacilitiesOfficerHome mHome = new FacilitiesOfficerHome();
                     mHome.setVisible(true);
-                }else if (role.equalsIgnoreCase("Attendance")){
-                    AttendanceHome attHome = new AttendanceHome();
-                    attHome.setVisible(true);
                 }
-
                 this.dispose(); //close login
             }
         }catch(IOException e){
