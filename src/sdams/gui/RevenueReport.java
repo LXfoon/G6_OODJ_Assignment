@@ -302,11 +302,12 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
         
             
         for(Payment p : allPayment){
+            if(p.getPaymentId() == null) continue;
             LocalDate dateVal = p.getPaymentDate();
+            if(dateVal == null) continue;
             String monthVal = getMonthStr(dateVal.getMonthValue());
             String yearVal = String.valueOf(dateVal.getYear());
 
-            if(p.getPaymentId() == null) continue;
             if(p.getStatus() ==  PaymentStatus.Refunded) continue;
 
             boolean matchMonth = monthFilter.equals("All") || monthVal.equalsIgnoreCase(monthFilter);

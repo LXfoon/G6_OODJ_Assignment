@@ -5,6 +5,7 @@
 package sdams.model;
 
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JOptionPane;
 import sdams.util.FileUtil;
 import static sdams.util.Generator.idGenerator;
@@ -32,10 +33,11 @@ public class ManageAdminServices implements UserManager{
         String role = "Admin";
 
         Validator.userValidator(name, email, password, phoneNum);
+        Validator.dupEmailChecker(email, null, allAdmin);
+        Validator.inputFieldChecker(new ArrayList<>(List.of(name, email, password)));
 
         loadUser();
         
-        //replace with actual admin class later
         Admin newAdmin = new Admin(id, name, email, password, phoneNum, role);
         allAdmin.add(newAdmin);
 
@@ -46,16 +48,18 @@ public class ManageAdminServices implements UserManager{
     @Override
     public void updateUser(String id, String name, String email, String password, String phoneNum) {
         loadUser();
-        Validator.userValidator(name, email, password, phoneNum);
-
+        Validator.userValidator(name, email, password, phoneNum);        
+        Validator.dupEmailChecker(email, id, allAdmin);
+        Validator.inputFieldChecker(new ArrayList<>(List.of(name, email, password)));
+        
         for(Admin a : allAdmin){
-            if(a.getId().equals(id)){
+            if(a.getId().equals(id)){                
                 a.setName(name);
                 a.setEmail(email);
                 a.setPassword(password);
                 a.setPhoneNum(phoneNum);
-
             }
+            
         }
 
         FileUtil.write("user.txt", allAdmin, Admin::toLine);
