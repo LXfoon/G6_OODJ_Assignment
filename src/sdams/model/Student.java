@@ -23,7 +23,7 @@ public class Student extends User {
     public static Student fromLine(String line) {
         String[] parts = line.split("\\|", -1);
         if (parts.length < 6) return null;
-        String role = parts[5].trim().toLowerCase();
+        String role = parts[5].trim();
         if (!ROLE.equals(role)) return null;
         return new Student(parts[0].trim(), parts[1], parts[2], parts[3], parts[4]);
     }
