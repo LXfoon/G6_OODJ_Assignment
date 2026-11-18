@@ -47,7 +47,7 @@ public class ManageStudentServices implements UserManager {
         }
     }
     
-     @Override
+    @Override
     public void addUser(String name, String email, String phoneNum) {
         String password = Generator.passwordGenerator();
         
