@@ -128,6 +128,7 @@ public class Login extends javax.swing.JFrame {
                 role = parts[5];
                 if(email.equals(parts[2]) && password.equals(parts[3])){
                     found = true;
+                    LoggedIn.setId(parts[0]);
                     LoggedIn.setUsername(parts[1]);
                     JOptionPane.showMessageDialog(null, "Login Successful");
                     break;
@@ -138,7 +139,7 @@ public class Login extends javax.swing.JFrame {
             if(!found){
                 JOptionPane.showMessageDialog(null, "Invalid Login");
             } else {
-                if(role.equalsIgnoreCase("Facilies Officer")){
+                if(role.equalsIgnoreCase("Facilities")){
                     FacilitiesOfficerHome mHome = new FacilitiesOfficerHome();
                     mHome.setVisible(true);
                 }

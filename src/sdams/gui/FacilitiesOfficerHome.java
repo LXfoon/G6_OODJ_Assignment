@@ -17,6 +17,7 @@ public class FacilitiesOfficerHome extends javax.swing.JFrame {
      */
     public FacilitiesOfficerHome() {
         initComponents();
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -35,13 +36,14 @@ public class FacilitiesOfficerHome extends javax.swing.JFrame {
         btnLogout = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(500, 300));
+        setPreferredSize(new java.awt.Dimension(500, 330));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel1.setText("Facilities Officer Main Menu");
 
         btnEquipmentInventoryManagement.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         btnEquipmentInventoryManagement.setText("Equipment Inventory Management ");
+        btnEquipmentInventoryManagement.addActionListener(this::btnEquipmentInventoryManagementActionPerformed);
 
         btnFacilityProblemManagement.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         btnFacilityProblemManagement.setText("Facility Problem Management ");
@@ -49,6 +51,7 @@ public class FacilitiesOfficerHome extends javax.swing.JFrame {
 
         btnStockReports.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         btnStockReports.setText("Equipment Inventory Stock Reports ");
+        btnStockReports.addActionListener(this::btnStockReportsActionPerformed);
 
         btnLogout.setText("Log Out");
         btnLogout.addActionListener(this::btnLogoutActionPerformed);
@@ -91,12 +94,26 @@ public class FacilitiesOfficerHome extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnFacilityProblemManagementActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFacilityProblemManagementActionPerformed
-        // TODO add your handling code here:
+        FacilityProblemFrame prb = new FacilityProblemFrame();
+        prb.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_btnFacilityProblemManagementActionPerformed
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnLogoutActionPerformed
+
+    private void btnEquipmentInventoryManagementActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEquipmentInventoryManagementActionPerformed
+        Inventory inv = new Inventory();
+        inv.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnEquipmentInventoryManagementActionPerformed
+
+    private void btnStockReportsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStockReportsActionPerformed
+        StockReport rep = new StockReport();
+        rep.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnStockReportsActionPerformed
 
     /**
      * @param args the command line arguments

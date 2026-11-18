@@ -4,6 +4,12 @@
  */
 package sdams.gui;
 
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import sdams.model.Equipment;
+import sdams.util.FileUtil;
+
 /**
  *
  * @author User
@@ -15,8 +21,67 @@ public class Inventory extends javax.swing.JFrame {
     /**
      * Creates new form Inventory
      */
+    private ArrayList<Equipment> list = new ArrayList<>();
+    private static final String FILE = "equipment.txt";
+    
     public Inventory() {
         initComponents();
+        setLocationRelativeTo(null);
+        
+        tableInventory.setModel(new DefaultTableModel(
+            new Object[]{"ID", "Name", "Category", "Qty", "Condition", "Location"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        });
+        
+        txfSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { applyFilters(); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { applyFilters(); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { applyFilters(); }
+        });
+        txfSearch.addActionListener(e -> applyFilters());   // Enter key
+        loadTable();
+    }
+    
+    public void loadTable(){
+        FileUtil.read(FILE, list, Equipment::fromLine);
+        applyFilters();
+    }
+    
+    private void showInTable(ArrayList<Equipment> data) {
+        DefaultTableModel model = (DefaultTableModel) tableInventory.getModel();
+        model.setRowCount(0);
+        for (Equipment e : data) {
+            model.addRow(new Object[]{e.getEquipmentId(), e.getName(), e.getCategory(),
+                                      e.getQuantity(), e.getCondition(), e.getLocation()});
+        }
+    }
+    
+    public void applyFilters(){
+        String key = txfSearch.getText().trim().toLowerCase();
+        String cat = String.valueOf(cmbCategory.getSelectedItem());
+        String cond = String.valueOf(cmbCondition.getSelectedItem());
+        
+        ArrayList<Equipment> result = new ArrayList<>();
+        for (Equipment e: list){
+            boolean matchSearch = key.isEmpty()
+                    || e.getEquipmentId().toLowerCase().contains(key)
+                    || e.getName().toLowerCase().contains(key);
+            boolean matchCat = cat.endsWith("All")
+                    || e.getCategory().equalsIgnoreCase(cat);
+            boolean matchCond = cond.endsWith("All")
+                    || e.getCondition().equalsIgnoreCase(cond);
+            
+            if (matchSearch && matchCat && matchCond){
+                result.add(e);
+            }
+        }
+        showInTable(result);
     }
 
     /**
@@ -29,62 +94,48 @@ public class Inventory extends javax.swing.JFrame {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tableInventory = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         btnAdd = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
-        jTextField1 = new javax.swing.JTextField();
+        txfSearch = new javax.swing.JTextField();
         btnReset = new javax.swing.JButton();
         btnBack = new javax.swing.JButton();
         cmbCategory = new javax.swing.JComboBox<>();
         cmbCondition = new javax.swing.JComboBox<>();
         btnSearch = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(500, 300));
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(500, 400));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
-            },
-            new String [] {
-                "ID", "Name", "Category", "Qty", "Condition", "Location"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-        });
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tableInventory);
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         jLabel1.setText("Equipment Inventory Management ");
 
         btnAdd.setText("Add");
+        btnAdd.addActionListener(this::btnAddActionPerformed);
 
         btnUpdate.setText("Update");
+        btnUpdate.addActionListener(this::btnUpdateActionPerformed);
 
         btnDelete.setText("Delete");
+        btnDelete.addActionListener(this::btnDeleteActionPerformed);
 
-        jTextField1.setText("jTextField1");
+        txfSearch.addActionListener(this::txfSearchActionPerformed);
 
         btnReset.setText("Reset");
+        btnReset.addActionListener(this::btnResetActionPerformed);
 
         btnBack.setText("Back");
         btnBack.addActionListener(this::btnBackActionPerformed);
 
-        cmbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Category", " " }));
+        cmbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Category: All", "Training", "Storage", "Mats", "Protective", " " }));
         cmbCategory.addActionListener(this::cmbCategoryActionPerformed);
 
-        cmbCondition.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Condition" }));
+        cmbCondition.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Condition: All", "Good", "Needs repair", "Damaged" }));
+        cmbCondition.addActionListener(this::cmbConditionActionPerformed);
 
         btnSearch.setText("Search");
         btnSearch.addActionListener(this::btnSearchActionPerformed);
@@ -109,7 +160,7 @@ public class Inventory extends javax.swing.JFrame {
                         .addComponent(btnDelete)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jTextField1)
+                        .addComponent(txfSearch)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnSearch)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -129,7 +180,7 @@ public class Inventory extends javax.swing.JFrame {
                     .addComponent(btnBack))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txfSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cmbCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cmbCondition, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnReset)
@@ -142,23 +193,88 @@ public class Inventory extends javax.swing.JFrame {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnDelete)
                         .addComponent(btnUpdate)))
-                .addGap(0, 8, Short.MAX_VALUE))
+                .addGap(0, 108, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmbCategoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbCategoryActionPerformed
-        // TODO add your handling code here:
+        applyFilters();
     }//GEN-LAST:event_cmbCategoryActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        // TODO add your handling code here:
+        applyFilters();
     }//GEN-LAST:event_btnSearchActionPerformed
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
-        // TODO add your handling code here:
+        new FacilitiesOfficerHome().setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_btnBackActionPerformed
+
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        new AddInventory(this).setVisible(true);
+    }//GEN-LAST:event_btnAddActionPerformed
+
+    private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+        int row = tableInventory.getSelectedRow();
+        if (row == -1){
+            JOptionPane.showMessageDialog(this, "Please select an item to update,");
+            return;
+        }
+        
+        String id = tableInventory.getValueAt(row, 0).toString();
+        for (Equipment e : list){
+            if (e.getEquipmentId().equals(id)){
+                new UpdateInventory(this, e).setVisible(true);
+                break;
+            }
+        }
+    }//GEN-LAST:event_btnUpdateActionPerformed
+
+    private void cmbConditionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbConditionActionPerformed
+        applyFilters();
+    }//GEN-LAST:event_cmbConditionActionPerformed
+
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+        txfSearch.setText("");
+        cmbCategory.setSelectedIndex(0);
+        cmbCondition.setSelectedIndex(0);
+        applyFilters();
+    }//GEN-LAST:event_btnResetActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        int row = tableInventory.getSelectedRow();
+        if (row == -1){
+            JOptionPane.showMessageDialog(this, "Please select an item to update,");
+            return;
+        }
+        
+        String id = tableInventory.getValueAt(row, 0).toString();
+        String name = tableInventory.getValueAt(row, 1).toString();
+        
+        int choice = JOptionPane.showConfirmDialog(this,
+                "Delete " + id + " - " + name + "?\nThis cannot be undone.",
+                "Confirm delete",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+        
+        if (choice != JOptionPane.YES_OPTION){
+            return;
+        }
+        
+        ArrayList<Equipment> all = new ArrayList<>();
+        FileUtil.read(FILE, all, Equipment::fromLine);
+        all.removeIf(e -> e.getEquipmentId().equals(id));
+        FileUtil.write(FILE, all, Equipment::toLine);
+        
+        JOptionPane.showMessageDialog(this, "Equipment " + id + " deleted.");
+        loadTable();
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void txfSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txfSearchActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txfSearchActionPerformed
 
     /**
      * @param args the command line arguments
@@ -196,7 +312,7 @@ public class Inventory extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cmbCondition;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTable tableInventory;
+    private javax.swing.JTextField txfSearch;
     // End of variables declaration//GEN-END:variables
 }
