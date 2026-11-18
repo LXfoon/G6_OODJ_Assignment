@@ -25,9 +25,15 @@ ArrayList<Student> allStudent = new ArrayList<>();
     /**
      * Creates new form UpdateAtt
      */
+    private boolean valid;
     public UpdateAtt() {
         initComponents();
         setLocationRelativeTo(null);
+        
+        if (SelectedClass.getId() == null || SelectedClass.getId().trim().isEmpty()) {
+            valid = false;
+            return;
+        }
         
         try{
             FileUtil.read("attendance.txt", allAtt, AttendanceRecord::fromLine);
@@ -36,13 +42,13 @@ ArrayList<Student> allStudent = new ArrayList<>();
             model.setRowCount(0);
   
             for(AttendanceRecord a : allAtt){
-                if(a.getAttId() == null) continue;
+                if(a.getAttId() == null || a.getClassId() == null) continue;
                 if(!a.getClassId().equalsIgnoreCase(SelectedClass.getId())) continue;
                 
                 String studentName = "";
                 
                 for(Student s : allStudent){
-                    if(a.getStudentId() == null) continue;
+                    if(a.getStudentId() == null || s.getId() == null) continue;
                     
                     if(a.getStudentId().equalsIgnoreCase(s.getId())){
                         studentName = s.getName();
@@ -64,8 +70,10 @@ ArrayList<Student> allStudent = new ArrayList<>();
             TableColumn targetColumn = studentTable.getColumnModel().getColumn(2);
             targetColumn.setCellEditor(new DefaultCellEditor(attStatus));
             
-        }catch(Exception e){
+            valid = true;
+        }catch(RuntimeException e){
             System.out.println("Error: "+e.getMessage());
+            valid = false;
         }
     }
 
@@ -188,6 +196,7 @@ ArrayList<Student> allStudent = new ArrayList<>();
         this.dispose();
     }//GEN-LAST:event_saveBtnActionPerformed
 
+     private boolean getValid() { return valid; }
     /**
      * @param args the command line arguments
      */
@@ -216,9 +225,14 @@ ArrayList<Student> allStudent = new ArrayList<>();
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new UpdateAtt().setVisible(true);
+        java.awt.EventQueue.invokeLater(() -> {
+            UpdateAtt update = new UpdateAtt();
+            if(update.getValid()){
+                update.setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(null, "No class found.");
+                new ManageAtt().setVisible(true);
+                update.dispose();
             }
         });
     }

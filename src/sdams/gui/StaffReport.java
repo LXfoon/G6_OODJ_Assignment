@@ -6,6 +6,10 @@ package sdams.gui;
 
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.general.DefaultPieDataset;
 import sdams.model.Staff;
 import sdams.util.FileUtil;
 import sdams.util.ReportGenerator;
@@ -48,6 +52,24 @@ public class StaffReport extends javax.swing.JFrame implements ReportGenerator<S
             st.getRole()
         });
     }
+    
+    private void showPie(int admin, int ins, int fac, int att) {
+        DefaultPieDataset<String> data = new DefaultPieDataset<>();
+        data.setValue("Admin", admin);
+        data.setValue("Instructor", ins);
+        data.setValue("Fac Officer", fac);
+        data.setValue("Att Officer", att);
+
+        JFreeChart chart = ChartFactory.createPieChart(null, data, true, true, false);
+        ChartPanel panel = new ChartPanel(chart);
+        panel.setPreferredSize(new java.awt.Dimension(300, 200));
+
+        staffChart.removeAll();
+        staffChart.setLayout(new java.awt.BorderLayout());
+        staffChart.add(panel, java.awt.BorderLayout.CENTER);
+        staffChart.revalidate();
+        staffChart.repaint();
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -73,6 +95,7 @@ public class StaffReport extends javax.swing.JFrame implements ReportGenerator<S
         facCountTxt = new javax.swing.JLabel();
         backBtn = new javax.swing.JButton();
         resetBtn = new javax.swing.JButton();
+        staffChart = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -144,15 +167,24 @@ public class StaffReport extends javax.swing.JFrame implements ReportGenerator<S
             }
         });
 
+        staffChart.setBackground(new java.awt.Color(204, 204, 255));
+
+        javax.swing.GroupLayout staffChartLayout = new javax.swing.GroupLayout(staffChart);
+        staffChart.setLayout(staffChartLayout);
+        staffChartLayout.setHorizontalGroup(
+            staffChartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+        staffChartLayout.setVerticalGroup(
+            staffChartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 200, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(180, 180, 180)
-                .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(18, 18, 18)
@@ -183,16 +215,20 @@ public class StaffReport extends javax.swing.JFrame implements ReportGenerator<S
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4)
-                            .addComponent(backBtn))
+                            .addComponent(backBtn)
+                            .addComponent(staffChart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(resetBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(searchTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(roleDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(resetBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(searchTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(roleDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 487, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -226,8 +262,11 @@ public class StaffReport extends javax.swing.JFrame implements ReportGenerator<S
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel7)
                             .addComponent(facCountTxt))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
-                        .addComponent(backBtn)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(staffChart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(backBtn)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -299,6 +338,7 @@ public class StaffReport extends javax.swing.JFrame implements ReportGenerator<S
     private javax.swing.JButton resetBtn;
     private javax.swing.JComboBox<String> roleDropdown;
     private javax.swing.JTextField searchTxt;
+    private javax.swing.JPanel staffChart;
     private javax.swing.JTable staffTable;
     // End of variables declaration//GEN-END:variables
 
@@ -361,5 +401,7 @@ public class StaffReport extends javax.swing.JFrame implements ReportGenerator<S
         instructorCountTxt.setText(String.valueOf(instructorCount));
         attCountTxt.setText(String.valueOf(attCount));
         facCountTxt.setText(String.valueOf(facCount));
+        
+        showPie(adminCount, instructorCount, facCount, attCount);
     }
 }

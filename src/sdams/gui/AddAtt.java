@@ -76,7 +76,7 @@ public class AddAtt extends javax.swing.JFrame {
             targetColumn.setCellEditor(new DefaultCellEditor(attStatus));
             
             valid = found;
-        }catch(Exception e){
+        }catch(RuntimeException e){
             System.out.println("Error: "+e.getMessage());
             valid = false;
         }

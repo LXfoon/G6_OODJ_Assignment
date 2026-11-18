@@ -29,35 +29,49 @@ public class ViewAdmin extends javax.swing.JFrame {
     /**
      * Creates new form ViewAdmin
      */
+    
+    private boolean valid;
     public ViewAdmin() {
         initComponents();
         setLocationRelativeTo(null);
         
-        FileUtil.read("user.txt", allAdmin, Staff::fromUserLine);
-        FileUtil.read("staff.txt", allSalary, line -> line);
-        for(Staff s : allAdmin){
-            for(String salaryLine : allSalary){
-                Map.Entry<String, Double> e = Staff.fromSalaryLine(salaryLine);
-                if(e != null && e.getKey().equals(s.getId())){
-                    s.setSalary(e.getValue());
+        if(SelectedAdmin.getId() == null || SelectedAdmin.getId().trim().isEmpty()) {
+            valid = false;
+            return;
+        }
+        
+        try{
+            FileUtil.read("user.txt", allAdmin, Staff::fromUserLine);
+            FileUtil.read("staff.txt", allSalary, line -> line);
+            for(Staff s : allAdmin){
+                for(String salaryLine : allSalary){
+                    Map.Entry<String, Double> e = Staff.fromSalaryLine(salaryLine);
+                    if(e != null && e.getKey().equals(s.getId())){
+                        s.setSalary(e.getValue());
+                        break;
+                    }
+                }
+            }
+
+            for(Staff s : allAdmin){
+                if(s instanceof Admin && s.getId().equals(id)){
+                    selectedAdmin = (Admin) s;
                     break;
                 }
             }
+
+            idTxt.setText(selectedAdmin.getId());
+            nameTxt.setText(selectedAdmin.getName());
+            emailTxt.setText(selectedAdmin.getEmail());
+            passwordTxt.setText(selectedAdmin.getPassword());
+            phoneNumTxt.setText(selectedAdmin.getPhoneNum());
+            salaryTxt.setText(String.valueOf(selectedAdmin.getSalary()));
+
+            valid = true;
+        } catch (RuntimeException e){
+            System.out.println("Error: "+e.getMessage());
+            valid = false;
         }
-        
-        for(Staff s : allAdmin){
-            if(s instanceof Admin && s.getId().equals(id)){
-                selectedAdmin = (Admin) s;
-                break;
-            }
-        }
-        
-        idTxt.setText(selectedAdmin.getId());
-        nameTxt.setText(selectedAdmin.getName());
-        emailTxt.setText(selectedAdmin.getEmail());
-        passwordTxt.setText(selectedAdmin.getPassword());
-        phoneNumTxt.setText(selectedAdmin.getPhoneNum());
-        salaryTxt.setText(String.valueOf(selectedAdmin.getSalary()));
     }
 
     /**
@@ -261,6 +275,7 @@ public class ViewAdmin extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_deleteBtnActionPerformed
 
+    private boolean getValid() {return valid;}
     /**
      * @param args the command line arguments
      */
@@ -289,9 +304,14 @@ public class ViewAdmin extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new ViewAdmin().setVisible(true);
+        java.awt.EventQueue.invokeLater(() -> {
+            ViewAdmin view = new ViewAdmin();
+            if(view.getValid()){
+                view.setVisible(true);
+            }else{
+                JOptionPane.showMessageDialog(null, "No user found.");
+                new ManageAdmin().setVisible(true);
+                view.dispose();
             }
         });
     }

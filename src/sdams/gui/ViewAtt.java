@@ -67,7 +67,7 @@ TreeSet<String> instructorList = new TreeSet<>();
             for(AttendanceRecord a : allAtt){
                 addRow(model, a);
             }
-        }catch(Exception e){
+        }catch(RuntimeException e){
             System.out.println("Error: "+e.getMessage());
         }
     }

@@ -47,7 +47,7 @@ public class ManageAdmin extends javax.swing.JFrame {
                 }
             }
             
-        }catch(Exception e){
+        }catch(RuntimeException e){
             System.out.println("Error: "+e.getMessage());
         }
     }
@@ -92,7 +92,7 @@ public class ManageAdmin extends javax.swing.JFrame {
                     });
                 }
             }
-        }catch(Exception e){
+        }catch(NullPointerException e){
             System.out.println("Error: "+e.getMessage());
         }
     }

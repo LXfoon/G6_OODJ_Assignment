@@ -7,8 +7,14 @@ package sdams.gui;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import javax.swing.table.DefaultTableModel;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 import sdams.model.Payment;
 import sdams.model.Payment.PaymentStatus;
 import sdams.util.FileUtil;
@@ -75,6 +81,35 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
                 });
     }
     
+    private void showBar() {
+        TreeMap<Integer, Double> revenuePerYear = new TreeMap<>();
+        for(Payment p : allPayment){
+            if(p.getPaymentId() == null) continue;
+            if(p.getStatus() == PaymentStatus.Refunded) continue;
+            
+            int paymentYear = p.getPaymentDate().getYear();
+            if(!revenuePerYear.containsKey(paymentYear)){
+                revenuePerYear.put(paymentYear, p.getAmount());
+            } else {
+                revenuePerYear.merge(paymentYear, p.getAmount(), Double::sum);
+            }
+        }
+        
+        DefaultCategoryDataset data = new DefaultCategoryDataset();
+        for(int year : revenuePerYear.keySet()){
+            data.addValue(revenuePerYear.get(year), "Revenue", String.valueOf(year));
+        }
+        JFreeChart chart = ChartFactory.createBarChart("Total Revenue per Year", "Year", "Revenue (RM)", data, PlotOrientation.VERTICAL, false, true, false);
+        ChartPanel panel = new ChartPanel(chart);
+        panel.setPreferredSize(new java.awt.Dimension(300, 200));
+
+        revenueChart.removeAll();
+        revenueChart.setLayout(new java.awt.BorderLayout());
+        revenueChart.add(panel, java.awt.BorderLayout.CENTER);
+        revenueChart.revalidate();
+        revenueChart.repaint();
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -95,6 +130,7 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
         classCountTxt = new javax.swing.JLabel();
         revenueCountTxt = new javax.swing.JLabel();
         resetBtn = new javax.swing.JButton();
+        revenueChart = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -158,6 +194,19 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
             }
         });
 
+        revenueChart.setBackground(new java.awt.Color(204, 204, 255));
+
+        javax.swing.GroupLayout revenueChartLayout = new javax.swing.GroupLayout(revenueChart);
+        revenueChart.setLayout(revenueChartLayout);
+        revenueChartLayout.setHorizontalGroup(
+            revenueChartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+        revenueChartLayout.setVerticalGroup(
+            revenueChartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 200, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -165,20 +214,8 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(resetBtn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(monthlyDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(yearlyDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(169, 169, 169)
-                        .addComponent(jLabel1)
-                        .addGap(0, 189, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(backBtn)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -186,23 +223,32 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(revenueCountTxt)))
-                        .addGap(12, 12, 12)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                                .addComponent(revenueCountTxt))
+                            .addComponent(revenueChart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 396, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(resetBtn)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(monthlyDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(yearlyDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(backBtn))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(272, 272, 272)
+                        .addComponent(jLabel1)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addGap(2, 2, 2)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(yearlyDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(monthlyDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(resetBtn))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                .addGap(12, 12, 12)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
@@ -211,9 +257,17 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel3)
                             .addComponent(revenueCountTxt))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(backBtn))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(revenueChart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(yearlyDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(monthlyDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(resetBtn))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(backBtn)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -271,6 +325,8 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backBtn;
+    private javax.swing.JPanel chartHolder;
+    private javax.swing.JPanel chartHolder1;
     private javax.swing.JLabel classCountTxt;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -278,6 +334,7 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JComboBox<String> monthlyDropdown;
     private javax.swing.JButton resetBtn;
+    private javax.swing.JPanel revenueChart;
     private javax.swing.JLabel revenueCountTxt;
     private javax.swing.JTable revenueTable;
     private javax.swing.JComboBox<String> yearlyDropdown;
@@ -361,5 +418,6 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
         
         classCountTxt.setText(String.valueOf(count));
         revenueCountTxt.setText(df.format(total));
+        showBar();
     }
 }

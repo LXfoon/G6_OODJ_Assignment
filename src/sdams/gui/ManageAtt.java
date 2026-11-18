@@ -63,7 +63,7 @@ ArrayList<Booking> allBooking = new ArrayList<>();
                 });
             }
             
-        }catch(Exception e){
+        }catch(RuntimeException e){
             System.out.println("Error: "+e.getMessage());
         }
     }
@@ -103,7 +103,7 @@ ArrayList<Booking> allBooking = new ArrayList<>();
                     });
                 }
             }
-        }catch(Exception e){
+        }catch(RuntimeException e){
             System.out.println("Error: "+e.getMessage());
         }
     }
