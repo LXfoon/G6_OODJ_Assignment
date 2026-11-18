@@ -1,0 +1,6 @@
+E001|Punching bag|Training|8|Good|Hall A
+E002|Sparring gloves|Protective|20|Needs repair|Store room
+E003|Floor mat|Mats|12|Good|Hall B
+E004|Cabinet|Storage|6|Needs repair|Classroom
+E005|Safety Goggles|Protective|35|Good|Cabinet 1
+E006|Work Gloves|Protective|24|Good|Cabinet 3
