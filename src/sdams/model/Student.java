@@ -10,7 +10,7 @@ package sdams.model;
  */
 public class Student extends User {
 
-    public static final String ROLE = "student";
+    public static final String ROLE = "Student";
 
     public Student() {
         super();

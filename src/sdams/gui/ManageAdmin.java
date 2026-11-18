@@ -7,6 +7,7 @@ package sdams.gui;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
 import sdams.model.Admin;
+import sdams.model.Staff;
 import sdams.util.FileUtil;
 
 /**
@@ -14,7 +15,7 @@ import sdams.util.FileUtil;
  * @author Foon
  */
 public class ManageAdmin extends javax.swing.JFrame {
-    ArrayList<Admin> allAdmin = new ArrayList<>();
+    ArrayList<Staff> allAdmin = new ArrayList<>();
 
     /**
      * Creates new form ManageAdmin
@@ -30,7 +31,7 @@ public class ManageAdmin extends javax.swing.JFrame {
         refreshTable();
         
         try{
-            FileUtil.read("user.txt", allAdmin, Admin::fromLine);
+            FileUtil.read("user.txt", allAdmin, Staff::fromUserLine);
             DefaultTableModel model = (DefaultTableModel) adminTable.getModel();
             model.setRowCount(0);
             
@@ -52,10 +53,10 @@ public class ManageAdmin extends javax.swing.JFrame {
     }
     
     public void refreshTable() {
-        FileUtil.read("user.txt", allAdmin, Admin::fromLine);
+        FileUtil.read("user.txt", allAdmin, Staff::fromUserLine);
         DefaultTableModel model = (DefaultTableModel) adminTable.getModel();
         model.setRowCount(0);
-        for(Admin a : allAdmin){
+        for(Staff a : allAdmin){
                 if(a.getId() == null){
                     continue;
                 }else if(a.getRole().equalsIgnoreCase("Admin")){
@@ -74,10 +75,10 @@ public class ManageAdmin extends javax.swing.JFrame {
         model.setRowCount(0);
         
         try{
-            ArrayList<Admin> newList = new ArrayList<>();
-            FileUtil.read("user.txt", newList, Admin::fromLine);
+            ArrayList<Staff> newList = new ArrayList<>();
+            FileUtil.read("user.txt", newList, Staff::fromUserLine);
             
-            for(Admin a : newList){
+            for(Staff a : newList){
                 if(a.getId() == null || a.getRole() == null) continue;
                 if(!a.getRole().equalsIgnoreCase("Admin")) continue;
                 

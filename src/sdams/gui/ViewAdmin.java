@@ -5,22 +5,27 @@
 package sdams.gui;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import javax.swing.JOptionPane;
 import sdams.exception.ValidationException;
 import sdams.model.Admin;
-import sdams.model.ManageAdminServices;
+import sdams.model.ManageStaffServices;
+import sdams.model.Staff;
 import sdams.util.FileUtil;
+import sdams.util.Validator;
 
 /**
  *
  * @author Foon
  */
 public class ViewAdmin extends javax.swing.JFrame {
-    ArrayList<Admin> allAdmin = new ArrayList<>();
+    ArrayList<Staff> allAdmin = new ArrayList<>();
+    ArrayList<String> allSalary = new ArrayList<>();
     Admin selectedAdmin = new Admin();
     String id = SelectedAdmin.getId();
     ManageAdmin manage = new ManageAdmin();
-    ManageAdminServices manageAd = new ManageAdminServices();
+    ManageStaffServices manageAd = new ManageStaffServices();
     /**
      * Creates new form ViewAdmin
      */
@@ -28,10 +33,22 @@ public class ViewAdmin extends javax.swing.JFrame {
         initComponents();
         setLocationRelativeTo(null);
         
-        FileUtil.read("user.txt", allAdmin, Admin::fromLine);
-        for(int i=0; i<allAdmin.size(); i++){
-            if(id.equals(allAdmin.get(i).getId())){
-                selectedAdmin = allAdmin.get(i);
+        FileUtil.read("user.txt", allAdmin, Staff::fromUserLine);
+        FileUtil.read("staff.txt", allSalary, line -> line);
+        for(Staff s : allAdmin){
+            for(String salaryLine : allSalary){
+                Map.Entry<String, Double> e = Staff.fromSalaryLine(salaryLine);
+                if(e != null && e.getKey().equals(s.getId())){
+                    s.setSalary(e.getValue());
+                    break;
+                }
+            }
+        }
+        
+        for(Staff s : allAdmin){
+            if(s instanceof Admin && s.getId().equals(id)){
+                selectedAdmin = (Admin) s;
+                break;
             }
         }
         
@@ -40,6 +57,7 @@ public class ViewAdmin extends javax.swing.JFrame {
         emailTxt.setText(selectedAdmin.getEmail());
         passwordTxt.setText(selectedAdmin.getPassword());
         phoneNumTxt.setText(selectedAdmin.getPhoneNum());
+        salaryTxt.setText(String.valueOf(selectedAdmin.getSalary()));
     }
 
     /**
@@ -65,6 +83,8 @@ public class ViewAdmin extends javax.swing.JFrame {
         nameTxt = new javax.swing.JTextField();
         emailTxt = new javax.swing.JTextField();
         passwordTxt = new javax.swing.JPasswordField();
+        jLabel7 = new javax.swing.JLabel();
+        salaryTxt = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -106,6 +126,8 @@ public class ViewAdmin extends javax.swing.JFrame {
 
         nameTxt.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
 
+        jLabel7.setText("Salary");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -113,33 +135,37 @@ public class ViewAdmin extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addComponent(backBtn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(updateBtn))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(10, 10, 10)
+                                .addComponent(backBtn)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(updateBtn))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(136, 136, 136)
+                                .addComponent(jLabel1)
+                                .addGap(0, 57, Short.MAX_VALUE)))
+                        .addGap(12, 12, 12)
+                        .addComponent(deleteBtn))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(136, 136, 136)
-                        .addComponent(jLabel1)
-                        .addGap(0, 57, Short.MAX_VALUE)))
-                .addGap(12, 12, 12)
-                .addComponent(deleteBtn)
+                        .addGap(60, 60, 60)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel6)
+                            .addComponent(jLabel5)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(salaryTxt)
+                            .addComponent(emailTxt, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
+                            .addComponent(nameTxt, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
+                            .addComponent(phoneNumTxt)
+                            .addComponent(passwordTxt)
+                            .addComponent(idTxt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(60, 60, 60)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel6)
-                    .addComponent(jLabel5)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(emailTxt, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
-                    .addComponent(nameTxt, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
-                    .addComponent(phoneNumTxt)
-                    .addComponent(passwordTxt)
-                    .addComponent(idTxt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -150,23 +176,27 @@ public class ViewAdmin extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(idTxt))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(nameTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(emailTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(passwordTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(phoneNumTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(salaryTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(deleteBtn)
                     .addComponent(backBtn)
@@ -190,13 +220,25 @@ public class ViewAdmin extends javax.swing.JFrame {
             char rawPass[] = passwordTxt.getPassword();
             String password = String.valueOf(rawPass);
             String phoneNum = phoneNumTxt.getText();
+            String salaryStr = salaryTxt.getText().trim();
+            
+            if(salaryStr.isEmpty()) throw new ValidationException("Salary is required.");
+            
+            Validator.inputFieldChecker(List.of(salaryStr));
+            double salary;
+            try{
+                salary = Double.parseDouble(salaryStr);
+            }catch (NumberFormatException e){
+                throw new ValidationException("Salary must be a valid number.");
+            }
             
             selectedAdmin.setName(name);
             selectedAdmin.setEmail(email);
             selectedAdmin.setPassword(password);
             selectedAdmin.setPhoneNum(phoneNum);
+            selectedAdmin.setSalary(salary);
             
-            manageAd.updateUser(id, name, email, password, phoneNum);
+            manageAd.updateStaff(id, name, email, password, phoneNum, salary);
             manage.refreshTable();
         }catch (ValidationException v){
             JOptionPane.showMessageDialog(null, v.getMessage());
@@ -265,9 +307,11 @@ public class ViewAdmin extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JTextField nameTxt;
     private javax.swing.JPasswordField passwordTxt;
     private javax.swing.JTextField phoneNumTxt;
+    private javax.swing.JTextField salaryTxt;
     private javax.swing.JButton updateBtn;
     // End of variables declaration//GEN-END:variables
 }
