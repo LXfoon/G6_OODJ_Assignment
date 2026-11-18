@@ -192,11 +192,6 @@ public class EditStudent extends javax.swing.JFrame {
         String email = emailField.getText().trim();
         String phone = phoneField.getText().trim();
 
-        if (name.isEmpty() || email.isEmpty() || phone.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Name, email and phone are required.", "Missing input", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
         try {
             Student stu = service.findById(editingId);
             if (stu == null) {
@@ -207,13 +202,12 @@ public class EditStudent extends javax.swing.JFrame {
                 return;
             }
 
-            // Service: updateUser validates, updates user.txt, shows success dialog
             service.updateUser(editingId, name, email, stu.getPassword(), phone);
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this,
                     ex.getMessage() == null ? "Update failed." : ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
-            return;   // stay on EditStudent
+            return;
         }
 
         goBack();

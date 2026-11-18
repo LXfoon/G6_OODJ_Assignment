@@ -10,6 +10,7 @@ package sdams.model;
  */
 
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JOptionPane;
 
 import sdams.util.Generator;
@@ -23,6 +24,7 @@ public class ManageStaffServices implements UserManager {
     private static final String STAFF_FILE = "staff.txt";
 
     private final ArrayList<Staff> allStaff = new ArrayList<>();
+    private final ArrayList<User> allUser = new ArrayList<>();
     private final ArrayList<String> allUserLines = new ArrayList<>();
     
     private String pendingId;
@@ -31,6 +33,7 @@ public class ManageStaffServices implements UserManager {
     @Override
     public void loadUser() {
         allStaff.clear();
+        allUser.clear();
         
         ArrayList<String> salaryLines = new ArrayList<>();
         FileUtil.read(STAFF_FILE, salaryLines, s -> s);
@@ -39,15 +42,24 @@ public class ManageStaffServices implements UserManager {
         
         for (String line : allUserLines) {
             Staff s = Staff.fromLines(line, salaryLines);
-            if (s != null && !(s instanceof Admin)) allStaff.add(s);   // exclude Admin
+            if (s != null) {
+                allStaff.add(s);  
+                allUser.add(s);
+            } else {
+                Manager m = Manager.fromLine(line);
+                if (m != null) allUser.add(m); // <- XW CHANGED
+            }
         }
         
     }
     
     @Override
     public void addUser(String name, String email, String phoneNum) {
+        loadUser();
         String password = Generator.passwordGenerator();
         Validator.userValidator(name, email, password, phoneNum);
+        Validator.dupEmailChecker(email, null, allUser); 
+        Validator.inputFieldChecker(new ArrayList<>(List.of(name, email, password)));
         String id = Generator.idGenerator("", USER_FILE);
 
         this.pendingId = id;
@@ -84,6 +96,7 @@ public class ManageStaffServices implements UserManager {
             case "Instructor" ->  new Instructor(id, name, email, password, phone, salary);
             case "Facilities" -> new FacOfficer(id, name, email, password, phone, salary);
             case "Attendance" -> new AttOfficer(id, name, email, password, phone, salary);
+            case "Admin" -> new Admin(id, name, email, password, phone, salary); //CHANGED
             default -> new Instructor(id, name, email, password, phone, salary);
         };
 
@@ -100,8 +113,9 @@ public class ManageStaffServices implements UserManager {
     @Override
     public void updateUser(String id, String name, String email, String password, String phoneNum) {
         // role cannot be edited
-        if (allStaff.isEmpty()) loadUser();
         Validator.userValidator(name, email, password, phoneNum);
+        Validator.dupEmailChecker(email, id, allUser); //CHANGED
+        Validator.inputFieldChecker(new ArrayList<>(List.of(name, email, password))); //CHANGED
 
         Staff staff = findById(id);
         if (staff == null) {
@@ -117,7 +131,7 @@ public class ManageStaffServices implements UserManager {
         FileUtil.write(USER_FILE, allUserLines, s -> s);
     }
     
-    public void updateStaff(String id, String name, String email, String phoneNum, double salary) {
+    public void updateStaff(String id, String name, String email, String password, String phoneNum, double salary) {
         loadUser();
         Staff staff = findById(id);
         if (staff == null) {
@@ -131,9 +145,7 @@ public class ManageStaffServices implements UserManager {
             return;
         }
         
-        String existingPassword = staff.getPassword();
-        
-        updateUser(id, name, email, existingPassword, phoneNum);
+        updateUser(id, name, email, password, phoneNum);
         
         staff.setSalary(salary); 
         writeSalaryFile();

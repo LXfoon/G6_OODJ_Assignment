@@ -13,13 +13,13 @@ import java.security.SecureRandom;
  * @author Foon
  */
 public class Generator {
-    public static String idGenerator(String prefix){
+    public static String idGenerator(String prefix, String filePath){
         String newId="";
         int maxId = 0;
         int padLength = 3;
         
         try{
-           FileReader fr = new FileReader("user.txt");
+           FileReader fr = new FileReader(filePath);
             BufferedReader br = new BufferedReader(fr); 
             String line;
             
@@ -31,7 +31,7 @@ public class Generator {
                 if(!rawId.startsWith(prefix)) continue;
                 
                 String numberId = rawId.substring(prefix.length());
-                int current = Integer.parseInt(parts[0]);
+                int current = Integer.parseInt(numberId);
                 if(current > maxId) maxId = current;
             }
             

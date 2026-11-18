@@ -161,13 +161,6 @@ public class AddStudent extends javax.swing.JFrame {
         String email = emailField.getText().trim();
         String phone = phoneField.getText().trim();
 
-        if (name.isEmpty() || email.isEmpty() || phone.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Name, email and phone are required.",
-                    "Missing input", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
         try {
             service.addUser(name, email, phone);
         } catch (RuntimeException ex) {

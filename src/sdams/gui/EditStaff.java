@@ -22,10 +22,7 @@ public class EditStaff extends javax.swing.JFrame {
     private final DecimalFormat moneyFmt = new DecimalFormat("0.00");
     
     private String editingId;
-
-    // Snapshot for Undo
-    private String oriName, oriEmail, oriPhone, oriRole;
-    private double oriSalary;
+    private Staff oriStaff;
     
     /**
      * Creates new form EditStaff
@@ -44,36 +41,28 @@ public class EditStaff extends javax.swing.JFrame {
         }
         
         this.editingId = id.trim();
-        
         service.loadUser();
-        loadStaff(editingId);
-    }
-    
-    private void loadStaff(String id) {
-        Staff s = service.findById(id);
-        if (s == null) {
+        this.oriStaff = service.findById(editingId);
+        if (oriStaff == null) {
             javax.swing.SwingUtilities.invokeLater(() -> {
                 JOptionPane.showMessageDialog(this,
-                        "Staff not found: " + id, "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                        "Staff not found: " + id, "Error", JOptionPane.ERROR_MESSAGE);
                 goBack();
             });
             return;
         }
 
-        oriName = s.getName();
-        oriEmail = s.getEmail();
-        oriPhone = s.getPhoneNum();
-        oriRole = s.getRole();
-        oriSalary = s.getSalary();
-
-        pageTitle.setText("Update Staff: " + oriName);
-        nameField.setText(oriName);
-        emailField.setText(oriEmail);
-        phoneField.setText(oriPhone);
-        salaryField.setText(moneyFmt.format(oriSalary));
+        loadStaff(editingId);
+    }
+    
+    private void loadStaff(String id) {
+        pageTitle.setText("Update Staff: " + oriStaff.getName());
+        nameField.setText(oriStaff.getName());
+        emailField.setText(oriStaff.getEmail());
+        phoneField.setText(oriStaff.getPhoneNum());
+        salaryField.setText(moneyFmt.format(oriStaff.getSalary()));
           
-        roleCombo.setSelectedItem(displayRole(oriRole));
+        roleCombo.setSelectedItem(displayRole(oriStaff.getRole()));
         roleCombo.setEnabled(false);
         roleCombo.setToolTipText("Role cannot be changed on this screen.");
     }
@@ -241,16 +230,11 @@ public class EditStaff extends javax.swing.JFrame {
     }
     
     private void editBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editBtnActionPerformed
-        String name  = nameField.getText().trim();
+        String name = nameField.getText().trim();
         String email = emailField.getText().trim();
         String phone = phoneField.getText().trim();
         String salaryStr = salaryField.getText().trim();
-
-        if (name.isEmpty() || email.isEmpty() || phone.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Name, email and phone are required.", "Missing input", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
+        
         double salary;
         try {
             salary = Double.parseDouble(salaryStr);
@@ -258,9 +242,14 @@ public class EditStaff extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Invalid salary: \"" + salaryStr + "\"", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        
+        if (salary < 0) {
+            JOptionPane.showMessageDialog(this, "Salary must be 0 or greater.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         try {
-            service.updateStaff(editingId, name, email, phone, salary);
+            service.updateStaff(editingId, name, email, oriStaff.getPassword(), phone, salary);
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this,
                     ex.getMessage() == null ? "Update failed." : ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -271,11 +260,10 @@ public class EditStaff extends javax.swing.JFrame {
     }//GEN-LAST:event_editBtnActionPerformed
 
     private void undoBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_undoBtnActionPerformed
-        nameField.setText(oriName);
-        emailField.setText(oriEmail);
-        phoneField.setText(oriPhone);
-        salaryField.setText(moneyFmt.format(oriSalary));
-        roleCombo.setSelectedItem(displayRole(oriRole));
+        nameField.setText(oriStaff.getName());
+        emailField.setText(oriStaff.getEmail());
+        phoneField.setText(oriStaff.getPhoneNum());
+        salaryField.setText(moneyFmt.format(oriStaff.getSalary()));
     }//GEN-LAST:event_undoBtnActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing

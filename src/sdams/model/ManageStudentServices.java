@@ -5,6 +5,7 @@
 package sdams.model;
 
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JOptionPane;
 
 import sdams.util.FileUtil;
@@ -19,7 +20,8 @@ import sdams.util.Validator;
 public class ManageStudentServices implements UserManager {
     
     private static final String USER_FILE = "user.txt";
-
+    
+    private final ArrayList<User> allUser = new ArrayList<>();  
     private final ArrayList<Student> allStudents = new ArrayList<>();
     private final ArrayList<String> allUserLines = new ArrayList<>();
     
@@ -27,10 +29,21 @@ public class ManageStudentServices implements UserManager {
     public void loadUser() {
         allStudents.clear();
         allUserLines.clear();
+        allUser.clear();
         FileUtil.read(USER_FILE, allUserLines, stu -> stu);
         for (String line : allUserLines) {
             Student stu = Student.fromLine(line);
-            if (stu != null) allStudents.add(stu);
+            
+            String[] parts = line.split("\\|", -1);
+            if (parts.length < 6) continue;
+            
+            if (stu != null) {
+                allStudents.add(stu);
+            } else {
+                Manager m = Manager.fromLine(line);
+                if (m != null) allUser.add(m);
+            }
+            
         }
     }
     
@@ -38,12 +51,12 @@ public class ManageStudentServices implements UserManager {
     public void addUser(String name, String email, String phoneNum) {
         String password = Generator.passwordGenerator();
         
-        Validator.userValidator(name, email, password, phoneNum); 
+        Validator.userValidator(name, email, password, phoneNum);
+        Validator.inputFieldChecker(List.of(name, email, password, phoneNum));
+        loadUser();
+        Validator.dupEmailChecker(email, null, allUser);
         
         String id = Generator.idGenerator("", USER_FILE);
-                
-        loadUser();
-
         Student student = new Student(id, name, email, password, phoneNum);
         allUserLines.add(student.toLine());
         allStudents.add(student);
@@ -57,6 +70,9 @@ public class ManageStudentServices implements UserManager {
     public void updateUser(String id, String name, String email, String password, String phoneNum) {
         loadUser();
         Validator.userValidator(name, email, password, phoneNum);
+        
+        Validator.dupEmailChecker(email, id, allUser);
+        Validator.inputFieldChecker(new ArrayList<>(List.of(name, email, password)));
 
         Student student = findById(id);
         if (student == null) {

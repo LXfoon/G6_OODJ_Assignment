@@ -10,6 +10,7 @@ package sdams.gui;
  */
 
 import javax.swing.JOptionPane;
+import sdams.exception.ValidationException;
 import sdams.model.ManageStaffServices;
 
 public class AddStaff extends javax.swing.JFrame {
@@ -181,13 +182,6 @@ public class AddStaff extends javax.swing.JFrame {
         String role  = (String) roleCombo.getSelectedItem();
         String salaryStr = salaryField.getText().trim();
 
-        if (name.isEmpty() || email.isEmpty() || phone.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Name, email and phone are required.",
-                    "Missing input", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
         double salary;
         try {
             salary = Double.parseDouble(salaryStr);
@@ -196,10 +190,16 @@ public class AddStaff extends javax.swing.JFrame {
             return;
         }
         
-        String id = service.addStaff(name, email, phone, role, salary);
-
-        if (id != null) {
+        try {
+            String id = service.addStaff(name, email, phone, role, salary);
+            if (id == null) return;
+            
+            JOptionPane.showMessageDialog(this,
+                    "Staff created successfully!\n\nID: " + id);
             goBack();
+        } catch (ValidationException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(),
+                    "Validation", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_createBtnActionPerformed
 

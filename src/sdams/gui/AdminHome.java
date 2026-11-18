@@ -11,7 +11,7 @@ package sdams.gui;
 public class AdminHome extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AdminHome.class.getName());
-
+    
     /**
      * Creates new form AdminHome
      */
@@ -36,6 +36,7 @@ public class AdminHome extends javax.swing.JFrame {
         manageStudentBtn = new javax.swing.JButton();
         viewPaymentBtn = new javax.swing.JButton();
         logOutBtn = new javax.swing.JButton();
+        editProfileBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -63,6 +64,11 @@ public class AdminHome extends javax.swing.JFrame {
         logOutBtn.setFocusable(false);
         logOutBtn.addActionListener(this::logOutBtnActionPerformed);
 
+        editProfileBtn.setText("Edit Profile");
+        editProfileBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        editProfileBtn.setFocusable(false);
+        editProfileBtn.addActionListener(this::editProfileBtnActionPerformed);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -73,7 +79,10 @@ public class AdminHome extends javax.swing.JFrame {
                     .addComponent(manageStaffBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(manageStudentBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
                     .addComponent(viewPaymentBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
-                    .addComponent(logOutBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(logOutBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(editProfileBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE)))
                 .addGap(75, 75, 75))
         );
         jPanel1Layout.setVerticalGroup(
@@ -81,13 +90,15 @@ public class AdminHome extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGap(18, 18, 18)
                 .addComponent(manageStaffBtn)
-                .addGap(26, 26, 26)
+                .addGap(18, 18, 18)
                 .addComponent(manageStudentBtn)
-                .addGap(26, 26, 26)
+                .addGap(18, 18, 18)
                 .addComponent(viewPaymentBtn)
-                .addGap(26, 26, 26)
-                .addComponent(logOutBtn)
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(logOutBtn)
+                    .addComponent(editProfileBtn))
+                .addContainerGap(49, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -104,7 +115,7 @@ public class AdminHome extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(30, 30, 30)
-                .addComponent(welcometxt, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)
+                .addComponent(welcometxt, javax.swing.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(18, 18, 18))
@@ -138,6 +149,11 @@ public class AdminHome extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_viewPaymentBtnActionPerformed
 
+    private void editProfileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editProfileBtnActionPerformed
+        new EditProfile(LoggedIn.getId(), this).setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_editProfileBtnActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -164,6 +180,7 @@ public class AdminHome extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton editProfileBtn;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JButton logOutBtn;
     private javax.swing.JButton manageStaffBtn;

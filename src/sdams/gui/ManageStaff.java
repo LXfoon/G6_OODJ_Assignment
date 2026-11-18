@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
+import sdams.model.Admin;
 
 import sdams.model.Staff;
 import sdams.model.ManageStaffServices;
@@ -23,6 +24,9 @@ import sdams.model.Instructor;
  *
  * @author xiaow
  */
+
+// for admin use: cannot manage other admin
+// only manage Instructor/AttOfficer/FacOfficer
 public class ManageStaff extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ManageStaff.class.getName());
@@ -62,6 +66,7 @@ public class ManageStaff extends javax.swing.JFrame {
     private void refreshTable() {
         tableModel.setRowCount(0);
         for (Staff s : service.getAllStaff()) {
+            if (s instanceof Admin) continue; // exclude admin
             tableModel.addRow(new Object[]{
                 s.getId(),
                 s.getName(),
