@@ -14,9 +14,9 @@ import javax.swing.table.TableColumn;
 import sdams.model.AttendanceRecord;
 import sdams.model.AttendanceRecord.AttStatus;
 import sdams.model.Booking;
+import sdams.model.Booking.BookingStatus;
 import sdams.model.Student;
 import sdams.util.FileUtil;
-import sdams.util.Generator;
 import sdams.util.LoggedInChecker;
 
 /**
@@ -51,7 +51,7 @@ public class AddAtt extends javax.swing.JFrame {
             
             boolean found = false;
             for(Booking b : allBooking){
-                if(b.getClassId() != null && b.getClassId().equalsIgnoreCase(SelectedClass.getId())){
+                if(b.getClassId() != null && b.getClassId().equalsIgnoreCase(SelectedClass.getId()) && b.getStatus() != BookingStatus.Cancelled){
                     found = true;
                     for(Student s : allStudent){
                         if(s.getId() == null) continue;

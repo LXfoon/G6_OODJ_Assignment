@@ -39,22 +39,21 @@ ArrayList<Booking> allBooking = new ArrayList<>();
             FileUtil.read("booking.txt", allBooking, Booking::fromLine);
             DefaultTableModel model = (DefaultTableModel) classTable.getModel();
             model.setRowCount(0);
-            boolean isBookingCompleted = true;
             
             for(ClassSession c : allClass){
                 if(c.getClassId() == null) continue;
                 if(c.getStatus() != ClassStatus.Completed) continue;
+                boolean hasBooking = false;
                 
                 for(Booking b : allBooking){
                     if(b.getBookingId() == null) continue;
                     if(!b.getClassId().equalsIgnoreCase(c.getClassId())) continue;
-                    if(b.getStatus() != BookingStatus.Completed){
-                        isBookingCompleted = false;
-                        break;   
-                    }
+                    if(b.getStatus() == BookingStatus.Cancelled) continue;
+                    hasBooking = true;
+                    break;
                 }
                 
-                if(!isBookingCompleted) continue;
+                if(!hasBooking) continue;
                 
                 model.addRow(new Object[] {
                     c.getClassId(),
@@ -81,6 +80,17 @@ ArrayList<Booking> allBooking = new ArrayList<>();
             for(ClassSession c : newList){
                 if(c.getClassId() == null) continue;
                 if(c.getStatus() != ClassStatus.Completed) continue;
+                boolean hasBooking = false;
+                
+                for(Booking b : allBooking){
+                    if(b.getBookingId() == null) continue;
+                    if(!b.getClassId().equalsIgnoreCase(c.getClassId())) continue;
+                    if(b.getStatus() == BookingStatus.Cancelled) continue;
+                    hasBooking = true;
+                    break;
+                }
+                
+                if(!hasBooking) continue;
                 
                 String name = c.getClassName() == null ? "" : c.getClassName().toLowerCase();
                 
