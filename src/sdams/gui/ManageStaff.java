@@ -67,6 +67,8 @@ public class ManageStaff extends javax.swing.JFrame {
         tableModel.setRowCount(0);
         for (Staff s : service.getAllStaff()) {
             if (s instanceof Admin) continue; // exclude admin
+            
+            if (!s.isActive()) continue; // exclude deactivated accounts
             tableModel.addRow(new Object[]{
                 s.getId(),
                 s.getName(),

@@ -16,8 +16,8 @@ public class Student extends User {
         super();
     }
 
-    public Student(String id, String name, String email, String password, String phoneNum) {
-        super(id, name, email, password, phoneNum, ROLE);
+    public Student(String id, String name, String email, String password, String phoneNum, String status) {
+        super(id, name, email, password, phoneNum, ROLE, status);
     }
 
     public static Student fromLine(String line) {
@@ -25,6 +25,6 @@ public class Student extends User {
         if (parts.length < 6) return null;
         String role = parts[5].trim();
         if (!ROLE.equals(role)) return null;
-        return new Student(parts[0].trim(), parts[1], parts[2], parts[3], parts[4]);
+        return new Student(parts[0].trim(), parts[1], parts[2], parts[3], parts[4], parts[6]);
     }
 }

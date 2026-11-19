@@ -13,7 +13,7 @@ public class Admin extends Staff{
         super(); 
     }
     
-    public Admin(String id, String name, String email, String password,String phoneNum, double salary) {
-        super(id, name, email, password, phoneNum, "Admin", salary);
+    public Admin(String id, String name, String email, String password,String phoneNum, String status, double salary) {
+        super(id, name, email, password, phoneNum, "Admin", status, salary);
     }
 }

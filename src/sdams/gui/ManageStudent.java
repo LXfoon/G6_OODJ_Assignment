@@ -56,8 +56,13 @@ public class ManageStudent extends javax.swing.JFrame {
     private void refreshTable() {
         tableModel.setRowCount(0);
         for (Student stu : service.getAllStudents()) {
+            if (!stu.isActive()) continue; // exclude deactivated accounts
+            
             tableModel.addRow(new Object[]{
-                stu.getId(), stu.getName(), stu.getEmail(), stu.getPhoneNum()
+                stu.getId(), 
+                stu.getName(), 
+                stu.getEmail(), 
+                stu.getPhoneNum()
             });
         }
         studentSummary.setText("Total Students: " + service.count());
@@ -156,6 +161,12 @@ public class ManageStudent extends javax.swing.JFrame {
         });
         studentTable.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(studentTable);
+        if (studentTable.getColumnModel().getColumnCount() > 0) {
+            studentTable.getColumnModel().getColumn(0).setResizable(false);
+            studentTable.getColumnModel().getColumn(1).setResizable(false);
+            studentTable.getColumnModel().getColumn(2).setResizable(false);
+            studentTable.getColumnModel().getColumn(3).setResizable(false);
+        }
 
         backBtn.setText("Back to Main Menu");
         backBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -163,9 +174,11 @@ public class ManageStudent extends javax.swing.JFrame {
         backBtn.addActionListener(this::backBtnActionPerformed);
 
         updateBtn.setText("Update");
+        updateBtn.setFocusable(false);
         updateBtn.addActionListener(this::updateBtnActionPerformed);
 
         deleteBtn.setText("Delete");
+        deleteBtn.setFocusable(false);
         deleteBtn.addActionListener(this::deleteBtnActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
