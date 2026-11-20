@@ -50,7 +50,7 @@ public class InstructorRating extends javax.swing.JFrame {
 
         cmbScore.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Score", "1", "2", "3", "4", "5" }));
 
-        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Status", "Rated", "Not Rated" }));
+        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Status", "Rated", "Unrated" }));
 
         btnReset.setText("Reset");
 

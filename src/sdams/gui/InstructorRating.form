@@ -133,7 +133,7 @@
           <StringArray count="3">
             <StringItem index="0" value="All Status"/>
             <StringItem index="1" value="Rated"/>
-            <StringItem index="2" value="Not Rated"/>
+            <StringItem index="2" value="Unrated"/>
           </StringArray>
         </Property>
       </Properties>
