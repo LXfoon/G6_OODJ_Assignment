@@ -1,0 +1,3 @@
+C001|Beginner Karate|Karate|007|2026-11-10|18:00|19:30|50.0|Available|20|10
+C002|Beginner Judo|Judo|006|2026-12-02|10:00|11:30|40.0|Available|20|8
+C003|Taekwondo Basics|Taekwondo|007|2026-11-30|19:00|20:30|45.0|Available|20|6

@@ -34,7 +34,7 @@
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="cmbDisciplines" min="-2" pref="117" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="dateClass" min="-2" max="-2" attributes="0"/>
+                              <Component id="datePicker1" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="btnReset" min="-2" pref="81" max="-2" attributes="0"/>
                           </Group>
@@ -72,12 +72,12 @@
               <Component id="lblAvailable" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="dateClass" alignment="0" min="-2" pref="29" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="txtSearch" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
                       <Component id="cmbDisciplines" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
-                      <Component id="btnReset" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
+                      <Component id="btnReset" alignment="1" min="-2" pref="30" max="-2" attributes="0"/>
                   </Group>
+                  <Component id="datePicker1" alignment="0" min="-2" pref="30" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
               <Component id="jScrollPane1" min="-2" pref="384" max="-2" attributes="0"/>
@@ -95,10 +95,10 @@
   <SubComponents>
     <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Browse Classes"/>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Segoe UI" size="24" style="1"/>
         </Property>
+        <Property name="text" type="java.lang.String" value="Browse Classes"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="lblAvailable">
@@ -222,7 +222,7 @@
         <Property name="text" type="java.lang.String" value="Book Selected Class"/>
       </Properties>
     </Component>
-    <Component class="com.github.lgooddatepicker.components.DatePicker" name="dateClass">
+    <Component class="com.github.lgooddatepicker.components.DatePicker" name="datePicker1">
     </Component>
   </SubComponents>
 </Form>
