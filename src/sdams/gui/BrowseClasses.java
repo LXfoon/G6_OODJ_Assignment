@@ -4,6 +4,15 @@
  */
 package sdams.gui;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import sdams.model.ClassSession;
+import sdams.model.Instructor;
+import sdams.model.Staff;
+import sdams.util.FileUtil;
+
 /**
  *
  * @author Mei Shi
@@ -12,11 +21,97 @@ public class BrowseClasses extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(BrowseClasses.class.getName());
 
+    private ArrayList<ClassSession> classList = new ArrayList<>();
+    private ArrayList<Instructor> instructorList = new ArrayList<>();
+    private DefaultTableModel tableModel;
+    
     /**
      * Creates new form BrowseClasses
      */
     public BrowseClasses() {
         initComponents();
+        loadClass();
+    }
+    
+    private void loadClass(){
+        try{
+            // clear existing table rows
+            DefaultTableModel model = (DefaultTableModel) tblClass.getModel();
+            model.setRowCount(0);
+            
+            // read class information
+            FileUtil.read("class.txt", classList, ClassSession::fromLine);
+            
+            // read user records and get staff information
+            ArrayList<Staff> staffList = new ArrayList<>();
+            FileUtil.read("user.txt", staffList, Staff::fromUserLine);
+            
+            // get instructor name only
+            instructorList.clear();
+
+            for(Staff s : staffList){
+                if(s instanceof Instructor i){
+                    instructorList.add(i);
+                }
+            }
+            
+            // display class schedules
+            for(ClassSession cs: classList){
+                String instructorName = "";
+                
+                for (Instructor i : instructorList){
+                    if (i.getId().equals(cs.getInstructorId())){
+                        instructorName = i.getName();
+                        break;
+                    }
+                }
+                
+                model.addRow(new Object[]{
+                    cs.getClassId(), cs.getClassName(), cs.getDiscipline(), instructorName,
+                    cs.getDate(), cs.getStartTime(), cs.getEndTime(), cs.getFee(), cs.getAvailableSlots()
+                });
+            }
+            
+            // show message
+            lblAvailable.setText("Available Classes: " + model.getRowCount());
+            
+        } catch(Exception e) {
+            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+        }
+    }
+    
+    private void filterClass(){
+        // clear existing table rows
+        DefaultTableModel model = (DefaultTableModel) tblClass.getModel();
+        model.setRowCount(0);
+        
+        // get filter values
+        String search = txtSearch.getText().trim().toLowerCase();
+        String discipline = String.valueOf(cmbDisciplines.getSelectedItem());
+        LocalDate date = datePicker.getDate();
+        
+        // check each class
+        for(ClassSession cs: classList){
+            boolean matchSearch = search.isEmpty() || cs.getClassId().contains(search) || cs.getClassName().contains(search);
+            boolean matchDisciplines = discipline.equals("All Disciplines") || cs.getDiscipline().equalsIgnoreCase(discipline);
+            boolean matchDate = date == null || cs.getDate().equals(date);
+            
+            if(matchSearch && matchDisciplines && matchDate){
+                loadClass();
+            }
+        }
+    }
+    
+    private void filterListener(){
+        // search when typing
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter(){
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent evt){
+                filterClass();
+            }
+        });
+        cmbDisciplines.addActionListener(e -> filterClass());
+        datePicker.addDateChangeListener(e -> filterClass());
     }
 
     /**
@@ -49,24 +144,26 @@ public class BrowseClasses extends javax.swing.JFrame {
         lblAvailable.setText("Available Classes: xx");
 
         txtSearch.setToolTipText("");
+        txtSearch.addActionListener(this::txtSearchActionPerformed);
 
         cmbDisciplines.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Disciplines", "Karate", "Judo", "Taekwondo", "MMA" }));
+        cmbDisciplines.addActionListener(this::cmbDisciplinesActionPerformed);
 
         btnReset.setText("Reset");
 
         tblClass.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "ID", "Class Name", "Disciplines", "Instructor", "Date", "Time", "Fee (RM)", "Available Slot"
+                "ID", "Class Name", "Disciplines", "Instructor", "Date", "Start Time", "End Time", "Fee (RM)", "Available Slot"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Double.class, java.lang.Integer.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Double.class, java.lang.Integer.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -74,6 +171,17 @@ public class BrowseClasses extends javax.swing.JFrame {
             }
         });
         jScrollPane1.setViewportView(tblClass);
+        if (tblClass.getColumnModel().getColumnCount() > 0) {
+            tblClass.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tblClass.getColumnModel().getColumn(1).setPreferredWidth(150);
+            tblClass.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tblClass.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tblClass.getColumnModel().getColumn(4).setPreferredWidth(80);
+            tblClass.getColumnModel().getColumn(5).setPreferredWidth(75);
+            tblClass.getColumnModel().getColumn(6).setPreferredWidth(75);
+            tblClass.getColumnModel().getColumn(7).setPreferredWidth(70);
+            tblClass.getColumnModel().getColumn(8).setPreferredWidth(90);
+        }
 
         btnBack.setText("Back to Student Main Menu");
         btnBack.addActionListener(this::btnBackActionPerformed);
@@ -145,6 +253,14 @@ public class BrowseClasses extends javax.swing.JFrame {
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnBackActionPerformed
+
+    private void txtSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchActionPerformed
+        filterListener();
+    }//GEN-LAST:event_txtSearchActionPerformed
+
+    private void cmbDisciplinesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbDisciplinesActionPerformed
+        filterListener();
+    }//GEN-LAST:event_cmbDisciplinesActionPerformed
 
     /**
      * @param args the command line arguments
