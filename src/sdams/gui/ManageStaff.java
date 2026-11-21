@@ -291,8 +291,7 @@ public class ManageStaff extends javax.swing.JFrame {
     private void updateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateBtnActionPerformed
         String id = getSelectedId();
         if (id == null) {
-            JOptionPane.showMessageDialog(this, 
-                    "Select a staff row first.", "No selection", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Select a staff first.");
             return;
         }
         EditStaff updateStaff = new EditStaff(id); 
@@ -304,11 +303,9 @@ public class ManageStaff extends javax.swing.JFrame {
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
         String id = getSelectedId();
         if (id == null) {
-            JOptionPane.showMessageDialog(this,
-                    "Select a staff row first.", "No selection", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Select a staff first.");
             return;
         }
-
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Delete staff " + id + "? This cannot be undone.",
                 "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);

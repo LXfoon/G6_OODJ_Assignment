@@ -194,8 +194,6 @@ public class AddStaff extends javax.swing.JFrame {
             String id = service.addStaff(name, email, phone, role, salary);
             if (id == null) return;
             
-            JOptionPane.showMessageDialog(this,
-                    "Staff created successfully!\n\nID: " + id);
             goBack();
         } catch (ValidationException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(),

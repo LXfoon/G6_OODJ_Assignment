@@ -14,7 +14,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
 import sdams.model.Payment;
-import sdams.model.PaymentDetailsManager;
 import sdams.util.FileUtil;
 
 /**
@@ -41,6 +40,12 @@ public class ViewPayment extends javax.swing.JFrame {
         tableModel = (DefaultTableModel) paymentTable.getModel();
         sorter = new TableRowSorter<>(tableModel);
         paymentTable.setRowSorter(sorter);
+        
+        viewDetailsBtn.setEnabled(false);
+        paymentTable.getSelectionModel().addListSelectionListener(e -> {
+            boolean hasSelected = paymentTable.getSelectedRow() >= 0;
+            viewDetailsBtn.setEnabled(hasSelected);
+        });
         
         loadData();
         applyFilter();
