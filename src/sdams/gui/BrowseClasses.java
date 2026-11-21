@@ -8,10 +8,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import sdams.model.Booking;
 import sdams.model.ClassSession;
 import sdams.model.Instructor;
 import sdams.model.Staff;
 import sdams.util.FileUtil;
+import sdams.util.Generator;
 
 /**
  *
@@ -31,6 +33,22 @@ public class BrowseClasses extends javax.swing.JFrame {
     public BrowseClasses() {
         initComponents();
         loadClass();
+        
+        datePicker.addDateChangeListener(e -> filterClass());
+        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                filterClass();
+            }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                filterClass();
+            }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                filterClass();
+            }
+        });
     }
     
     private void loadClass(){
@@ -56,19 +74,18 @@ public class BrowseClasses extends javax.swing.JFrame {
             }
             
             // display class schedules
-            for(ClassSession cs: classList){
+            for(ClassSession cs : classList){
                 String instructorName = "";
                 
-                for (Instructor i : instructorList){
-                    if (i.getId().equals(cs.getInstructorId())){
+                for(Instructor i : instructorList){
+                    if(i.getId().equals(cs.getInstructorId())){
                         instructorName = i.getName();
                         break;
                     }
                 }
                 
                 model.addRow(new Object[]{
-                    cs.getClassId(), cs.getClassName(), cs.getDiscipline(), instructorName,
-                    cs.getDate(), cs.getStartTime(), cs.getEndTime(), cs.getFee(), cs.getAvailableSlots()
+                    cs.getClassId(), cs.getClassName(), cs.getDiscipline(), instructorName, cs.getDate(), cs.getStartTime(), cs.getEndTime(), cs.getFee(), cs.getAvailableSlots()
                 });
             }
             
@@ -91,27 +108,28 @@ public class BrowseClasses extends javax.swing.JFrame {
         LocalDate date = datePicker.getDate();
         
         // check each class
-        for(ClassSession cs: classList){
-            boolean matchSearch = search.isEmpty() || cs.getClassId().contains(search) || cs.getClassName().contains(search);
+        for(ClassSession cs : classList){
+            String instructorName = "";
+            for(Instructor i : instructorList){
+                if(i.getId().equals(cs.getInstructorId())){
+                    instructorName = i.getName();
+                    break;
+                }
+            }
+            
+            boolean matchSearch = search.isEmpty() || cs.getClassId().toLowerCase().contains(search) || cs.getClassName().toLowerCase().contains(search) || instructorName.toLowerCase().contains(search);
             boolean matchDisciplines = discipline.equals("All Disciplines") || cs.getDiscipline().equalsIgnoreCase(discipline);
             boolean matchDate = date == null || cs.getDate().equals(date);
             
             if(matchSearch && matchDisciplines && matchDate){
-                loadClass();
+                model.addRow(new Object[]{
+                    cs.getClassId(), cs.getClassName(), cs.getDiscipline(), instructorName, cs.getDate(), cs.getStartTime(), cs.getEndTime(), cs.getFee(), cs.getAvailableSlots()
+                });
             }
         }
-    }
-    
-    private void filterListener(){
-        // search when typing
-        txtSearch.addKeyListener(new java.awt.event.KeyAdapter(){
-            @Override
-            public void keyReleased(java.awt.event.KeyEvent evt){
-                filterClass();
-            }
-        });
-        cmbDisciplines.addActionListener(e -> filterClass());
-        datePicker.addDateChangeListener(e -> filterClass());
+        
+        // update available class count
+        lblAvailable.setText("Available Classes: " + model.getRowCount());
     }
 
     /**
@@ -138,8 +156,8 @@ public class BrowseClasses extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel1.setText("Browse Classes");
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
 
         lblAvailable.setText("Available Classes: xx");
 
@@ -150,6 +168,7 @@ public class BrowseClasses extends javax.swing.JFrame {
         cmbDisciplines.addActionListener(this::cmbDisciplinesActionPerformed);
 
         btnReset.setText("Reset");
+        btnReset.addActionListener(this::btnResetActionPerformed);
 
         tblClass.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -170,6 +189,7 @@ public class BrowseClasses extends javax.swing.JFrame {
                 return types [columnIndex];
             }
         });
+        tblClass.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         jScrollPane1.setViewportView(tblClass);
         if (tblClass.getColumnModel().getColumnCount() > 0) {
             tblClass.getColumnModel().getColumn(0).setPreferredWidth(50);
@@ -187,8 +207,10 @@ public class BrowseClasses extends javax.swing.JFrame {
         btnBack.addActionListener(this::btnBackActionPerformed);
 
         btnMyBookings.setText("My Bookings");
+        btnMyBookings.addActionListener(this::btnMyBookingsActionPerformed);
 
         btnBook.setText("Book Selected Class");
+        btnBook.addActionListener(this::btnBookActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -251,16 +273,92 @@ public class BrowseClasses extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
-        // TODO add your handling code here:
+        StudentHome studentHome = new StudentHome();
+        studentHome.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_btnBackActionPerformed
 
     private void txtSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchActionPerformed
-        filterListener();
+        filterClass();
     }//GEN-LAST:event_txtSearchActionPerformed
 
     private void cmbDisciplinesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbDisciplinesActionPerformed
-        filterListener();
+        filterClass();
     }//GEN-LAST:event_cmbDisciplinesActionPerformed
+
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+        txtSearch.setText("");
+        cmbDisciplines.setSelectedIndex(0);
+        datePicker.clear();
+        
+        filterClass();
+    }//GEN-LAST:event_btnResetActionPerformed
+
+    private void btnMyBookingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMyBookingsActionPerformed
+        MyBookings myBookings = new MyBookings();
+        myBookings.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnMyBookingsActionPerformed
+
+    private void btnBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBookActionPerformed
+        // must select a row
+        int selectedRow = tblClass.getSelectedRow();
+        if(selectedRow == -1){
+            JOptionPane.showMessageDialog(null, "Please select a class first.");
+        }
+        
+        // get selected class id
+        int modelRow = tblClass.convertColumnIndexToModel(selectedRow);
+        String classId = tblClass.getValueAt(modelRow, 0).toString();
+        
+        // find selected class
+        ClassSession selectedClass = null;
+        for(ClassSession cs : classList){
+            if(cs.getClassId().equals(classId)){
+                selectedClass = cs;
+                break;
+            }
+        }
+        
+        if(selectedClass == null){
+            JOptionPane.showMessageDialog(null, "Class record not found.");
+        }
+        
+        // check available slots
+        if(selectedClass.getAvailableSlots() <= 0 || selectedClass.getStatus() != ClassSession.ClassStatus.Available){
+            JOptionPane.showMessageDialog(null, "Sorry, this class is full or unavailable!");
+        }
+        
+        // get current student id
+        String studentId = LoggedIn.getId();
+        
+        // read existing booking records
+        ArrayList<Booking> bookingList = new ArrayList<>();
+        FileUtil.read("booking.txt", bookingList, Booking::fromLine);
+        
+        // create new booking
+        String bookingId = Generator.idGenerator("B", "booking.txt");
+        Booking newBooking = new Booking(bookingId, studentId, classId, Booking.BookingStatus.Booked, java.time.LocalDate.now());
+        bookingList.add(newBooking);
+        
+        // save booking records
+        FileUtil.write("booking.txt", bookingList, Booking::toLine);
+        
+        // minus 1 to available slots
+        selectedClass.setAvailableSlots(selectedClass.getAvailableSlots() - 1);
+        
+        // update class status if no available slots
+        if(selectedClass.getAvailableSlots() == 0){
+            selectedClass.setStatus(ClassSession.ClassStatus.Full);
+        }
+        
+        // save update to class records
+        FileUtil.write("class.txt", classList, ClassSession::toLine);
+        
+        // refresh table
+        loadClass();
+        JOptionPane.showMessageDialog(null, "Class successfully booked");
+    }//GEN-LAST:event_btnBookActionPerformed
 
     /**
      * @param args the command line arguments

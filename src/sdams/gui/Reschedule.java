@@ -4,6 +4,11 @@
  */
 package sdams.gui;
 
+import java.util.ArrayList;
+import javax.swing.table.DefaultTableModel;
+import sdams.model.ClassSession;
+import sdams.model.Instructor;
+
 /**
  *
  * @author Mei Shi
@@ -12,6 +17,10 @@ public class Reschedule extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Reschedule.class.getName());
 
+    private ArrayList<ClassSession> classList = new ArrayList<>();
+    private ArrayList<Instructor> instructorList = new ArrayList<>();
+    private DefaultTableModel tableModel;
+    
     /**
      * Creates new form Reschedule
      */
@@ -57,17 +66,17 @@ public class Reschedule extends javax.swing.JFrame {
 
         tblClass.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "ID", "Class Name", "Instructor", "Date", "Time", "Available Slot"
+                "ID", "Class Name", "Deciplines", "Instructor", "Date", "Start Time", "End Time", "Fee (RM)", "Available Slot"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Double.class, java.lang.Integer.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -75,6 +84,17 @@ public class Reschedule extends javax.swing.JFrame {
             }
         });
         jScrollPane1.setViewportView(tblClass);
+        if (tblClass.getColumnModel().getColumnCount() > 0) {
+            tblClass.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tblClass.getColumnModel().getColumn(1).setPreferredWidth(150);
+            tblClass.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tblClass.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tblClass.getColumnModel().getColumn(4).setPreferredWidth(80);
+            tblClass.getColumnModel().getColumn(5).setPreferredWidth(75);
+            tblClass.getColumnModel().getColumn(6).setPreferredWidth(75);
+            tblClass.getColumnModel().getColumn(7).setPreferredWidth(70);
+            tblClass.getColumnModel().getColumn(8).setPreferredWidth(90);
+        }
 
         btnBack.setText("Back to My Booings");
 
@@ -126,7 +146,7 @@ public class Reschedule extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3)
                     .addComponent(lblBookingClassInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)

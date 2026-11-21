@@ -29,7 +29,8 @@ public class Payment {
     
     public enum PaymentStatus{
         Paid,
-        Refunded;
+        Refunded,
+        Unpaid;
         
         public static PaymentStatus fromString(String s){
             if(s == null) return null;

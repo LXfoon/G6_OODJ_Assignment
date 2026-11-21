@@ -4,6 +4,17 @@
  */
 package sdams.gui;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import sdams.model.Booking;
+import sdams.model.ClassSession;
+import sdams.model.Instructor;
+import sdams.model.Payment;
+import sdams.model.Staff;
+import sdams.util.FileUtil;
+
 /**
  *
  * @author Mei Shi
@@ -12,11 +23,158 @@ public class MyBookings extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MyBookings.class.getName());
 
+    private ArrayList<Booking> bookingList = new ArrayList<>();
+    private ArrayList<ClassSession> classList = new ArrayList<>();
+    private ArrayList<Instructor> instructorList = new ArrayList<>();
+    private ArrayList<Payment> paymentList = new ArrayList<>();
+    private DefaultTableModel tableModel;
+    
     /**
      * Creates new form MyBookings
      */
     public MyBookings() {
         initComponents();
+        loadBooking();
+        
+        dateSearch.addDateChangeListener(e -> filterBooking());
+        txtSearchBooking.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                filterBooking();
+            }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                filterBooking();
+            }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                filterBooking();
+            }
+        });
+    }
+    
+    private void loadBooking(){
+        try{
+            DefaultTableModel model = (DefaultTableModel) tblBooking.getModel();
+            model.setRowCount(0);
+            
+            // get information from booking records and other records
+            FileUtil.read("booking.txt", bookingList, Booking::fromLine);
+            FileUtil.read("class.txt", classList, ClassSession::fromLine);
+            FileUtil.read("payment.txt", paymentList, Payment::fromLine);
+            
+            // read user records and get staff information
+            ArrayList<Staff> staffList = new ArrayList<>();
+            FileUtil.read("user.txt", staffList, Staff::fromUserLine);
+            
+            // get instructor name only
+            instructorList.clear();
+
+            for(Staff s : staffList){
+                if(s instanceof Instructor i){
+                    instructorList.add(i);
+                }
+            }
+            
+            // display booking information
+            for(Booking b: bookingList){
+                // find matching class
+                ClassSession cs = null;
+                for(ClassSession c : classList){
+                    if(c.getClassId().equals(b.getClassId())){
+                        cs = c;
+                        break;
+                    }
+                }
+                
+                // skip if cannot found the class record
+                if(cs == null){
+                    continue;
+                }
+                
+                // find instructor name
+                String instructorName = "";
+                for(Instructor i : instructorList){
+                    if(i.getId().equals(cs.getInstructorId())){
+                        instructorName = i.getName();
+                        break;
+                    }
+                }
+                
+                // find payment status for the booking
+                String paymentStatus = "Unpaid";
+                for(Payment p : paymentList){
+                    if(p.getBookingId().equals(b.getBookingId())){
+                        paymentStatus = p.getStatus().toString();
+                        break;
+                    }
+                }
+                
+                model.addRow(new Object[]{
+                    b.getBookingId(), cs.getClassName(), instructorName, cs.getDate(), cs.getStartTime(), cs.getEndTime(), b.getStatus(), paymentStatus
+                });
+            }
+            
+            // show message
+            lblTotal.setText("Total Bookings: " + model.getRowCount());
+            
+        } catch(Exception e) {
+            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+        }
+    }
+    
+    private void filterBooking(){
+        // clear existing table rows
+        DefaultTableModel model = (DefaultTableModel) tblBooking.getModel();
+        model.setRowCount(0);
+        
+        // get filter values
+        String search = txtSearchBooking.getText().trim().toLowerCase();
+        String status = String.valueOf(cmbStatus.getSelectedItem());
+        LocalDate date = dateSearch.getDate();
+        
+        // check each booking
+        for(Booking b: bookingList){
+            ClassSession cs = null;
+            for(ClassSession c : classList){
+                if(c.getClassId().equals(b.getClassId())){
+                    cs = c;
+                    break;
+                }
+            }
+            if(cs == null){
+                continue;
+            }
+                
+            String instructorName = "";
+            for(Instructor i : instructorList){
+                if(i.getId().equals(cs.getInstructorId())){
+                    instructorName = i.getName();
+                    break;
+                }
+            }
+               
+            String paymentStatus = "Unpaid";
+            for(Payment p : paymentList){
+                if(p.getBookingId().equals(b.getBookingId())){
+                    paymentStatus = p.getStatus().toString();
+                    break;
+                }
+            }
+            
+            boolean matchSearch = search.isEmpty() || b.getBookingId().toLowerCase().contains(search) || cs.getClassName().toLowerCase().contains(search) || instructorName.toLowerCase().contains(search);
+            boolean matchStatus = status.equals("All Status") || b.getStatus().toString().equalsIgnoreCase(status);
+            boolean matchDate = date == null || cs.getDate().equals(date);
+            
+            if(matchSearch && matchStatus && matchDate){
+                model.addRow(new Object[]{
+                    b.getBookingId(), cs.getClassName(), instructorName, cs.getDate(), cs.getStartTime(), cs.getEndTime(), b.getStatus(), paymentStatus
+                });
+            }
+        }
+        
+        // update booking records count
+        lblTotal.setText("Total Bookings: " + model.getRowCount());
     }
 
     /**
@@ -38,7 +196,7 @@ public class MyBookings extends javax.swing.JFrame {
         btnPay = new javax.swing.JButton();
         btnReschedule = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
-        dateBooking = new com.github.lgooddatepicker.components.DatePicker();
+        dateSearch = new com.github.lgooddatepicker.components.DatePicker();
         btnReset = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -49,38 +207,55 @@ public class MyBookings extends javax.swing.JFrame {
 
         lblTotal.setText("Total Bookings: xx");
 
-        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Status", "Booked", "Completed", "Cancelled" }));
+        txtSearchBooking.addActionListener(this::txtSearchBookingActionPerformed);
+
+        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Status", "Booked", "Cancelled", "Completed" }));
+        cmbStatus.addActionListener(this::cmbStatusActionPerformed);
 
         tblBooking.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Booking ID", "Class", "Instructor", "Date", "Time", "Status", "Payment"
+                "Booking ID", "Class", "Instructor", "Date", "Start Time", "End Time", "Status", "Payment"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class
             };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
             }
         });
+        tblBooking.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         jScrollPane1.setViewportView(tblBooking);
+        if (tblBooking.getColumnModel().getColumnCount() > 0) {
+            tblBooking.getColumnModel().getColumn(0).setPreferredWidth(60);
+            tblBooking.getColumnModel().getColumn(1).setPreferredWidth(150);
+            tblBooking.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tblBooking.getColumnModel().getColumn(3).setPreferredWidth(70);
+            tblBooking.getColumnModel().getColumn(4).setPreferredWidth(65);
+            tblBooking.getColumnModel().getColumn(5).setPreferredWidth(65);
+            tblBooking.getColumnModel().getColumn(6).setPreferredWidth(70);
+            tblBooking.getColumnModel().getColumn(7).setPreferredWidth(60);
+        }
 
         btnBack.setText("Back to Browse Classes");
+        btnBack.addActionListener(this::btnBackActionPerformed);
 
         btnPay.setText("Pay Now");
 
         btnReschedule.setText("Reschedule");
 
         btnCancel.setText("Cancel Booking");
+        btnCancel.addActionListener(this::btnCancelActionPerformed);
 
         btnReset.setText("Reset");
+        btnReset.addActionListener(this::btnResetActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -103,7 +278,7 @@ public class MyBookings extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(cmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(dateBooking, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(dateSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(btnReset))
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -131,7 +306,7 @@ public class MyBookings extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(cmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtSearchBooking, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(dateBooking, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(dateSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(26, 26, 26)
@@ -147,6 +322,132 @@ public class MyBookings extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void txtSearchBookingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchBookingActionPerformed
+        filterBooking();
+    }//GEN-LAST:event_txtSearchBookingActionPerformed
+
+    private void cmbStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbStatusActionPerformed
+        filterBooking();
+    }//GEN-LAST:event_cmbStatusActionPerformed
+
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+        txtSearchBooking.setText("");
+        cmbStatus.setSelectedIndex(0);
+        dateSearch.clear();
+        
+        filterBooking();
+    }//GEN-LAST:event_btnResetActionPerformed
+
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        BrowseClasses browseClasses = new BrowseClasses();
+        browseClasses.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnBackActionPerformed
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        try{
+            // must select a row
+            int selectedRow = tblBooking.getSelectedRow();
+            if(selectedRow == -1){
+                JOptionPane.showMessageDialog(null, "Please select a booking first.");
+                return;
+            }
+
+            // get selected Booking ID
+            int modelRow = tblBooking.convertRowIndexToModel(selectedRow);
+            String bookingId = tblBooking.getValueAt(modelRow, 0).toString();
+
+            // reload latest records
+            FileUtil.read("booking.txt", bookingList, Booking::fromLine);
+            FileUtil.read("class.txt", classList, ClassSession::fromLine);
+            FileUtil.read("payment.txt", paymentList, Payment::fromLine);
+
+            // find booking record
+            Booking selectedBooking = null;
+            for(Booking b : bookingList){
+                if(b.getBookingId().equals(bookingId)){
+                    selectedBooking = b;
+                    break;
+                }
+            }
+
+            if(selectedBooking == null){
+                JOptionPane.showMessageDialog(null, "Booking records not found.");
+                return;
+            }
+
+            // logic:
+            // Booked + Unpaid = Must make payment then only can cancel
+            // Booked -> Cancelled + Paid = Cancel but no refund
+            // Completed + Paid = Cannot cancel
+            // Instructor cancel class + Paid = Refund
+
+            // check booking status
+            if(selectedBooking.getStatus() != Booking.BookingStatus.Booked){
+                JOptionPane.showMessageDialog(null, "Only Booked class can be cancelled. Please choose Booked class.");
+                return;
+            }
+
+            // check payment status
+            boolean isPaid = false;
+            for(Payment p : paymentList){
+                if(p.getBookingId().equals(bookingId) && p.getStatus() == Payment.PaymentStatus.Paid){
+                    isPaid = true;
+                    break;
+                }
+            }
+
+            if(!isPaid){
+                JOptionPane.showMessageDialog(null, "Please make payment before cancelling this booking!");
+                return;
+            }
+
+            // confirm cancellation
+            int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to cancel this booking?\n" + "Please note that payment is non-refundable!", "Confirm Cancellation", JOptionPane.YES_NO_OPTION);
+            if(confirm != JOptionPane.YES_OPTION){
+                return;
+            }
+
+            ClassSession selectedClass = null;
+            for(ClassSession cs : classList){
+                if(cs.getClassId().equals(selectedBooking.getClassId())){
+                    selectedClass = cs;
+                    break;
+                }
+            }
+
+            if(selectedClass == null){
+                JOptionPane.showMessageDialog(null, "Class record not found.");
+                return;
+            }
+
+            if(selectedClass.getStatus() == ClassSession.ClassStatus.Completed || selectedClass.getStatus() == ClassSession.ClassStatus.Cancelled){
+                JOptionPane.showMessageDialog(null, "This booking cannot be cancel because the class is already completed or cancelled.");
+                return;
+            }
+
+            // updated booking status
+            selectedBooking.setStatus(Booking.BookingStatus.Cancelled);
+
+            // add available slots after cancel
+            selectedClass.setAvailableSlots(selectedClass.getAvailableSlots() + 1);
+
+            if(selectedClass.getStatus() == ClassSession.ClassStatus.Full){
+                selectedClass.setStatus(ClassSession.ClassStatus.Available);
+            }
+
+            // save update
+            FileUtil.write("booking.txt", bookingList, Booking::toLine);
+            FileUtil.write("class.txt", classList, ClassSession::toLine);
+
+            // refresh table
+            loadBooking();
+            JOptionPane.showMessageDialog(null, "Booking successfully cancelled. No refund will be provided!");
+        } catch(Exception e) {
+            JOptionPane.showMessageDialog(null, "Error cancelling booking: " + e.getMessage());
+        }
+    }//GEN-LAST:event_btnCancelActionPerformed
 
     /**
      * @param args the command line arguments
@@ -180,7 +481,7 @@ public class MyBookings extends javax.swing.JFrame {
     private javax.swing.JButton btnReschedule;
     private javax.swing.JButton btnReset;
     private javax.swing.JComboBox<String> cmbStatus;
-    private com.github.lgooddatepicker.components.DatePicker dateBooking;
+    private com.github.lgooddatepicker.components.DatePicker dateSearch;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblTotal;
