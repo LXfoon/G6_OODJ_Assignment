@@ -248,8 +248,10 @@ public class MyBookings extends javax.swing.JFrame {
         btnBack.addActionListener(this::btnBackActionPerformed);
 
         btnPay.setText("Pay Now");
+        btnPay.addActionListener(this::btnPayActionPerformed);
 
         btnReschedule.setText("Reschedule");
+        btnReschedule.addActionListener(this::btnRescheduleActionPerformed);
 
         btnCancel.setText("Cancel Booking");
         btnCancel.addActionListener(this::btnCancelActionPerformed);
@@ -448,6 +450,61 @@ public class MyBookings extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Error cancelling booking: " + e.getMessage());
         }
     }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void btnPayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPayActionPerformed
+        try{
+            int selectedRow = tblBooking.getSelectedRow();
+            if(selectedRow == -1){
+                JOptionPane.showMessageDialog(null, "Please select a booking first.");
+                return;
+            }
+            
+            int modelRow = tblBooking.convertRowIndexToModel(selectedRow);
+            String bookingId = tblBooking.getValueAt(modelRow, 0).toString();
+            String paymentStatus = tblBooking.getValueAt(modelRow, 7).toString();
+            
+            if(!paymentStatus.equalsIgnoreCase("Unpaid")){
+                JOptionPane.showMessageDialog(null, "Only Unpaid booking can make payment. Please choose Unpaid booking.");
+                return;
+            }
+            
+            MakePayment makePayment = new MakePayment(bookingId);
+            if(makePayment.isPaymentInfoLoaded()){
+                makePayment.setVisible(true);
+                this.dispose();
+            }
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null, "Error processing to make payment: " + e.getMessage());
+        }
+    }//GEN-LAST:event_btnPayActionPerformed
+
+    private void btnRescheduleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRescheduleActionPerformed
+        // check selected row
+        try{
+            int selectedRow = tblBooking.getSelectedRow();
+            if(selectedRow == -1){
+                JOptionPane.showMessageDialog(null, "Please select a booking first.");
+                return;
+            }
+            
+            int modelRow = tblBooking.convertRowIndexToModel(selectedRow);
+            String bookingId = tblBooking.getValueAt(modelRow, 0).toString();
+            String bookingStatus = tblBooking.getValueAt(modelRow, 6).toString();
+            
+            if(!bookingStatus.equalsIgnoreCase("Booked")){
+                JOptionPane.showMessageDialog(null, "Only Booked booking can reschedule. Please choose Booked booking.");
+                return;
+            }
+            
+            Reschedule reschedule = new Reschedule(bookingId);
+            if(reschedule.isRescheduleLoaded()){
+                reschedule.setVisible(true);
+                this.dispose();
+            }
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null, "Error processing reschedule: " + e.getMessage());
+        }
+    }//GEN-LAST:event_btnRescheduleActionPerformed
 
     /**
      * @param args the command line arguments

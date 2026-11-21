@@ -46,6 +46,7 @@ public class PaymentDetails extends javax.swing.JFrame {
         btnClassInfo.setText("Class Information");
 
         btnBack.setText("Back");
+        btnBack.addActionListener(this::btnBackActionPerformed);
 
         txtaDetails.setColumns(20);
         txtaDetails.setRows(5);
@@ -89,6 +90,12 @@ public class PaymentDetails extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        ManagePayment managePayment = new ManagePayment();
+        managePayment.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnBackActionPerformed
 
     /**
      * @param args the command line arguments

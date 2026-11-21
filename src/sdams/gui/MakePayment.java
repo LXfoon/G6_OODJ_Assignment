@@ -4,6 +4,14 @@
  */
 package sdams.gui;
 
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import sdams.model.Booking;
+import sdams.model.ClassSession;
+import sdams.model.Payment;
+import sdams.util.FileUtil;
+import sdams.util.Generator;
+
 /**
  *
  * @author Mei Shi
@@ -11,12 +19,100 @@ package sdams.gui;
 public class MakePayment extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MakePayment.class.getName());
+    
+    private String bookingId;
+    private boolean paymentInfoLoaded = false;
+    
+    private ArrayList<Booking> bookingList = new ArrayList<>();
+    private ArrayList<ClassSession> classList = new ArrayList<>();
+    private ArrayList<Payment> paymentList = new ArrayList<>();
 
     /**
      * Creates new form MakePayment
      */
-    public MakePayment() {
+    public MakePayment(String bookingId) {
         initComponents();
+        this.bookingId = bookingId;
+        loadPayment();
+    }
+    
+    private void loadPayment(){
+        try{
+            FileUtil.read("booking.txt", bookingList, Booking::fromLine);
+            FileUtil.read("class.txt", classList, ClassSession::fromLine);
+            FileUtil.read("payment.txt", paymentList, Payment::fromLine);
+            
+            // find selected booking id
+            Booking selectedBooking = null;
+            for(Booking b : bookingList){
+                if(b.getBookingId().equals(bookingId) && b.getStudentId().equals(LoggedIn.getId())){
+                    selectedBooking = b;
+                    break;
+                }
+            }
+            
+            if(selectedBooking == null){
+                JOptionPane.showMessageDialog(null, "Booking record not found.");
+                btnPay.setEnabled(false);
+                return;
+            }
+            
+            // find corresponding class
+            ClassSession selectedClass = null;
+            for(ClassSession cs : classList){
+                if(cs.getClassId().equals(selectedBooking.getClassId())){
+                    selectedClass = cs;
+                    break;
+                }
+            }
+            
+            if(selectedClass == null){
+                JOptionPane.showMessageDialog(null, "Class record not found.");
+                btnPay.setEnabled(false);
+                return;
+            }
+            
+            // all information loaded successfully
+            paymentInfoLoaded = true;
+            
+            // display booking information
+            lblUnpaidInfo.setText(selectedBooking.getBookingId() + ":" + selectedClass.getClassName());
+            
+            // display amount
+            lblAmountInfo.setText(String.format("RM %.2f", selectedClass.getFee()));
+            
+            // check booking status
+            if(selectedBooking.getStatus() != Booking.BookingStatus.Booked){
+                JOptionPane.showMessageDialog(null, "Only Booked bookings can make payment.");
+                btnPay.setEnabled(false);
+                return;
+            }
+            
+            // check existing payment record
+            Payment selectedPayment = null;
+            for(Payment p : paymentList){
+                if(p.getBookingId().equals(bookingId)){
+                    selectedPayment = p;
+                    break;
+                }
+            }
+            
+            if(selectedPayment != null){
+                if(selectedPayment.getStatus() == Payment.PaymentStatus.Paid){
+                    JOptionPane.showMessageDialog(null, "This payment is already paid!");
+                    btnPay.setEnabled(false);
+                } else if(selectedPayment.getStatus() == Payment.PaymentStatus.Refunded){
+                    JOptionPane.showMessageDialog(null, "This payment has been refunded. Please contact the Administratos!");
+                    btnPay.setEnabled(false);
+                }
+            }
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null, "Error loading payment details: " + e.getMessage());
+        }
+    }
+    
+    public boolean isPaymentInfoLoaded(){
+        return paymentInfoLoaded;
     }
 
     /**
@@ -30,7 +126,6 @@ public class MakePayment extends javax.swing.JFrame {
 
         btngMethod = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
-        lblPaymentID = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
@@ -48,8 +143,6 @@ public class MakePayment extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel1.setText("Make Payment");
 
-        lblPaymentID.setText("Payment ID: xx");
-
         jLabel3.setText("Unpaid Booking");
 
         jLabel4.setText("Amount (RM)");
@@ -63,10 +156,13 @@ public class MakePayment extends javax.swing.JFrame {
         radEWallet.setText("E-Wallet");
 
         btnBack.setText("Back");
+        btnBack.addActionListener(this::btnBackActionPerformed);
 
         btnClear.setText("Clear");
+        btnClear.addActionListener(this::btnClearActionPerformed);
 
         btnPay.setText("Pay");
+        btnPay.addActionListener(this::btnPayActionPerformed);
 
         lblUnpaidInfo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
@@ -106,18 +202,13 @@ public class MakePayment extends javax.swing.JFrame {
                         .addGap(167, 167, 167)
                         .addComponent(jLabel1)))
                 .addGap(31, 31, 31))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(lblPaymentID)
-                .addGap(210, 210, 210))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(25, 25, 25)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblPaymentID)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(lblUnpaidInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -131,7 +222,7 @@ public class MakePayment extends javax.swing.JFrame {
                     .addComponent(jLabel5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(radEWallet)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnBack, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -142,6 +233,76 @@ public class MakePayment extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        MyBookings myBookings = new MyBookings();
+        myBookings.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnBackActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        btngMethod.clearSelection();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnPayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPayActionPerformed
+        try{
+            // check payment method
+            String paymentMethod = "";
+            if(radBank.isSelected()){
+                paymentMethod = "Bank";
+            } else if(radEWallet.isSelected()){
+                paymentMethod = "E-Wallet";
+            } else {
+                JOptionPane.showMessageDialog(null, "Please select a payment method.");
+                return;
+            }
+            
+            // reload latest payment reocrds
+            FileUtil.read("payment.txt", paymentList, Payment::fromLine);
+            
+            // check whether payment already exists in the records
+            Payment selectedPayment = null;
+            for(Payment p : paymentList){
+                if(p.getBookingId().equals(bookingId)){
+                    selectedPayment = p;
+                    break;
+                }
+            }
+            
+            if(selectedPayment != null){
+                if(selectedPayment.getStatus() == Payment.PaymentStatus.Paid){
+                    JOptionPane.showMessageDialog(null, "This payment is already paid!");
+                    return;
+                }
+                if(selectedPayment.getStatus() == Payment.PaymentStatus.Refunded){
+                    JOptionPane.showMessageDialog(null, "This payment has been refunded. Please contact the Administratos!");
+                    return;
+                }
+            }
+            
+            // confirm payment
+            ClassSession selectedClass = null;
+            int confirm = JOptionPane.showConfirmDialog(null, "Confirm your payment of " + String.format("RM %.2f", selectedClass.getFee()) + "using" + paymentMethod + "?", "Confirm Payment", JOptionPane.YES_NO_OPTION);
+            if(confirm != JOptionPane.YES_OPTION){
+                return;
+            }
+            
+            // create new payment record
+            String paymentId = Generator.idGenerator("P", "payment.txt");
+            Payment newPayment = new Payment(paymentId, bookingId, LoggedIn.getId(), paymentMethod, selectedClass.getFee(), java.time.LocalDate.now(), Payment.PaymentStatus.Paid);
+            paymentList.add(newPayment);
+            
+            // save new payment record
+            FileUtil.write("payment.txt", paymentList, Payment::toLine);
+            
+            JOptionPane.showMessageDialog(null, "Payment successful! Thank you!");
+            
+            // prevent another payment on the same page
+            btnPay.setEnabled(false);
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null, "Error processing payment: " + e.getMessage());
+        }
+    }//GEN-LAST:event_btnPayActionPerformed
 
     /**
      * @param args the command line arguments
@@ -165,7 +326,7 @@ public class MakePayment extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new MakePayment().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new MakePayment("").setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -178,7 +339,6 @@ public class MakePayment extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel lblAmountInfo;
-    private javax.swing.JLabel lblPaymentID;
     private javax.swing.JLabel lblUnpaidInfo;
     private javax.swing.JRadioButton radBank;
     private javax.swing.JRadioButton radEWallet;

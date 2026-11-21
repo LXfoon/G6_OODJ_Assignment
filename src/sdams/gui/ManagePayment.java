@@ -4,6 +4,13 @@
  */
 package sdams.gui;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import sdams.model.Payment;
+import sdams.util.FileUtil;
+
 /**
  *
  * @author Mei Shi
@@ -11,12 +18,81 @@ package sdams.gui;
 public class ManagePayment extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ManagePayment.class.getName());
+    
+    private ArrayList<Payment> paymentList = new ArrayList<>();
+    private DefaultTableModel tableModel;
 
     /**
      * Creates new form ManagePayment
      */
     public ManagePayment() {
         initComponents();
+        loadPayment();
+        
+        datePayment.addDateChangeListener(e -> filterPayment());
+        txtSearchPayment.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                filterPayment();
+            }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                filterPayment();
+            }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                filterPayment();
+            }
+        });
+    }
+    
+    public void loadPayment(){
+        try{
+            // clear existing table rows
+            DefaultTableModel model = (DefaultTableModel) tblPayment.getModel();
+            model.setRowCount(0);
+            
+            // read class information
+            FileUtil.read("payment.txt", paymentList, Payment::fromLine);
+            
+            // display payment records
+            for(Payment p : paymentList){
+                model.addRow(new Object[]{
+                    p.getPaymentId(), p.getBookingId(), p.getAmount(), p.getPaymentDate(), p.getPaymentMethod(), p.getStatus()
+                });
+            }
+            
+            // show message
+            lblTotal.setText("Total Payment Records: " + model.getRowCount());
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+        }
+    }
+    
+    private void filterPayment(){
+        // clear existing table rows
+        DefaultTableModel model = (DefaultTableModel) tblPayment.getModel();
+        model.setRowCount(0);
+        
+        // get filter values
+        String search = txtSearchPayment.getText().trim().toLowerCase();
+        String status = String.valueOf(cmbStatus.getSelectedItem());
+        LocalDate date = datePayment.getDate();
+        
+        // check each class
+        for(Payment p : paymentList){
+            boolean matchSearch = search.isEmpty() || p.getPaymentId().toLowerCase().contains(search) || p.getBookingId().toLowerCase().contains(search) || (p.getPaymentMethod() != null && p.getPaymentMethod().toLowerCase().contains(search));
+            boolean matchStatus = status.equals("All Status") || (p.getStatus() != null && p.getStatus().toString().equalsIgnoreCase(status));
+            boolean matchDate = date == null || p.getPaymentDate().equals(date);
+            
+            if(matchSearch && matchStatus && matchDate){
+                model.addRow(new Object[]{
+                    p.getPaymentId(), p.getBookingId(), p.getAmount(), p.getPaymentDate(), p.getPaymentMethod(), p.getStatus()
+                });
+            }
+        }
+        
+        lblTotal.setText("Total Payment Records: " + model.getRowCount());
     }
 
     /**
@@ -48,9 +124,13 @@ public class ManagePayment extends javax.swing.JFrame {
 
         lblTotal.setText("Total Payment Records: xx");
 
-        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Status", "Paid", "Pending", "Unpaid" }));
+        txtSearchPayment.addActionListener(this::txtSearchPaymentActionPerformed);
+
+        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Status", "Paid", "Refunded", "Unpaid" }));
+        cmbStatus.addActionListener(this::cmbStatusActionPerformed);
 
         btnReset.setText("Reset");
+        btnReset.addActionListener(this::btnResetActionPerformed);
 
         tblPayment.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -74,6 +154,7 @@ public class ManagePayment extends javax.swing.JFrame {
         jScrollPane1.setViewportView(tblPayment);
 
         btnBack.setText("Back to Student Main Menu");
+        btnBack.addActionListener(this::btnBackActionPerformed);
 
         btnMakePayment.setText("Make Payment");
 
@@ -139,6 +220,28 @@ public class ManagePayment extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void txtSearchPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchPaymentActionPerformed
+        filterPayment();
+    }//GEN-LAST:event_txtSearchPaymentActionPerformed
+
+    private void cmbStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbStatusActionPerformed
+        filterPayment();
+    }//GEN-LAST:event_cmbStatusActionPerformed
+
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+        txtSearchPayment.setText("");
+        cmbStatus.setSelectedIndex(0);
+        datePayment.clear();
+        
+        filterPayment();
+    }//GEN-LAST:event_btnResetActionPerformed
+
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        StudentHome studentHome = new StudentHome();
+        studentHome.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnBackActionPerformed
 
     /**
      * @param args the command line arguments
