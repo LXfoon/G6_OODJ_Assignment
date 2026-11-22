@@ -4,3 +4,4 @@ B003|012|C003|Cancelled|2026-11-17
 B004|null|C001|Booked|2026-11-21
 B005|null|C002|Booked|2026-11-21
 B006|null|C001|Booked|2026-11-21
+B007|null|C002|Booked|2026-11-22

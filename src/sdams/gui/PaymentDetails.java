@@ -4,6 +4,15 @@
  */
 package sdams.gui;
 
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import sdams.model.Booking;
+import sdams.model.ClassSession;
+import sdams.model.Instructor;
+import sdams.model.Payment;
+import sdams.model.Staff;
+import sdams.util.FileUtil;
+
 /**
  *
  * @author Mei Shi
@@ -12,11 +21,116 @@ public class PaymentDetails extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(PaymentDetails.class.getName());
 
+    private String paymentId;
+    private boolean detailsLoaded = false;
+    
+    private Payment selectedPayment;
+    private Booking selectedBooking;
+    private ClassSession selectedClass;
+    
+    private ArrayList<Booking> bookingList = new ArrayList<>();
+    private ArrayList<ClassSession> classList = new ArrayList<>();
+    private ArrayList<Payment> paymentList = new ArrayList<>();
+    private ArrayList<Staff> staffList = new ArrayList<>();
+    
     /**
      * Creates new form PaymentDetails
      */
-    public PaymentDetails() {
+    public PaymentDetails(String paymentId) {
         initComponents();
+        this.paymentId = paymentId;
+        
+        txtaDetails.setEditable(false);
+        txtaDetails.setLineWrap(true);
+        txtaDetails.setWrapStyleWord(true);
+        
+        loadDetails();
+    }
+    
+    private void loadDetails(){
+        try{
+            FileUtil.read("booking.txt", bookingList, Booking::fromLine);
+            FileUtil.read("class.txt", classList, ClassSession::fromLine);
+            FileUtil.read("payment.txt", paymentList, Payment::fromLine);
+            FileUtil.read("user.txt", staffList, Staff::fromUserLine);
+            
+            // find payment
+            for(Payment p : paymentList){
+                if(p.getPaymentId().equals(paymentId)){
+                    selectedPayment = p;
+                    break;
+                }
+            }
+            
+            if(selectedPayment == null){
+                JOptionPane.showMessageDialog(null, "Payment record not found.");
+                return;
+            }
+            
+            // find booking
+            for(Booking b : bookingList){
+                if(b.getBookingId().equals(selectedPayment.getBookingId())){
+                    selectedBooking = b;
+                    break;
+                }
+            }
+            
+            if(selectedBooking == null){
+                JOptionPane.showMessageDialog(null, "Booking record not found.");
+                return;
+            }
+            
+            // find class
+            for(ClassSession cs : classList){
+                if(cs.getClassId().equals(selectedBooking.getClassId())){
+                    selectedClass = cs;
+                    break;
+                }
+            }
+            
+            if(selectedClass == null){
+                JOptionPane.showMessageDialog(null, "Class record not found.");
+                return;
+            }
+            
+            // display information to the text area
+            showPaymentInfo();
+            detailsLoaded = true;
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(this, "Error loading payment details: " + e.getMessage());
+        }
+    }
+    
+    private void showPaymentInfo(){
+        String details = "Payment ID: " + selectedPayment.getPaymentId() + "\nBooking ID: " + selectedPayment.getBookingId() + "\nAmount: RM" + String.format("%.2f", selectedPayment.getAmount())
+                + "\nPayment Date: " + (selectedPayment.getPaymentDate() == null ? "Unpaid" : selectedPayment.getPaymentDate()) 
+                + "\nPayment Method: " + (selectedPayment.getPaymentMethod() == null || selectedPayment.getPaymentMethod().isEmpty() ? "Unpaid" : selectedPayment.getPaymentMethod()) 
+                + "\nPayment Status: " + selectedPayment.getStatus() + "\nBooking Status: " + selectedBooking.getStatus();
+        
+        txtaDetails.setText(details);
+    }
+    
+    private String findInstructorName(String instructorId){
+        for(Staff s : staffList){
+            if(s instanceof Instructor && s.getId().equals(instructorId)){
+                return s.getName();
+            }
+        }
+        
+        return "Unknown Instructor";
+    }
+    
+    private void showClassInfo(){
+        String instructorName = findInstructorName(selectedClass.getInstructorId());
+        String details = "Class ID: " + selectedClass.getClassId() + "\nClass Name: " + selectedClass.getClassName() + "\nDiscipline: " + selectedClass.getDiscipline() + "\nInstructor: " + instructorName 
+                + "\nClass Date: " + selectedClass.getDate() + "\nClass Start Time: " + selectedClass.getStartTime() + "\nClass End Time: " + selectedClass.getEndTime()
+                + "\nFee: RM" + String.format("%.2f", selectedClass.getFee());
+        
+        txtaDetails.setText(details);
+    }
+    
+    public boolean isDetailsLoaded(){
+        return detailsLoaded;
     }
 
     /**
@@ -38,12 +152,14 @@ public class PaymentDetails extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
-        jLabel1.setText("Payment Details");
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel1.setText("Payment Details");
 
         btnPaymentInfo.setText("Payment Information");
+        btnPaymentInfo.addActionListener(this::btnPaymentInfoActionPerformed);
 
         btnClassInfo.setText("Class Information");
+        btnClassInfo.addActionListener(this::btnClassInfoActionPerformed);
 
         btnBack.setText("Back");
         btnBack.addActionListener(this::btnBackActionPerformed);
@@ -97,6 +213,14 @@ public class PaymentDetails extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_btnBackActionPerformed
 
+    private void btnPaymentInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPaymentInfoActionPerformed
+        showPaymentInfo();
+    }//GEN-LAST:event_btnPaymentInfoActionPerformed
+
+    private void btnClassInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClassInfoActionPerformed
+        showClassInfo();
+    }//GEN-LAST:event_btnClassInfoActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -119,7 +243,7 @@ public class PaymentDetails extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new PaymentDetails().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new PaymentDetails("").setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

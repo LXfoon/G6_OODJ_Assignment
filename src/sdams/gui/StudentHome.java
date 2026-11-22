@@ -17,6 +17,7 @@ public class StudentHome extends javax.swing.JFrame {
      */
     public StudentHome() {
         initComponents();
+        lblWelcome.setText("Welcome, " + LoggedIn.getUsername());
     }
 
     /**
@@ -34,6 +35,7 @@ public class StudentHome extends javax.swing.JFrame {
         btnManagePayment = new javax.swing.JButton();
         btnInstructorRating = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
+        btnProfile = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -45,34 +47,44 @@ public class StudentHome extends javax.swing.JFrame {
         lblWelcome.setText("Welcome, [student name]");
 
         btnBookClasses.setText("Book Classes");
+        btnBookClasses.addActionListener(this::btnBookClassesActionPerformed);
 
         btnManagePayment.setText("Manage Payment");
+        btnManagePayment.addActionListener(this::btnManagePaymentActionPerformed);
 
         btnInstructorRating.setText("Instructor Rating");
+        btnInstructorRating.addActionListener(this::btnInstructorRatingActionPerformed);
 
         btnLogout.setText("Logout");
+        btnLogout.addActionListener(this::btnLogoutActionPerformed);
+
+        btnProfile.setText("Profile");
+        btnProfile.addActionListener(this::btnProfileActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(btnLogout))
-                    .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGap(108, 108, 108)
-                        .addComponent(jLabel1))
-                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGap(146, 146, 146)
                         .addComponent(lblWelcome, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addGroup(layout.createSequentialGroup()
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnBookClasses, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnManagePayment, javax.swing.GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
-                            .addComponent(btnInstructorRating, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(btnBookClasses, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnManagePayment, javax.swing.GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
+                                .addComponent(btnInstructorRating, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btnLogout)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnProfile)))))
                 .addContainerGap(108, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -89,13 +101,47 @@ public class StudentHome extends javax.swing.JFrame {
                 .addGap(27, 27, 27)
                 .addComponent(btnInstructorRating)
                 .addGap(20, 20, 20)
-                .addComponent(btnLogout)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnLogout)
+                    .addComponent(btnProfile))
                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnBookClassesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBookClassesActionPerformed
+        BrowseClasses browseClasses = new BrowseClasses();
+        browseClasses.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnBookClassesActionPerformed
+
+    private void btnManagePaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManagePaymentActionPerformed
+        ManagePayment managePayment = new ManagePayment();
+        managePayment.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnManagePaymentActionPerformed
+
+    private void btnInstructorRatingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInstructorRatingActionPerformed
+        InstructorRating instructorRating = new InstructorRating();
+        instructorRating.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnInstructorRatingActionPerformed
+
+    private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
+        LoggedIn.setId("");
+        LoggedIn.setUsername("");
+        
+        Login login = new Login();
+        login.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnLogoutActionPerformed
+
+    private void btnProfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProfileActionPerformed
+        new EditProfile(LoggedIn.getId(), this).setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnProfileActionPerformed
 
     /**
      * @param args the command line arguments
@@ -127,6 +173,7 @@ public class StudentHome extends javax.swing.JFrame {
     private javax.swing.JButton btnInstructorRating;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnManagePayment;
+    private javax.swing.JButton btnProfile;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lblWelcome;
     // End of variables declaration//GEN-END:variables

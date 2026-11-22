@@ -157,8 +157,10 @@ public class ManagePayment extends javax.swing.JFrame {
         btnBack.addActionListener(this::btnBackActionPerformed);
 
         btnMakePayment.setText("Make Payment");
+        btnMakePayment.addActionListener(this::btnMakePaymentActionPerformed);
 
         btnDetails.setText("View Details");
+        btnDetails.addActionListener(this::btnDetailsActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -242,6 +244,54 @@ public class ManagePayment extends javax.swing.JFrame {
         studentHome.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnBackActionPerformed
+
+    private void btnMakePaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMakePaymentActionPerformed
+        try{
+            int selectedRow = tblPayment.getSelectedRow();
+            if(selectedRow == -1){
+                JOptionPane.showMessageDialog(null, "Please select a payment first.");
+                return;
+            }
+            
+            int modelRow = tblPayment.convertRowIndexToModel(selectedRow);
+            String bookingId = tblPayment.getModel().getValueAt(modelRow, 1).toString();
+            String paymentStatus = tblPayment.getModel().getValueAt(modelRow, 5).toString();
+            
+            if(!paymentStatus.equalsIgnoreCase("Unpaid")){
+                JOptionPane.showMessageDialog(null, "Only Unpaid payment can be made. Please select an Unpaid payment.");
+                return;
+            }
+            
+            MakePayment makePayment = new MakePayment(bookingId);
+            if(makePayment.isPaymentInfoLoaded()){
+                makePayment.setVisible(true);
+                this.dispose();
+            }
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null, "Error processing to make payment: " + e.getMessage());
+        }
+    }//GEN-LAST:event_btnMakePaymentActionPerformed
+
+    private void btnDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDetailsActionPerformed
+        try{
+            int selectedRow = tblPayment.getSelectedRow();
+            if(selectedRow == -1){
+                JOptionPane.showMessageDialog(null, "Please select a payment first.");
+                return;
+            }
+            
+            int modelRow = tblPayment.convertRowIndexToModel(selectedRow);
+            String paymentId = tblPayment.getModel().getValueAt(modelRow, 0).toString();
+            
+            PaymentDetails paymentDetails = new PaymentDetails(paymentId);
+            if(paymentDetails.isDetailsLoaded()){
+                paymentDetails.setVisible(true);
+                this.dispose();
+            }
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null, "Error processing payment details: " + e.getMessage());
+        }
+    }//GEN-LAST:event_btnDetailsActionPerformed
 
     /**
      * @param args the command line arguments

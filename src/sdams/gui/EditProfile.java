@@ -8,7 +8,7 @@ import java.awt.Window;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
-import sdams.model.Admin;
+//import sdams.model.Admin;
 import sdams.model.AttOfficer;
 import sdams.model.FacOfficer;
 import sdams.model.Instructor;
@@ -287,7 +287,7 @@ public class EditProfile extends javax.swing.JFrame {
             return switch (role) {
                 case "student" -> new Student (userId, name, email, psw, phone);
                 case "manager" -> new Manager (userId, name, email, psw, phone, "Manager");
-                case "admin" -> new Admin (userId, name, email, psw, phone, 0.0);
+                //case "admin" -> new Admin (userId, name, email, psw, phone, 0.0);
                 case "instructor" -> new Instructor(userId, name, email, psw, phone, 0.0);
                 case "facilities" -> new FacOfficer(userId, name, email, psw, phone, 0.0);
                 case "attendance" -> new AttOfficer(userId, name, email, psw, phone, 0.0);
@@ -311,7 +311,7 @@ public class EditProfile extends javax.swing.JFrame {
         return switch (role) {
             case "student" -> new Student (id, name, email, psw, phone);
             case "manager" -> new Manager (id, name, email, psw, phone, "Manager");
-            case "admin" -> new Admin (id, name, email, psw, phone, 0.0);
+            //case "admin" -> new Admin (id, name, email, psw, phone, 0.0);
             case "instructor" -> new Instructor(id, name, email, psw, phone, 0.0);
             case "facilities" -> new FacOfficer(id, name, email, psw, phone, 0.0);
             case "attendance" -> new AttOfficer(id, name, email, psw, phone, 0.0);

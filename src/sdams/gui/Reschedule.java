@@ -101,10 +101,8 @@ public class Reschedule extends javax.swing.JFrame {
     
     private String findInstructorName(String instructorId){
         for(Staff s : staffList){
-            if(s instanceof Instructor){
-                if(s.getId().equals(instructorId)){
-                    return s.getName();
-                }
+            if(s instanceof Instructor && s.getId().equals(instructorId)){
+                return s.getName();
             }
         }
         

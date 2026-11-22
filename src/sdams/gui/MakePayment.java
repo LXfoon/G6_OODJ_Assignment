@@ -76,7 +76,7 @@ public class MakePayment extends javax.swing.JFrame {
             paymentInfoLoaded = true;
             
             // display booking information
-            lblUnpaidInfo.setText(selectedBooking.getBookingId() + ":" + selectedClass.getClassName());
+            lblUnpaidInfo.setText(selectedBooking.getBookingId() + ": " + selectedClass.getClassName());
             
             // display amount
             lblAmountInfo.setText(String.format("RM %.2f", selectedClass.getFee()));

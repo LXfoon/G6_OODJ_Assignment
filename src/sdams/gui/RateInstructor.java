@@ -4,19 +4,123 @@
  */
 package sdams.gui;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import sdams.model.ClassSession;
+import sdams.model.Instructor;
+import sdams.model.Rating;
+import sdams.model.Staff;
+import sdams.util.FileUtil;
+
 /**
  *
  * @author Mei Shi
  */
-public class RateClass extends javax.swing.JFrame {
+public class RateInstructor extends javax.swing.JFrame {
     
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(RateClass.class.getName());
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(RateInstructor.class.getName());
 
+    private String classId;
+    private String studentId = "010";
+    private boolean ratingInfoLoaded = false;
+    
+    private ArrayList<Rating> ratingList = new ArrayList<>();
+    private ArrayList<ClassSession> classList = new ArrayList<>();
+    private ArrayList<Staff> staffList = new ArrayList<>();
+    private ArrayList<Instructor> instructorList = new ArrayList<>();
+    
     /**
      * Creates new form RateClass
      */
-    public RateClass() {
+    public RateInstructor(String studentId) {
         initComponents();
+        this.classId = classId;
+        
+        txtaComment.setLineWrap(true);
+        txtaComment.setWrapStyleWord(true);
+        
+        loadRatingInfo();
+    }
+    
+    private void loadRatingInfo(){
+        try{
+            FileUtil.read("rating.txt", ratingList, Rating::fromLine);
+            FileUtil.read("class.txt", classList, ClassSession::fromLine);
+            FileUtil.read("user.txt", staffList, Staff::fromUserLine);
+            
+            // get all instructors
+            instructorList.clear();
+
+            for(Staff s : staffList){
+                if(s instanceof Instructor i){
+                    instructorList.add(i);
+                }
+            }
+            
+            // find rating records
+            Rating selectedRating = null;
+            for(Rating r : ratingList){
+                if(r.getClassId().equals(classId) && r.getStudentId().equals(studentId)){
+                    selectedRating = r;
+                    break;
+                }
+            }
+            
+            if(selectedRating == null){
+                JOptionPane.showMessageDialog(null, "Rating record not found.");
+                btnSubmit.setEnabled(false);
+                return;
+            }
+            
+            // check rating status
+            if(selectedRating.getStatus() != Rating.RatingStatus.Unrated){
+                JOptionPane.showMessageDialog(null, "This class has already been rated.");
+                return;
+            }
+            
+            // find class information
+            ClassSession selectedClass = null;
+            for(ClassSession cs : classList){
+                if(cs.getClassId().equals(classId)){
+                    selectedClass = cs;
+                    break;
+                }
+            }
+            
+            if(selectedClass == null){
+                JOptionPane.showMessageDialog(null, "Class record not found.");
+                btnSubmit.setEnabled(false);
+                return;
+            }
+            
+            // find instructor information
+            Instructor selectedInstructor = null;
+            for(Instructor i : instructorList){
+                if(i.getId().equals(selectedClass.getInstructorId())){
+                    selectedInstructor = i;
+                    break;
+                }
+            }
+            
+            if(selectedInstructor == null){
+                JOptionPane.showMessageDialog(null, "Instrutor record not found.");
+                btnSubmit.setEnabled(false);
+                return;
+            }
+            
+            // display information
+            lblClassInfo.setText(selectedClass.getClassId() + ": " + selectedClass.getClassName());
+            lblInstructorInfo.setText(selectedInstructor.getName());
+            
+            ratingInfoLoaded = true;
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null, "Error loading details: " + e.getMessage());
+        }
+    }
+    
+    public boolean isRatingInfoLoaded(){
+        return ratingInfoLoaded;
     }
 
     /**
@@ -53,12 +157,17 @@ public class RateClass extends javax.swing.JFrame {
         jLabel3.setText("Instructor");
 
         btnBack.setText("Back");
+        btnBack.addActionListener(this::btnBackActionPerformed);
 
         btnSubmit.setText("Submit");
+        btnSubmit.addActionListener(this::btnSubmitActionPerformed);
 
         btnClear.setText("Clear");
+        btnClear.addActionListener(this::btnClearActionPerformed);
 
         jLabel4.setText("Score");
+
+        spinnerScore.setModel(new javax.swing.SpinnerNumberModel(1, 1, 5, 1));
 
         jLabel5.setText("Comment");
 
@@ -96,15 +205,14 @@ public class RateClass extends javax.swing.JFrame {
                                         .addGap(18, 18, 18)
                                         .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE))
                                     .addComponent(lblClassInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(lblInstructorInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(22, 22, 22))
+                                    .addComponent(lblInstructorInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnBack)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(btnClear)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnSubmit)))))
-                .addContainerGap(9, Short.MAX_VALUE))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -127,7 +235,7 @@ public class RateClass extends javax.swing.JFrame {
                             .addComponent(spinnerScore, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel5))
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnBack, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -139,6 +247,70 @@ public class RateClass extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        InstructorRating instructorRating = new InstructorRating();
+        instructorRating.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnBackActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        spinnerScore.setValue(1);
+        txtaComment.setText("");
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnSubmitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSubmitActionPerformed
+        try{
+            Rating selectedRating = null;
+            Instructor selectedInstructor = null;
+            
+            // check rating information
+            if(!ratingInfoLoaded || selectedRating == null){
+                JOptionPane.showMessageDialog(null, "Rating information is not available.");
+                return;
+            }
+            
+            // get score input and comment input
+            int score = Integer.parseInt(spinnerScore.getValue().toString());
+            String comment = txtaComment.getText().trim();
+            
+            // validate comment
+            if(comment.isEmpty()){
+                JOptionPane.showMessageDialog(null, "Please enter your comment.");
+                txtaComment.requestFocus();
+                return;
+            }
+            
+            // check rating status again
+            if(selectedRating.getStatus() == Rating.RatingStatus.Rated){
+                JOptionPane.showMessageDialog(null, "This class has already been rated.");
+                return;
+            }
+            
+            // confirm rating
+            int confirm = JOptionPane.showConfirmDialog(null, "Confirm rate " + selectedInstructor.getName() + "with" + score + "?", "Confirm Rating", JOptionPane.YES_NO_OPTION);
+            if(confirm != JOptionPane.YES_OPTION){
+                return;
+            }
+            
+            // update rating information
+            selectedRating.setScore(score);
+            selectedRating.setComment(comment);
+            selectedRating.setRatingDate(LocalDate.now());
+            selectedRating.setStatus(Rating.RatingStatus.Rated);
+            
+            // save updated rating records
+            FileUtil.write("rating.txt", ratingList, Rating::toLine);
+            
+            JOptionPane.showMessageDialog(null, "Rating submitted successfully!");
+            
+            InstructorRating instructorRating = new InstructorRating();
+            instructorRating.setVisible(true);
+            this.dispose();
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null, "Error submitting rating: " + e.getMessage());
+        }
+    }//GEN-LAST:event_btnSubmitActionPerformed
 
     /**
      * @param args the command line arguments
@@ -162,7 +334,7 @@ public class RateClass extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new RateClass().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new RateInstructor("").setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

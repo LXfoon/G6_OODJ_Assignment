@@ -4,6 +4,16 @@
  */
 package sdams.gui;
 
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import sdams.model.Attendance;
+import sdams.model.ClassSession;
+import sdams.model.Instructor;
+import sdams.model.Rating;
+import sdams.model.Staff;
+import sdams.util.FileUtil;
+
 /**
  *
  * @author Mei Shi
@@ -12,11 +22,203 @@ public class InstructorRating extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(InstructorRating.class.getName());
 
+    private ArrayList<Attendance> attendanceList = new ArrayList<>();
+    private ArrayList<Rating> ratingList = new ArrayList<>();
+    private ArrayList<ClassSession> classList = new ArrayList<>();
+    private ArrayList<Instructor> instructorList = new ArrayList<>();
+    private DefaultTableModel tableModel;
+    
     /**
      * Creates new form InstructorRating
      */
     public InstructorRating() {
         initComponents();
+        loadRating();
+        
+        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                filterRating();
+            }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                filterRating();
+            }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                filterRating();
+            }
+        });
+    }
+    
+    private void loadRating(){
+        try{
+            // clear existing table rows
+            DefaultTableModel model = (DefaultTableModel) tblRate.getModel();
+            model.setRowCount(0);
+            
+            FileUtil.read("attendance.txt", attendanceList, Attendance::fromLine);
+            FileUtil.read("rating.txt", ratingList, Rating::fromLine);
+            FileUtil.read("class.txt", classList, ClassSession::fromLine);
+            
+            // read user records and get staff information
+            ArrayList<Staff> staffList = new ArrayList<>();
+            FileUtil.read("user.txt", staffList, Staff::fromUserLine);
+            
+            // get instructor name only
+            instructorList.clear();
+
+            for(Staff s : staffList){
+                if(s instanceof Instructor i){
+                    instructorList.add(i);
+                }
+            }
+            
+            // get current student id
+            String studentId = "010";
+            
+            // check each attendance record
+            for(Attendance a : attendanceList){
+                // only display current student Present attendance record
+                if(!a.getStudentId().equals(studentId)){
+                    continue;
+                }
+                
+                if(a.getStatus() == Attendance.AttStatus.Absent){
+                    continue;
+                }
+                
+                // find class information
+                ClassSession selectedClass = null;
+                for(ClassSession cs : classList){
+                    if(cs.getClassId().equals(a.getClassId())){
+                        selectedClass = cs;
+                        break;
+                    }
+                }
+                
+                if(selectedClass == null){
+                    continue;
+                }
+                
+                // find instructor name
+                String instructorName = "";
+                for(Instructor i : instructorList){
+                    if(i.getId().equals(selectedClass.getInstructorId())){
+                        instructorName = i.getName();
+                        break;
+                    }
+                }
+                
+                // find rating information
+                Rating selectedRating = null;
+                for(Rating r : ratingList){
+                    if(r.getStudentId().equals(studentId) && r.getClassId().equals(a.getClassId())){
+                        selectedRating = r;
+                        break;
+                    }
+                }
+                
+                // set rating status and score
+                String ratingStatus = "Unrated";
+                String score = "-";
+                
+                if(selectedRating != null){
+                    ratingStatus = selectedRating.getStatus().toString();
+                    if(selectedRating.getStatus() == Rating.RatingStatus.Rated){
+                        score = String.valueOf(selectedRating.getScore());
+                    }
+                }
+                
+                // add information to table
+                model.addRow(new Object[]{
+                    selectedClass.getClassId(), selectedClass.getClassName(), instructorName, selectedClass.getDate(), a.getStatus(), ratingStatus, score
+                });
+            }
+            
+            // show message
+            lblAttended.setText("Attended Classes: " + model.getRowCount());
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+        }
+    }
+    
+    private void filterRating(){
+        // clear existing table rows
+        DefaultTableModel model = (DefaultTableModel) tblRate.getModel();
+        model.setRowCount(0);
+        
+        // get filter values
+        String search = txtSearch.getText().trim().toLowerCase();
+        String score = String.valueOf(cmbScore.getSelectedItem());
+        String status = String.valueOf(cmbStatus.getSelectedItem());
+        
+        String studentId = "010";
+        
+        // check each attendance
+        for(Attendance a : attendanceList){
+            // only display current student Present attendance record
+            if(!a.getStudentId().equals(studentId)){
+                continue;
+            }
+                
+            if(a.getStatus() == Attendance.AttStatus.Absent){
+                continue;
+            }
+            
+            ClassSession selectedClass = null;
+            for(ClassSession cs : classList){
+                if(cs.getClassId().equals(a.getClassId())){
+                    selectedClass = cs;
+                    break;
+                }
+            }
+                
+            if(selectedClass == null){
+                continue;
+            }
+            
+            String instructorName = "";
+            for(Instructor i : instructorList){
+                if(i.getId().equals(selectedClass.getInstructorId())){
+                    instructorName = i.getName();
+                    break;
+                }
+            }
+                
+            Rating selectedRating = null;
+            for(Rating r : ratingList){
+                if(r.getStudentId().equals(studentId) && r.getClassId().equals(a.getClassId())){
+                    selectedRating = r;
+                    break;
+                }
+            }
+            
+            String ratingStatus = "Unrated";
+            String ratingScore = "-";
+                
+            if(selectedRating != null){
+                ratingStatus = selectedRating.getStatus().toString();
+                if(selectedRating.getStatus() == Rating.RatingStatus.Rated){
+                    ratingScore = String.valueOf(selectedRating.getScore());
+                }
+            }
+            
+            // check filter conditions
+            boolean matchSearch = search.isEmpty() || selectedClass.getClassId().toLowerCase().contains(search) || selectedClass.getClassName().toLowerCase().contains(search) 
+                    || instructorName.toLowerCase().contains(search);
+            boolean matchScore = score.equals("All Score") || ratingScore.equals(score);
+            boolean matchStatus = status.equals("All Status") || ratingStatus.equals(status);
+            
+            if(matchSearch && matchScore && matchStatus){
+                model.addRow(new Object[]{
+                    selectedClass.getClassId(), selectedClass.getClassName(), instructorName, selectedClass.getDate(), a.getStatus(), ratingStatus, ratingScore
+                });
+            }
+        }
+        
+        // update available class count
+        lblAttended.setText("Attended Classes: " + model.getRowCount());
     }
 
     /**
@@ -30,7 +232,7 @@ public class InstructorRating extends javax.swing.JFrame {
 
         jLabel1 = new javax.swing.JLabel();
         lblAttended = new javax.swing.JLabel();
-        txtSearchClass = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         cmbScore = new javax.swing.JComboBox<>();
         cmbStatus = new javax.swing.JComboBox<>();
         btnReset = new javax.swing.JButton();
@@ -48,17 +250,25 @@ public class InstructorRating extends javax.swing.JFrame {
 
         lblAttended.setText("Attended Classes: xx");
 
+        txtSearch.addActionListener(this::txtSearchActionPerformed);
+
         cmbScore.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Score", "1", "2", "3", "4", "5" }));
+        cmbScore.addActionListener(this::cmbScoreActionPerformed);
 
         cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Status", "Rated", "Unrated" }));
+        cmbStatus.addActionListener(this::cmbStatusActionPerformed);
 
         btnReset.setText("Reset");
+        btnReset.addActionListener(this::btnResetActionPerformed);
 
         btnBack.setText("Back to Student Main Menu");
+        btnBack.addActionListener(this::btnBackActionPerformed);
 
         btnRate.setText("Rate Selected Instructor");
+        btnRate.addActionListener(this::btnRateActionPerformed);
 
         btnMyRating.setText("My Ratings");
+        btnMyRating.addActionListener(this::btnMyRatingActionPerformed);
 
         tblRate.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -101,7 +311,7 @@ public class InstructorRating extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(txtSearchClass, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                         .addComponent(cmbScore, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -126,7 +336,7 @@ public class InstructorRating extends javax.swing.JFrame {
                 .addComponent(lblAttended)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtSearchClass, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cmbScore, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnReset, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -143,6 +353,67 @@ public class InstructorRating extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void cmbScoreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbScoreActionPerformed
+        filterRating();
+    }//GEN-LAST:event_cmbScoreActionPerformed
+
+    private void txtSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchActionPerformed
+        filterRating();
+    }//GEN-LAST:event_txtSearchActionPerformed
+
+    private void cmbStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbStatusActionPerformed
+        filterRating();
+    }//GEN-LAST:event_cmbStatusActionPerformed
+
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+        txtSearch.setText("");
+        cmbScore.setSelectedIndex(0);
+        cmbStatus.setSelectedIndex(0);
+        
+        filterRating();
+    }//GEN-LAST:event_btnResetActionPerformed
+
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        StudentHome studentHome = new StudentHome();
+        studentHome.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnBackActionPerformed
+
+    private void btnMyRatingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMyRatingActionPerformed
+        MyRatings myRatings = new MyRatings();
+        myRatings.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnMyRatingActionPerformed
+
+    private void btnRateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRateActionPerformed
+        try{
+            int selectedRow = tblRate.getSelectedRow();
+            if(selectedRow == -1){
+                JOptionPane.showMessageDialog(null, "Please select a class first.");
+                return;
+            }
+            
+            int modelRow = tblRate.convertRowIndexToModel(selectedRow);
+            String classId = tblRate.getModel().getValueAt(modelRow, 0).toString();
+            String status = tblRate.getModel().getValueAt(modelRow, 5).toString();
+            
+            if(!status.equalsIgnoreCase("Unrated")){
+                JOptionPane.showMessageDialog(null, "You can only rate an Unrated class. Please select an Unrated class.");
+                return;
+            }
+            
+            RateInstructor rateInstructor = new RateInstructor(classId);
+            if(rateInstructor.isRatingInfoLoaded()){
+                rateInstructor.setVisible(true);
+                this.dispose();
+            }
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null, "Error processing rating: " + e.getMessage());
+        }
+        
+        
+    }//GEN-LAST:event_btnRateActionPerformed
 
     /**
      * @param args the command line arguments
@@ -180,6 +451,6 @@ public class InstructorRating extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblAttended;
     private javax.swing.JTable tblRate;
-    private javax.swing.JTextField txtSearchClass;
+    private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
 }

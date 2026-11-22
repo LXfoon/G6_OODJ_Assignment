@@ -13,7 +13,7 @@ public class Attendance {
     
     public enum AttStatus{
         Present,
-        Absate,
+        Absent,
         Late;
         
         public static AttStatus fromString(String s){
