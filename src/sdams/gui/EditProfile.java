@@ -106,8 +106,6 @@ public class EditProfile extends javax.swing.JFrame {
 
         phoneLabel.setText("Phone Number:");
 
-        pswTxt.setText("jPasswordField1");
-
         showPswCheck.setText("show password");
         showPswCheck.setFocusable(false);
         showPswCheck.addActionListener(this::showPswCheckActionPerformed);
