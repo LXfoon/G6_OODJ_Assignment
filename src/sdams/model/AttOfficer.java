@@ -14,7 +14,7 @@ public class AttOfficer extends Staff {
         super(); 
     }
     
-    public AttOfficer(String id, String name, String email, String password,String phoneNum, double salary) {
-        super(id, name, email, password, phoneNum, "Attendance", salary);
+    public AttOfficer(String id, String name, String email, String password,String phoneNum, String status, double salary) {
+        super(id, name, email, password, phoneNum, "Attendance", status, salary);
     }
 }

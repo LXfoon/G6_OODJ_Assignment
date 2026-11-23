@@ -14,7 +14,7 @@ public class Instructor extends Staff {
         super(); 
     }
     
-    public Instructor(String id, String name, String email, String password,String phoneNum, double salary) {
-        super(id, name, email, password, phoneNum, "Instructor", salary);
+    public Instructor(String id, String name, String email, String password, String phoneNum, String status, double salary) {
+        super(id, name, email, password, phoneNum, "Instructor", status, salary);
     }
 }

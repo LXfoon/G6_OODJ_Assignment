@@ -140,9 +140,6 @@
     <Component class="javax.swing.JTextField" name="emailTxt">
     </Component>
     <Component class="javax.swing.JPasswordField" name="pswTxt">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="jPasswordField1"/>
-      </Properties>
     </Component>
     <Component class="javax.swing.JCheckBox" name="showPswCheck">
       <Properties>
