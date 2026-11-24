@@ -44,6 +44,7 @@ public class ManagerHome extends javax.swing.JFrame {
         exitBtn = new javax.swing.JButton();
         staffReportBtn = new javax.swing.JButton();
         revenueReportBtn = new javax.swing.JButton();
+        editBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -84,6 +85,13 @@ public class ManagerHome extends javax.swing.JFrame {
             }
         });
 
+        editBtn.setText("Edit Profile");
+        editBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -105,11 +113,13 @@ public class ManagerHome extends javax.swing.JFrame {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addComponent(revenueReportBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(staffReportBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(manageAdminBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(25, 25, 25)
-                                .addComponent(exitBtn)))
-                        .addGap(0, 86, Short.MAX_VALUE)))
+                                    .addComponent(manageAdminBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(0, 86, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(exitBtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(editBtn)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -121,15 +131,19 @@ public class ManagerHome extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(usernameTxt))
-                .addGap(24, 24, 24)
+                .addGap(27, 27, 27)
                 .addComponent(manageAdminBtn)
                 .addGap(18, 18, 18)
                 .addComponent(staffReportBtn)
                 .addGap(18, 18, 18)
                 .addComponent(revenueReportBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
-                .addComponent(exitBtn)
-                .addGap(25, 25, 25))
+                .addGap(0, 80, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(exitBtn)
+                    .addComponent(editBtn))
+                .addContainerGap())
         );
 
         pack();
@@ -160,6 +174,11 @@ public class ManagerHome extends javax.swing.JFrame {
         revenueReport.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_revenueReportBtnActionPerformed
+
+    private void editBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editBtnActionPerformed
+        new EditProfile(LoggedIn.getId(), this).setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_editBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -197,6 +216,7 @@ public class ManagerHome extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton editBtn;
     private javax.swing.JButton exitBtn;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
