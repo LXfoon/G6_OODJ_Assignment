@@ -292,7 +292,7 @@ public class EditProfile extends javax.swing.JFrame {
             return switch (role) {
                 case "student" -> new Student (userId, name, email, psw, phone, status);
                 case "manager" -> new Manager (userId, name, email, psw, phone, "Manager", status);
-                case "admin" -> new Admin (userId, name, email, psw, phone, status, 0.0);
+                //case "admin" -> new Admin (userId, name, email, psw, phone, status, 0.0);
                 case "instructor" -> new Instructor(userId, name, email, psw, phone, status, 0.0);
                 case "facilities" -> new FacOfficer(userId, name, email, psw, phone, status, 0.0);
                 case "attendance" -> new AttOfficer(userId, name, email, psw, phone, status, 0.0);
@@ -317,7 +317,7 @@ public class EditProfile extends javax.swing.JFrame {
         return switch (role) {
             case "student" -> new Student (id, name, email, psw, phone, status);
             case "manager" -> new Manager (id, name, email, psw, phone, "Manager", status);
-            case "admin" -> new Admin (id, name, email, psw, phone, status, 0.0);
+            //case "admin" -> new Admin (id, name, email, psw, phone, status, 0.0);
             case "instructor" -> new Instructor(id, name, email, psw, phone, status, 0.0);
             case "facilities" -> new FacOfficer(id, name, email, psw, phone, status, 0.0);
             case "attendance" -> new AttOfficer(id, name, email, psw, phone, status, 0.0);

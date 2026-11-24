@@ -73,10 +73,15 @@ public class BrowseClasses extends javax.swing.JFrame {
                 }
             }
             
-            // display class schedules
+            // display available class and full class
             for(ClassSession cs : classList){
-                String instructorName = "";
+                // skip completed and cancelled class
+                if(cs.getStatus() != ClassSession.ClassStatus.Available && cs.getStatus() != ClassSession.ClassStatus.Full){
+                    continue;
+                }
                 
+                // get instructor name
+                String instructorName = "Unknown";
                 for(Instructor i : instructorList){
                     if(i.getId().equals(cs.getInstructorId())){
                         instructorName = i.getName();
@@ -90,7 +95,7 @@ public class BrowseClasses extends javax.swing.JFrame {
             }
             
             // show message
-            lblAvailable.setText("Available Classes: " + model.getRowCount());
+            lblAvailable.setText("Classes: " + model.getRowCount());
             
         } catch(Exception e) {
             JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
@@ -109,7 +114,13 @@ public class BrowseClasses extends javax.swing.JFrame {
         
         // check each class
         for(ClassSession cs : classList){
-            String instructorName = "";
+            // display available and full class only
+            if(cs.getStatus() != ClassSession.ClassStatus.Available && cs.getStatus() != ClassSession.ClassStatus.Full){
+                continue;
+            }
+            
+            // for instructor name
+            String instructorName = "Unknown";
             for(Instructor i : instructorList){
                 if(i.getId().equals(cs.getInstructorId())){
                     instructorName = i.getName();
@@ -129,7 +140,7 @@ public class BrowseClasses extends javax.swing.JFrame {
         }
         
         // update available class count
-        lblAvailable.setText("Available Classes: " + model.getRowCount());
+        lblAvailable.setText("Classes: " + model.getRowCount());
     }
 
     /**
@@ -159,7 +170,7 @@ public class BrowseClasses extends javax.swing.JFrame {
         jLabel1.setText("Browse Classes");
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
 
-        lblAvailable.setText("Available Classes: xx");
+        lblAvailable.setText("Classes: xx");
 
         txtSearch.setToolTipText("");
         txtSearch.addActionListener(this::txtSearchActionPerformed);
@@ -238,11 +249,11 @@ public class BrowseClasses extends javax.swing.JFrame {
                                     .addComponent(btnBook))
                                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 738, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(346, 346, 346)
-                        .addComponent(lblAvailable))
-                    .addGroup(layout.createSequentialGroup()
                         .addGap(316, 316, 316)
-                        .addComponent(jLabel1)))
+                        .addComponent(jLabel1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(372, 372, 372)
+                        .addComponent(lblAvailable)))
                 .addContainerGap(31, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -305,11 +316,12 @@ public class BrowseClasses extends javax.swing.JFrame {
         int selectedRow = tblClass.getSelectedRow();
         if(selectedRow == -1){
             JOptionPane.showMessageDialog(null, "Please select a class first.");
+            return;
         }
         
         // get selected class id
-        int modelRow = tblClass.convertColumnIndexToModel(selectedRow);
-        String classId = tblClass.getValueAt(modelRow, 0).toString();
+        int modelRow = tblClass.convertRowIndexToModel(selectedRow);
+        String classId = tblClass.getModel().getValueAt(modelRow, 0).toString();
         
         // find selected class
         ClassSession selectedClass = null;
@@ -322,15 +334,32 @@ public class BrowseClasses extends javax.swing.JFrame {
         
         if(selectedClass == null){
             JOptionPane.showMessageDialog(null, "Class record not found.");
+            return;
         }
         
-        // check available slots
-        if(selectedClass.getAvailableSlots() <= 0 || selectedClass.getStatus() != ClassSession.ClassStatus.Available){
-            JOptionPane.showMessageDialog(null, "Sorry, this class is full or unavailable!");
+        // check class status
+        if(selectedClass.getStatus() == ClassSession.ClassStatus.Full || selectedClass.getAvailableSlots() <= 0){
+            JOptionPane.showMessageDialog(null, "Sorry, this class is full! Please select another class.");
+            return;
+        }
+        
+        if(selectedClass.getStatus() != ClassSession.ClassStatus.Available){
+            JOptionPane.showMessageDialog(null, "Sorry, this class is currently unavailable!");
+            return;
+        }
+        
+        // validate available class
+        if(selectedClass.getAvailableSlots() > selectedClass.getMaxSlots()){
+            JOptionPane.showMessageDialog(null, "Invalid class slot information. Please contact the Administrator.");
+            return;
         }
         
         // get current student id
         String studentId = LoggedIn.getId();
+        if(studentId == null || studentId.trim().isEmpty()){
+            JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+            return;
+        }
         
         // read existing booking records
         ArrayList<Booking> bookingList = new ArrayList<>();
@@ -338,13 +367,15 @@ public class BrowseClasses extends javax.swing.JFrame {
         
         // create new booking
         String bookingId = Generator.idGenerator("B", "booking.txt");
+        if(bookingId == null || bookingId.trim().isEmpty()){
+            JOptionPane.showMessageDialog(null, "Unable to generate booking ID. Please try again.");
+            return;
+        }
+        
         Booking newBooking = new Booking(bookingId, studentId, classId, Booking.BookingStatus.Booked, java.time.LocalDate.now());
         bookingList.add(newBooking);
         
-        // save booking records
-        FileUtil.write("booking.txt", bookingList, Booking::toLine);
-        
-        // minus 1 to available slots
+        // minus 1 available slots
         selectedClass.setAvailableSlots(selectedClass.getAvailableSlots() - 1);
         
         // update class status if no available slots
@@ -352,7 +383,8 @@ public class BrowseClasses extends javax.swing.JFrame {
             selectedClass.setStatus(ClassSession.ClassStatus.Full);
         }
         
-        // save update to class records
+        // save booking and class records
+        FileUtil.write("booking.txt", bookingList, Booking::toLine);
         FileUtil.write("class.txt", classList, ClassSession::toLine);
         
         // refresh table

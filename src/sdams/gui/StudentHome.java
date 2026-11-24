@@ -44,7 +44,7 @@ public class StudentHome extends javax.swing.JFrame {
         jLabel1.setText("Student Main Menu");
 
         lblWelcome.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        lblWelcome.setText("Welcome, [student name]");
+        lblWelcome.setText("Welcome, xxx");
 
         btnBookClasses.setText("Book Classes");
         btnBookClasses.addActionListener(this::btnBookClassesActionPerformed);
@@ -71,9 +71,6 @@ public class StudentHome extends javax.swing.JFrame {
                         .addGap(108, 108, 108)
                         .addComponent(jLabel1)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGap(146, 146, 146)
-                        .addComponent(lblWelcome, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -86,6 +83,10 @@ public class StudentHome extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnProfile)))))
                 .addContainerGap(108, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(lblWelcome)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

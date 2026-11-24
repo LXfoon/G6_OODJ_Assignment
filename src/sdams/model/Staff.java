@@ -58,8 +58,8 @@ public abstract class Staff extends User {
                 return new FacOfficer(id, name, email, pw, phone, status, 0.0);
             case "attendance": 
                 return new AttOfficer(id, name, email, pw, phone, status, 0.0);
-            case "admin":
-                return new Admin(id, name, email, pw, phone, status, 0.0);
+            //case "admin":
+                //return new Admin(id, name, email, pw, phone, status, 0.0);
             // placeholder for salary, set in fromLines
                 
             default: return null; // not staff

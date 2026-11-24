@@ -100,7 +100,8 @@ public class Payment {
     }
     
     public static Payment fromLine(String line) {
-        String parts[] = line.split("\\|");
+        LocalDate paymentDate = null;
+        String parts[] = line.split("\\|", -1);
         if(parts.length < 7) return null;
         
         String paymentId = parts[0].trim();
@@ -108,13 +109,16 @@ public class Payment {
         String studentId = parts[2].trim();
         String paymentMethod = parts[6].trim();
         double amount = Double.parseDouble(parts[3].trim());
-        LocalDate paymentDate = LocalDate.parse(parts[4].trim(), formatter);
+        if(!parts[4].trim().equals("-") && !parts[4].trim().isEmpty()){
+            paymentDate = LocalDate.parse(parts[4].trim(), formatter);
+        }
         PaymentStatus status = PaymentStatus.fromString(parts[5].trim());
         
         return new Payment(paymentId, bookingId, studentId, paymentMethod, amount, paymentDate, status);
     }
     
     public String toLine(){
-        return this.paymentId + "|" + this.bookingId + "|" + this.studentId + "|" + this.amount + "|" + this.paymentDate+ "|" + this.status + "|" + this.paymentMethod;
+        String Date = (this.paymentDate == null) ? "-" : this.paymentDate.toString();
+        return this.paymentId + "|" + this.bookingId + "|" + this.studentId + "|" + this.amount + "|" + Date+ "|" + this.status + "|" + this.paymentMethod;
     }
 }
