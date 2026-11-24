@@ -74,70 +74,8 @@ public class InstructorRating extends javax.swing.JFrame {
                 }
             }
             
-            // get current student id
-            String studentId = "010";
-            
-            // check each attendance record
-            for(Attendance a : attendanceList){
-                // only display current student Present attendance record
-                if(!a.getStudentId().equals(studentId)){
-                    continue;
-                }
-                
-                if(a.getStatus() == Attendance.AttStatus.Absent){
-                    continue;
-                }
-                
-                // find class information
-                ClassSession selectedClass = null;
-                for(ClassSession cs : classList){
-                    if(cs.getClassId().equals(a.getClassId())){
-                        selectedClass = cs;
-                        break;
-                    }
-                }
-                
-                if(selectedClass == null){
-                    continue;
-                }
-                
-                // find instructor name
-                String instructorName = "";
-                for(Instructor i : instructorList){
-                    if(i.getId().equals(selectedClass.getInstructorId())){
-                        instructorName = i.getName();
-                        break;
-                    }
-                }
-                
-                // find rating information
-                Rating selectedRating = null;
-                for(Rating r : ratingList){
-                    if(r.getStudentId().equals(studentId) && r.getClassId().equals(a.getClassId())){
-                        selectedRating = r;
-                        break;
-                    }
-                }
-                
-                // set rating status and score
-                String ratingStatus = "Unrated";
-                String score = "-";
-                
-                if(selectedRating != null){
-                    ratingStatus = selectedRating.getStatus().toString();
-                    if(selectedRating.getStatus() == Rating.RatingStatus.Rated){
-                        score = String.valueOf(selectedRating.getScore());
-                    }
-                }
-                
-                // add information to table
-                model.addRow(new Object[]{
-                    selectedClass.getClassId(), selectedClass.getClassName(), instructorName, selectedClass.getDate(), a.getStatus(), ratingStatus, score
-                });
-            }
-            
-            // show message
-            lblAttended.setText("Attended Classes: " + model.getRowCount());
+            // Display current student's attendance and rating
+            filterRating();
         } catch(Exception e){
             JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
@@ -148,24 +86,32 @@ public class InstructorRating extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) tblRate.getModel();
         model.setRowCount(0);
         
+        // get current student id
+        String studentId = LoggedIn.getId();
+        if(studentId == null || studentId.trim().isEmpty()){
+            JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+            return;
+        }
+        
         // get filter values
         String search = txtSearch.getText().trim().toLowerCase();
         String score = String.valueOf(cmbScore.getSelectedItem());
         String status = String.valueOf(cmbStatus.getSelectedItem());
         
-        String studentId = "010";
-        
-        // check each attendance
+        // Check each attendance record
         for(Attendance a : attendanceList){
-            // only display current student Present attendance record
+
+            // Only display current student's attendance
             if(!a.getStudentId().equals(studentId)){
                 continue;
             }
-                
+
+            // Only display Present or Late attendance
             if(a.getStatus() == Attendance.AttStatus.Absent){
                 continue;
             }
-            
+
+            // Find class information
             ClassSession selectedClass = null;
             for(ClassSession cs : classList){
                 if(cs.getClassId().equals(a.getClassId())){
@@ -173,19 +119,21 @@ public class InstructorRating extends javax.swing.JFrame {
                     break;
                 }
             }
-                
+
             if(selectedClass == null){
                 continue;
             }
-            
-            String instructorName = "";
+
+            // Find instructor name
+            String instructorName = "Unknown";
             for(Instructor i : instructorList){
                 if(i.getId().equals(selectedClass.getInstructorId())){
                     instructorName = i.getName();
                     break;
                 }
             }
-                
+
+            // Find rating information
             Rating selectedRating = null;
             for(Rating r : ratingList){
                 if(r.getStudentId().equals(studentId) && r.getClassId().equals(a.getClassId())){
@@ -193,18 +141,19 @@ public class InstructorRating extends javax.swing.JFrame {
                     break;
                 }
             }
-            
+
+            // Set rating status and score
             String ratingStatus = "Unrated";
             String ratingScore = "-";
-                
-            if(selectedRating != null){
+
+            if(selectedRating != null && selectedRating.getStatus() != null){
                 ratingStatus = selectedRating.getStatus().toString();
                 if(selectedRating.getStatus() == Rating.RatingStatus.Rated){
                     ratingScore = String.valueOf(selectedRating.getScore());
                 }
             }
-            
-            // check filter conditions
+
+            // check search condition
             boolean matchSearch = search.isEmpty() || selectedClass.getClassId().toLowerCase().contains(search) || selectedClass.getClassName().toLowerCase().contains(search) 
                     || instructorName.toLowerCase().contains(search);
             boolean matchScore = score.equals("All Score") || ratingScore.equals(score);
@@ -290,6 +239,11 @@ public class InstructorRating extends javax.swing.JFrame {
             }
         });
         jScrollPane1.setViewportView(tblRate);
+        if (tblRate.getColumnModel().getColumnCount() > 0) {
+            tblRate.getColumnModel().getColumn(1).setPreferredWidth(150);
+            tblRate.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tblRate.getColumnModel().getColumn(3).setPreferredWidth(80);
+        }
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -388,6 +342,12 @@ public class InstructorRating extends javax.swing.JFrame {
 
     private void btnRateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRateActionPerformed
         try{
+            String studentId = LoggedIn.getId();
+            if(studentId == null || studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+                return;
+            }
+            
             int selectedRow = tblRate.getSelectedRow();
             if(selectedRow == -1){
                 JOptionPane.showMessageDialog(null, "Please select a class first.");
@@ -411,8 +371,6 @@ public class InstructorRating extends javax.swing.JFrame {
         } catch(Exception e){
             JOptionPane.showMessageDialog(null, "Error processing rating: " + e.getMessage());
         }
-        
-        
     }//GEN-LAST:event_btnRateActionPerformed
 
     /**

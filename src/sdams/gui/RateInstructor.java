@@ -7,6 +7,7 @@ package sdams.gui;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import sdams.model.Attendance;
 import sdams.model.ClassSession;
 import sdams.model.Instructor;
 import sdams.model.Rating;
@@ -22,9 +23,13 @@ public class RateInstructor extends javax.swing.JFrame {
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(RateInstructor.class.getName());
 
     private String classId;
-    private String studentId = "010";
+    private String studentId;
     private boolean ratingInfoLoaded = false;
     
+    private Rating selectedRating = null;
+    private Instructor selectedInstructor = null;
+    
+    private ArrayList<Attendance> attendanceList = new ArrayList<>();
     private ArrayList<Rating> ratingList = new ArrayList<>();
     private ArrayList<ClassSession> classList = new ArrayList<>();
     private ArrayList<Staff> staffList = new ArrayList<>();
@@ -33,7 +38,7 @@ public class RateInstructor extends javax.swing.JFrame {
     /**
      * Creates new form RateClass
      */
-    public RateInstructor(String studentId) {
+    public RateInstructor(String classId) {
         initComponents();
         this.classId = classId;
         
@@ -45,6 +50,22 @@ public class RateInstructor extends javax.swing.JFrame {
     
     private void loadRatingInfo(){
         try{
+            ratingInfoLoaded = false;
+            selectedRating = null;
+            selectedInstructor = null;
+            
+            this.studentId = LoggedIn.getId();
+            if(this.studentId == null || this.studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+                return;
+            }
+            
+            if(classId == null || classId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Invalid Class ID.");
+                return;
+            }
+            
+            FileUtil.read("attendance.txt", attendanceList, Attendance::fromLine);
             FileUtil.read("rating.txt", ratingList, Rating::fromLine);
             FileUtil.read("class.txt", classList, ClassSession::fromLine);
             FileUtil.read("user.txt", staffList, Staff::fromUserLine);
@@ -58,8 +79,21 @@ public class RateInstructor extends javax.swing.JFrame {
                 }
             }
             
+            // check student's attendance
+            boolean hasAttended = false;
+            for(Attendance a : attendanceList){
+                if(a.getStudentId().equals(studentId) && a.getClassId().equals(classId) && (a.getStatus() == Attendance.AttStatus.Present || a.getStatus() == Attendance.AttStatus.Late)){
+                    hasAttended = true;
+                    break;
+                }
+            }
+            
+            if(!hasAttended){
+                JOptionPane.showMessageDialog(null, "You are not eligible to rate this class because you have not attended it.");
+                return;
+            }
+            
             // find rating records
-            Rating selectedRating = null;
             for(Rating r : ratingList){
                 if(r.getClassId().equals(classId) && r.getStudentId().equals(studentId)){
                     selectedRating = r;
@@ -69,7 +103,6 @@ public class RateInstructor extends javax.swing.JFrame {
             
             if(selectedRating == null){
                 JOptionPane.showMessageDialog(null, "Rating record not found.");
-                btnSubmit.setEnabled(false);
                 return;
             }
             
@@ -90,12 +123,10 @@ public class RateInstructor extends javax.swing.JFrame {
             
             if(selectedClass == null){
                 JOptionPane.showMessageDialog(null, "Class record not found.");
-                btnSubmit.setEnabled(false);
                 return;
             }
             
             // find instructor information
-            Instructor selectedInstructor = null;
             for(Instructor i : instructorList){
                 if(i.getId().equals(selectedClass.getInstructorId())){
                     selectedInstructor = i;
@@ -105,7 +136,6 @@ public class RateInstructor extends javax.swing.JFrame {
             
             if(selectedInstructor == null){
                 JOptionPane.showMessageDialog(null, "Instrutor record not found.");
-                btnSubmit.setEnabled(false);
                 return;
             }
             
@@ -115,6 +145,7 @@ public class RateInstructor extends javax.swing.JFrame {
             
             ratingInfoLoaded = true;
         } catch(Exception e){
+            ratingInfoLoaded = false;
             JOptionPane.showMessageDialog(null, "Error loading details: " + e.getMessage());
         }
     }
@@ -261,11 +292,8 @@ public class RateInstructor extends javax.swing.JFrame {
 
     private void btnSubmitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSubmitActionPerformed
         try{
-            Rating selectedRating = null;
-            Instructor selectedInstructor = null;
-            
             // check rating information
-            if(!ratingInfoLoaded || selectedRating == null){
+            if(!ratingInfoLoaded || selectedRating == null || selectedInstructor == null){
                 JOptionPane.showMessageDialog(null, "Rating information is not available.");
                 return;
             }
@@ -274,6 +302,12 @@ public class RateInstructor extends javax.swing.JFrame {
             int score = Integer.parseInt(spinnerScore.getValue().toString());
             String comment = txtaComment.getText().trim();
             
+            // validate score
+            if(score < 1 || score > 5){
+                JOptionPane.showMessageDialog(null, "Please select a score between 1 and 5.");
+            return;
+            }
+            
             // validate comment
             if(comment.isEmpty()){
                 JOptionPane.showMessageDialog(null, "Please enter your comment.");
@@ -281,23 +315,43 @@ public class RateInstructor extends javax.swing.JFrame {
                 return;
             }
             
+            // reload rating records before updating
+            FileUtil.read("rating.txt", ratingList, Rating::fromLine);
+            
+            Rating latestRating = null;
+            int ratingIndex = -1;
+            
+            for(int i = 0; i < ratingList.size(); i++){
+                Rating r = ratingList.get(i);
+                if(r.getRatingId().equals(selectedRating.getRatingId()) && r.getStudentId().equals(studentId) && r.getClassId().equals(classId)){
+                    latestRating = r;
+                    ratingIndex = i;
+                    break;
+                }
+            }
+            
+            if(latestRating == null){
+                JOptionPane.showMessageDialog(null, "Rating record not found. Please try again.");
+                return;
+            }
+            
             // check rating status again
-            if(selectedRating.getStatus() == Rating.RatingStatus.Rated){
+            if(latestRating.getStatus() != Rating.RatingStatus.Unrated){
                 JOptionPane.showMessageDialog(null, "This class has already been rated.");
                 return;
             }
             
             // confirm rating
-            int confirm = JOptionPane.showConfirmDialog(null, "Confirm rate " + selectedInstructor.getName() + "with" + score + "?", "Confirm Rating", JOptionPane.YES_NO_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(null, "Confirm rate " + selectedInstructor.getName() + " with " + score + "?", "Confirm Rating", JOptionPane.YES_NO_OPTION);
             if(confirm != JOptionPane.YES_OPTION){
                 return;
             }
             
             // update rating information
-            selectedRating.setScore(score);
-            selectedRating.setComment(comment);
-            selectedRating.setRatingDate(LocalDate.now());
-            selectedRating.setStatus(Rating.RatingStatus.Rated);
+            latestRating.setScore(score);
+            latestRating.setComment(comment);
+            latestRating.setRatingDate(LocalDate.now());
+            latestRating.setStatus(Rating.RatingStatus.Rated);
             
             // save updated rating records
             FileUtil.write("rating.txt", ratingList, Rating::toLine);

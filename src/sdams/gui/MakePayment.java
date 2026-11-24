@@ -22,6 +22,7 @@ public class MakePayment extends javax.swing.JFrame {
     
     private String bookingId;
     private boolean paymentInfoLoaded = false;
+    private boolean fromManagePayment = false;
     
     private ArrayList<Booking> bookingList = new ArrayList<>();
     private ArrayList<ClassSession> classList = new ArrayList<>();
@@ -33,11 +34,27 @@ public class MakePayment extends javax.swing.JFrame {
     public MakePayment(String bookingId) {
         initComponents();
         this.bookingId = bookingId;
+        this.fromManagePayment = false;
+        loadPayment();
+    }
+    
+    public MakePayment(String bookingId, boolean fromManagePayment) {
+        initComponents();
+        this.bookingId = bookingId;
+        this.fromManagePayment = fromManagePayment;
         loadPayment();
     }
     
     private void loadPayment(){
         try{
+            paymentInfoLoaded = false;
+            
+            String studentId = LoggedIn.getId();
+            if(studentId == null || studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+                return;
+            }
+            
             FileUtil.read("booking.txt", bookingList, Booking::fromLine);
             FileUtil.read("class.txt", classList, ClassSession::fromLine);
             FileUtil.read("payment.txt", paymentList, Payment::fromLine);
@@ -45,7 +62,7 @@ public class MakePayment extends javax.swing.JFrame {
             // find selected booking id
             Booking selectedBooking = null;
             for(Booking b : bookingList){
-                if(b.getBookingId().equals(bookingId) && b.getStudentId().equals(LoggedIn.getId())){
+                if(b.getBookingId().equals(bookingId) && b.getStudentId().equals(studentId)){
                     selectedBooking = b;
                     break;
                 }
@@ -53,7 +70,6 @@ public class MakePayment extends javax.swing.JFrame {
             
             if(selectedBooking == null){
                 JOptionPane.showMessageDialog(null, "Booking record not found.");
-                btnPay.setEnabled(false);
                 return;
             }
             
@@ -68,45 +84,48 @@ public class MakePayment extends javax.swing.JFrame {
             
             if(selectedClass == null){
                 JOptionPane.showMessageDialog(null, "Class record not found.");
-                btnPay.setEnabled(false);
                 return;
             }
             
-            // all information loaded successfully
-            paymentInfoLoaded = true;
-            
-            // display booking information
-            lblUnpaidInfo.setText(selectedBooking.getBookingId() + ": " + selectedClass.getClassName());
-            
-            // display amount
-            lblAmountInfo.setText(String.format("RM %.2f", selectedClass.getFee()));
-            
-            // check booking status
-            if(selectedBooking.getStatus() != Booking.BookingStatus.Booked){
-                JOptionPane.showMessageDialog(null, "Only Booked bookings can make payment.");
-                btnPay.setEnabled(false);
-                return;
-            }
-            
-            // check existing payment record
+            // find corresponding payment
             Payment selectedPayment = null;
             for(Payment p : paymentList){
-                if(p.getBookingId().equals(bookingId)){
+                if(p.getBookingId().equals(bookingId) && p.getStudentId().equals(studentId)){
                     selectedPayment = p;
                     break;
                 }
             }
             
-            if(selectedPayment != null){
-                if(selectedPayment.getStatus() == Payment.PaymentStatus.Paid){
-                    JOptionPane.showMessageDialog(null, "This payment is already paid!");
-                    btnPay.setEnabled(false);
-                } else if(selectedPayment.getStatus() == Payment.PaymentStatus.Refunded){
-                    JOptionPane.showMessageDialog(null, "This payment has been refunded. Please contact the Administratos!");
-                    btnPay.setEnabled(false);
-                }
+            if(selectedPayment == null){
+                JOptionPane.showMessageDialog(null, "Payment record not found. Please contact the Administrator.");
+                return;
             }
+            
+            if(selectedPayment.getStatus() == Payment.PaymentStatus.Paid){
+                JOptionPane.showMessageDialog(null, "This payment is already paid!");
+                return;
+            }
+            
+            if(selectedPayment.getStatus() == Payment.PaymentStatus.Refunded){
+                JOptionPane.showMessageDialog(null, "This payment has been refunded. Please contact the Administrator.");
+                return;
+            }
+            
+            if(selectedPayment.getStatus() != Payment.PaymentStatus.Unpaid){
+                JOptionPane.showMessageDialog(null, "Invalid payment status. Please contact the Administrator.");
+                return;
+            }
+            
+            // display booking information
+            lblUnpaidInfo.setText(selectedBooking.getBookingId() + ": " + selectedClass.getClassName());
+            
+            // display amount
+            lblAmountInfo.setText(String.format("RM %.2f", selectedPayment.getAmount()));
+            
+            // all information loaded successfully
+            paymentInfoLoaded = true;
         } catch(Exception e){
+            paymentInfoLoaded = false;
             JOptionPane.showMessageDialog(null, "Error loading payment details: " + e.getMessage());
         }
     }
@@ -235,8 +254,13 @@ public class MakePayment extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
-        MyBookings myBookings = new MyBookings();
-        myBookings.setVisible(true);
+        if(fromManagePayment){
+            ManagePayment managePayment = new ManagePayment();
+            managePayment.setVisible(true);
+        } else {
+            MyBookings myBookings = new MyBookings();
+            myBookings.setVisible(true); 
+        }
         this.dispose();
     }//GEN-LAST:event_btnBackActionPerformed
 
@@ -257,48 +281,111 @@ public class MakePayment extends javax.swing.JFrame {
                 return;
             }
             
+            String studentId = LoggedIn.getId();
+            if(studentId == null || studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+                return;
+            }
+            
             // reload latest payment reocrds
+            FileUtil.read("booking.txt", bookingList, Booking::fromLine);
+            FileUtil.read("class.txt", classList, ClassSession::fromLine);
             FileUtil.read("payment.txt", paymentList, Payment::fromLine);
             
-            // check whether payment already exists in the records
-            Payment selectedPayment = null;
-            for(Payment p : paymentList){
-                if(p.getBookingId().equals(bookingId)){
-                    selectedPayment = p;
+            // find booking
+            Booking selectedBooking = null;
+            for(Booking b : bookingList){
+                if(b.getBookingId().equals(bookingId) && b.getStudentId().equals(studentId)){
+                    selectedBooking = b;
                     break;
                 }
             }
             
-            if(selectedPayment != null){
-                if(selectedPayment.getStatus() == Payment.PaymentStatus.Paid){
-                    JOptionPane.showMessageDialog(null, "This payment is already paid!");
-                    return;
-                }
-                if(selectedPayment.getStatus() == Payment.PaymentStatus.Refunded){
-                    JOptionPane.showMessageDialog(null, "This payment has been refunded. Please contact the Administratos!");
-                    return;
+            if(selectedBooking == null){
+                JOptionPane.showMessageDialog(null, "Booking record not found.");
+                return;
+            }
+            
+            // check booking status
+            if(selectedBooking.getStatus() != Booking.BookingStatus.Booked){
+                JOptionPane.showMessageDialog(null, "Only Booked bookings can make payment. Please choose Booked bookings.");
+                return;
+            }
+            
+            // find corresponding class
+            ClassSession selectedClass = null;
+            for(ClassSession cs : classList){
+                if(cs.getClassId().equals(selectedBooking.getClassId())){
+                    selectedClass = cs;
+                    break;
                 }
             }
             
+            if(selectedClass == null){
+                JOptionPane.showMessageDialog(null, "Class record not found.");
+                return;
+            }
+            
+            // check whether payment already exists in the records
+            Payment selectedPayment = null;
+            int paymentIndex = -1;
+            
+            for(int i = 0; i < paymentList.size(); i++){
+                Payment p = paymentList.get(i);
+                if(p.getBookingId().equals(bookingId) && p.getStudentId().equals(studentId)){
+                    selectedPayment = p;
+                    paymentIndex = i;
+                    break;
+                }
+            }
+            
+            if(selectedPayment == null){
+                JOptionPane.showMessageDialog(null, "Payment record not found. Please contact the Administrator.");
+                return;
+            }
+            
+            if(selectedPayment.getStatus() == Payment.PaymentStatus.Paid){
+                JOptionPane.showMessageDialog(null, "This payment is already paid!");
+                return;
+            }
+                
+            if(selectedPayment.getStatus() == Payment.PaymentStatus.Refunded){
+                JOptionPane.showMessageDialog(null, "This payment has been refunded. Please contact the Administratos.");
+                return;
+            }
+            
+            if(selectedPayment.getStatus() != Payment.PaymentStatus.Unpaid){
+                JOptionPane.showMessageDialog(null, "Invalid payment status. Please contact the Administrator.");
+                return;
+            }
+            
             // confirm payment
-            ClassSession selectedClass = null;
-            int confirm = JOptionPane.showConfirmDialog(null, "Confirm your payment of " + String.format("RM %.2f", selectedClass.getFee()) + "using" + paymentMethod + "?", "Confirm Payment", JOptionPane.YES_NO_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(null, "Confirm your payment of " + String.format("RM %.2f", selectedPayment.getAmount()) + " using " + paymentMethod + "?", "Confirm Payment", JOptionPane.YES_NO_OPTION);
             if(confirm != JOptionPane.YES_OPTION){
                 return;
             }
             
             // create new payment record
-            String paymentId = Generator.idGenerator("P", "payment.txt");
-            Payment newPayment = new Payment(paymentId, bookingId, LoggedIn.getId(), paymentMethod, selectedClass.getFee(), java.time.LocalDate.now(), Payment.PaymentStatus.Paid);
-            paymentList.add(newPayment);
+            Payment updatedPayment = new Payment(selectedPayment.getPaymentId(), selectedPayment.getBookingId(), selectedPayment.getStudentId(), paymentMethod, selectedPayment.getAmount(), java.time.LocalDate.now(), Payment.PaymentStatus.Paid);
+            paymentList.set(paymentIndex, updatedPayment);
             
-            // save new payment record
+            // save updated payment record
             FileUtil.write("payment.txt", paymentList, Payment::toLine);
             
             JOptionPane.showMessageDialog(null, "Payment successful! Thank you!");
             
+            // close this form and return to previous form
+            if(fromManagePayment){
+                ManagePayment managePayment = new ManagePayment();
+                managePayment.setVisible(true);
+            } else {
+                MyBookings myBookings = new MyBookings();
+                myBookings.setVisible(true);
+            }
+            this.dispose();
+            
             // prevent another payment on the same page
-            btnPay.setEnabled(false);
+            paymentInfoLoaded = false;
         } catch(Exception e){
             JOptionPane.showMessageDialog(null, "Error processing payment: " + e.getMessage());
         }

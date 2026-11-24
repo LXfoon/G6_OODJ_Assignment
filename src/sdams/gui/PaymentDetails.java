@@ -49,6 +49,26 @@ public class PaymentDetails extends javax.swing.JFrame {
     
     private void loadDetails(){
         try{
+            detailsLoaded = false;
+            selectedPayment = null;
+            selectedBooking = null;
+            selectedClass = null;
+            
+            txtaDetails.setText("");
+            
+            String studentId = LoggedIn.getId();
+            if(studentId == null || studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+                return;
+            }
+            
+            // validate payment id
+            if(paymentId == null || paymentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Invalid Payment ID.");
+            return;
+            }
+            
+            // read txt file
             FileUtil.read("booking.txt", bookingList, Booking::fromLine);
             FileUtil.read("class.txt", classList, ClassSession::fromLine);
             FileUtil.read("payment.txt", paymentList, Payment::fromLine);
@@ -56,27 +76,33 @@ public class PaymentDetails extends javax.swing.JFrame {
             
             // find payment
             for(Payment p : paymentList){
-                if(p.getPaymentId().equals(paymentId)){
+                if(p.getPaymentId().equals(paymentId) && p.getStudentId().equals(studentId)){
                     selectedPayment = p;
                     break;
                 }
             }
             
             if(selectedPayment == null){
-                JOptionPane.showMessageDialog(null, "Payment record not found.");
+                JOptionPane.showMessageDialog(null, "Payment record not found or you do not have permission to view it.");
                 return;
             }
             
             // find booking
             for(Booking b : bookingList){
-                if(b.getBookingId().equals(selectedPayment.getBookingId())){
+                if(b.getBookingId().equals(selectedPayment.getBookingId()) && b.getStudentId().equals(studentId)){
                     selectedBooking = b;
                     break;
                 }
             }
             
             if(selectedBooking == null){
-                JOptionPane.showMessageDialog(null, "Booking record not found.");
+                JOptionPane.showMessageDialog(null, "Booking record not found or does not belong to this student.");
+                return;
+            }
+            
+            // check payment and booking ownership
+            if(!selectedPayment.getStudentId().equals(selectedBooking.getStudentId())){
+                JOptionPane.showMessageDialog(null, "Payment and Booking records do not match.");
                 return;
             }
             
@@ -97,14 +123,19 @@ public class PaymentDetails extends javax.swing.JFrame {
             showPaymentInfo();
             detailsLoaded = true;
         } catch(Exception e){
+            detailsLoaded = false;
             JOptionPane.showMessageDialog(this, "Error loading payment details: " + e.getMessage());
         }
     }
     
     private void showPaymentInfo(){
+        if(!detailsLoaded && selectedPayment == null){
+            return;
+        }
+        
         String details = "Payment ID: " + selectedPayment.getPaymentId() + "\nBooking ID: " + selectedPayment.getBookingId() + "\nAmount: RM" + String.format("%.2f", selectedPayment.getAmount())
                 + "\nPayment Date: " + (selectedPayment.getPaymentDate() == null ? "Unpaid" : selectedPayment.getPaymentDate()) 
-                + "\nPayment Method: " + (selectedPayment.getPaymentMethod() == null || selectedPayment.getPaymentMethod().isEmpty() ? "Unpaid" : selectedPayment.getPaymentMethod()) 
+                + "\nPayment Method: " + (selectedPayment.getPaymentMethod() == null || selectedPayment.getPaymentMethod().isEmpty() || selectedPayment.getPaymentMethod().equals("-") ? "Unpaid" : selectedPayment.getPaymentMethod()) 
                 + "\nPayment Status: " + selectedPayment.getStatus() + "\nBooking Status: " + selectedBooking.getStatus();
         
         txtaDetails.setText(details);
@@ -121,6 +152,11 @@ public class PaymentDetails extends javax.swing.JFrame {
     }
     
     private void showClassInfo(){
+        if(!detailsLoaded || selectedClass == null){
+            JOptionPane.showMessageDialog(null, "Class information is not available.");
+            return;
+        }
+        
         String instructorName = findInstructorName(selectedClass.getInstructorId());
         String details = "Class ID: " + selectedClass.getClassId() + "\nClass Name: " + selectedClass.getClassName() + "\nDiscipline: " + selectedClass.getDiscipline() + "\nInstructor: " + instructorName 
                 + "\nClass Date: " + selectedClass.getDate() + "\nClass Start Time: " + selectedClass.getStartTime() + "\nClass End Time: " + selectedClass.getEndTime()
@@ -214,10 +250,18 @@ public class PaymentDetails extends javax.swing.JFrame {
     }//GEN-LAST:event_btnBackActionPerformed
 
     private void btnPaymentInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPaymentInfoActionPerformed
+        if(!detailsLoaded){
+            JOptionPane.showMessageDialog(null, "Payment details are not available.");
+            return;
+        }
         showPaymentInfo();
     }//GEN-LAST:event_btnPaymentInfoActionPerformed
 
     private void btnClassInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClassInfoActionPerformed
+        if(!detailsLoaded){
+            JOptionPane.showMessageDialog(null, "Payment details are not available.");
+            return;
+        }
         showClassInfo();
     }//GEN-LAST:event_btnClassInfoActionPerformed
 

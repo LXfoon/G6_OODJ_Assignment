@@ -24,6 +24,8 @@ public class Reschedule extends javax.swing.JFrame {
     private String bookingId;
     private boolean rescheduleLoaded = false;
     
+    private ClassSession selectedClass = null;
+    
     private ArrayList<ClassSession> classList = new ArrayList<>();
     private ArrayList<Instructor> instructorList = new ArrayList<>();
     private ArrayList<Booking> bookingList = new ArrayList<>();
@@ -45,6 +47,12 @@ public class Reschedule extends javax.swing.JFrame {
     
     private void loadData(){
         try{
+            String studentId = LoggedIn.getId();
+            if(studentId == null || studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+                return;
+            }
+            
             FileUtil.read("booking.txt", bookingList, Booking::fromLine);
             FileUtil.read("class.txt", classList, ClassSession::fromLine);
             FileUtil.read("user.txt", staffList, Staff::fromUserLine);
@@ -60,19 +68,17 @@ public class Reschedule extends javax.swing.JFrame {
             // check wheter booking record exist
             if(selectedBooking == null){
                 JOptionPane.showMessageDialog(null, "Booking record not found.");
-                btnConfirm.setEnabled(false);
                 return;
             }
             
             // Only Booked booking can reschedule
             if(selectedBooking.getStatus() != Booking.BookingStatus.Booked){
                 JOptionPane.showMessageDialog(null, "Only Booked bookings can be reschedulled.");
-                btnConfirm.setEnabled(false);
                 return;
             }
             
             // find corresponding class
-            ClassSession selectedClass = null;
+            selectedClass = null;
             for(ClassSession cs : classList){
                 if(cs.getClassId().equals(selectedBooking.getClassId())){
                     selectedClass = cs;
@@ -82,18 +88,23 @@ public class Reschedule extends javax.swing.JFrame {
             
             if(selectedClass == null){
                 JOptionPane.showMessageDialog(null, "Class record not found.");
-                btnConfirm.setEnabled(false);
                 return;
             }
             
-            //rescheduleLoaded = true;
+            if(selectedClass.getStatus() == ClassSession.ClassStatus.Cancelled || selectedClass.getStatus() == ClassSession.ClassStatus.Completed){
+                JOptionPane.showMessageDialog(null, "This class cannot be rescheduled.");
+                return;
+            }
             
             // display selected booking information
-            lblBookingClassInfo.setText(selectedBooking.getBookingId() + "|" + selectedClass.getClassName());
-            lblDateTimeInfo.setText(selectedClass.getDate() + "|" + selectedClass.getStartTime() + "-" + selectedClass.getEndTime());
+            lblBookingClassInfo.setText(selectedBooking.getBookingId() + " | " + selectedClass.getClassName());
+            lblDateTimeInfo.setText(selectedClass.getDate() + " | " + selectedClass.getStartTime() + " - " + selectedClass.getEndTime());
             
             // display other available class in table
             loadAvailableClasses();
+            
+            // loading completed successfully
+            rescheduleLoaded = true;
         } catch(Exception e){
             JOptionPane.showMessageDialog(null, "Error loading booking details: " + e.getMessage());
         }
@@ -115,8 +126,13 @@ public class Reschedule extends javax.swing.JFrame {
             DefaultTableModel model = (DefaultTableModel) tblClass.getModel();
             model.setRowCount(0);
             
-            ClassSession selectedClass = null;
+            // check selected class
+            if(selectedClass == null){
+                JOptionPane.showMessageDialog(null, "Selected class information is not available.");
+                return;
+            }
             
+            // check each class
             for(ClassSession cs : classList){
                 // same class name
                 boolean sameName = cs.getClassName().equals(selectedClass.getClassName());
@@ -134,7 +150,7 @@ public class Reschedule extends javax.swing.JFrame {
                 boolean diffDateTime = !cs.getDate().equals(selectedClass.getDate()) || !cs.getStartTime().equals(selectedClass.getStartTime()) || !cs.getEndTime().equals(selectedClass.getEndTime());
                 
                 // has available slots
-                boolean hasSlots = cs.getAvailableSlots() > 0;
+                boolean hasSlots = cs.getAvailableSlots() > 0 && cs.getAvailableSlots() <= cs.getMaxSlots();
                 boolean available = cs.getStatus() == ClassSession.ClassStatus.Available;
                 
                 // check all conditions
@@ -315,7 +331,13 @@ public class Reschedule extends javax.swing.JFrame {
             
             // get selected Booking ID
             int modelRow = tblClass.convertRowIndexToModel(selectedRow);
-            String classId = tblClass.getValueAt(modelRow, 0).toString();
+            String classId = tblClass.getModel().getValueAt(modelRow, 0).toString();
+            
+            String studentId = LoggedIn.getId();
+            if(studentId == null || studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+                return;
+            }
 
             // reload latest records
             FileUtil.read("booking.txt", bookingList, Booking::fromLine);
@@ -329,14 +351,20 @@ public class Reschedule extends javax.swing.JFrame {
                     break;
                 }
             }
+            
+            // check booking
+            if(selectedBooking == null){
+                JOptionPane.showMessageDialog(null, "Booking record not found.");
+            return;
+            }
 
-            // check booking status again
-            if(selectedBooking == null || selectedBooking.getStatus() != Booking.BookingStatus.Booked){
+            // check booking status
+            if(selectedBooking.getStatus() != Booking.BookingStatus.Booked){
                 JOptionPane.showMessageDialog(null, "This booking cannot be rescheduled.");
                 return;
             }
             
-            // find selectedClass again
+            // find selectedClass again using latest records
             ClassSession selectedClass = null;
             for(ClassSession cs : classList){
                 if(cs.getClassId().equals(selectedBooking.getClassId())){
@@ -347,14 +375,13 @@ public class Reschedule extends javax.swing.JFrame {
             
             if(selectedClass == null){
                 JOptionPane.showMessageDialog(null, "Class record not found.");
-                btnConfirm.setEnabled(false);
                 return;
             }
             
-            // find new class
+            // find new class using selected id
             ClassSession newClass = null;
             for(ClassSession cs : classList){
-                if(cs.getClassId().equals(newClass)){
+                if(cs.getClassId().equals(classId)){
                     newClass = cs;
                     break;
                 }
@@ -366,7 +393,19 @@ public class Reschedule extends javax.swing.JFrame {
                 return;
             }
             
-            // validate new class again
+            // validate selected class slots
+            if(selectedClass.getAvailableSlots() < 0 || selectedClass.getAvailableSlots() > selectedClass.getMaxSlots()){
+                JOptionPane.showMessageDialog(null, "Invalid class slot information. Please contact the Administrator.");
+                return;
+            }
+            
+            // validate new class slots
+            if(newClass.getAvailableSlots() <= 0 || newClass.getAvailableSlots() > newClass.getMaxSlots() || newClass.getStatus() != ClassSession.ClassStatus.Available){
+                JOptionPane.showMessageDialog(null, "This class is no longer available. Please select another class.");
+                return;
+            }
+            
+            // validate new class details
             boolean sameName = newClass.getClassName().equals(selectedClass.getClassName());
             boolean sameDiscipline = newClass.getDiscipline().equals(selectedClass.getDiscipline());
             boolean sameInstructor = newClass.getInstructorId().equals(selectedClass.getInstructorId());
@@ -376,7 +415,7 @@ public class Reschedule extends javax.swing.JFrame {
             boolean available = newClass.getStatus() == ClassSession.ClassStatus.Available;
                 
             if(!sameName || !sameDiscipline || !sameInstructor || !sameFee || !diffDateTime || !hasSlots || !available){
-                JOptionPane.showMessageDialog(null, "This class is no longer available. Please select another class.");
+                JOptionPane.showMessageDialog(null, "Selected class does not meet the reschedule requirements.");
                 loadAvailableClasses();
                 return;
             }
@@ -390,7 +429,7 @@ public class Reschedule extends javax.swing.JFrame {
             // add available slots
             selectedClass.setAvailableSlots(selectedClass.getAvailableSlots() + 1);
             
-            if(selectedClass.getStatus() == ClassSession.ClassStatus.Full){
+            if(selectedClass.getAvailableSlots() > 0 && selectedClass.getStatus() == ClassSession.ClassStatus.Full){
                 selectedClass.setStatus(ClassSession.ClassStatus.Available);
             }
             

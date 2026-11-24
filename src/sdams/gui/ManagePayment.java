@@ -52,11 +52,22 @@ public class ManagePayment extends javax.swing.JFrame {
             DefaultTableModel model = (DefaultTableModel) tblPayment.getModel();
             model.setRowCount(0);
             
+            // get current student id
+            String studentId = LoggedIn.getId();
+            if(studentId == null || studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+                return;
+            }
+            
             // read class information
             FileUtil.read("payment.txt", paymentList, Payment::fromLine);
             
             // display payment records
             for(Payment p : paymentList){
+                if(!p.getStudentId().equals(studentId)){
+                    continue;
+                }
+                
                 model.addRow(new Object[]{
                     p.getPaymentId(), p.getBookingId(), p.getAmount(), p.getPaymentDate(), p.getPaymentMethod(), p.getStatus()
                 });
@@ -74,6 +85,13 @@ public class ManagePayment extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) tblPayment.getModel();
         model.setRowCount(0);
         
+        // get current student id
+        String studentId = LoggedIn.getId();
+        if(studentId == null || studentId.trim().isEmpty()){
+            JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+            return;
+        }
+        
         // get filter values
         String search = txtSearchPayment.getText().trim().toLowerCase();
         String status = String.valueOf(cmbStatus.getSelectedItem());
@@ -81,7 +99,16 @@ public class ManagePayment extends javax.swing.JFrame {
         
         // check each class
         for(Payment p : paymentList){
-            boolean matchSearch = search.isEmpty() || p.getPaymentId().toLowerCase().contains(search) || p.getBookingId().toLowerCase().contains(search) || (p.getPaymentMethod() != null && p.getPaymentMethod().toLowerCase().contains(search));
+            // only current student's payment
+            if(!p.getStudentId().equals(studentId)){
+                continue;
+            }
+            
+            String paymentId = p.getPaymentId() == null ? "" : p.getPaymentId().toLowerCase();
+            String bookingId = p.getBookingId() == null ? "" : p.getBookingId().toLowerCase();
+            String paymentMethod = p.getPaymentMethod() == null ? "" : p.getPaymentMethod().toLowerCase();
+            
+            boolean matchSearch = search.isEmpty() || paymentId.contains(search) || bookingId.contains(search) || paymentMethod.contains(search);
             boolean matchStatus = status.equals("All Status") || (p.getStatus() != null && p.getStatus().toString().equalsIgnoreCase(status));
             boolean matchDate = date == null || p.getPaymentDate().equals(date);
             
@@ -254,15 +281,37 @@ public class ManagePayment extends javax.swing.JFrame {
             }
             
             int modelRow = tblPayment.convertRowIndexToModel(selectedRow);
-            String bookingId = tblPayment.getModel().getValueAt(modelRow, 1).toString();
-            String paymentStatus = tblPayment.getModel().getValueAt(modelRow, 5).toString();
+            String paymentId = tblPayment.getModel().getValueAt(modelRow, 0).toString();
             
-            if(!paymentStatus.equalsIgnoreCase("Unpaid")){
+            String studentId = LoggedIn.getId();
+            if(studentId == null || studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+                return;
+            }
+            
+            FileUtil.read("payment.txt", paymentList, Payment::fromLine);
+            
+            Payment selectedPayment = null;
+            for(Payment p : paymentList){
+                if(p.getPaymentId().equals(paymentId) && studentId.equals(p.getStudentId())){
+                    selectedPayment = p;
+                    break;
+                }
+            }
+            
+            // check payment record
+            if(selectedPayment == null){
+                JOptionPane.showMessageDialog(null, "Payment record not found.");
+                return;
+            }
+            
+            // only Unpaid can make payment
+            if(selectedPayment.getStatus() != Payment.PaymentStatus.Unpaid){
                 JOptionPane.showMessageDialog(null, "Only Unpaid payment can be made. Please select an Unpaid payment.");
                 return;
             }
             
-            MakePayment makePayment = new MakePayment(bookingId);
+            MakePayment makePayment = new MakePayment(selectedPayment.getBookingId(), true);
             if(makePayment.isPaymentInfoLoaded()){
                 makePayment.setVisible(true);
                 this.dispose();
@@ -282,6 +331,30 @@ public class ManagePayment extends javax.swing.JFrame {
             
             int modelRow = tblPayment.convertRowIndexToModel(selectedRow);
             String paymentId = tblPayment.getModel().getValueAt(modelRow, 0).toString();
+            
+            String studentId = LoggedIn.getId();
+            if(studentId == null || studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+                return;
+            }
+            
+            FileUtil.read("payment.txt", paymentList, Payment::fromLine);
+            
+            // find selected payment
+            Payment selectedPayment = null;
+            for(Payment p : paymentList){
+                if(p.getPaymentId().equals(paymentId) && studentId.equals(p.getStudentId())){
+                    selectedPayment = p;
+                    break;
+                }
+            }
+            
+            // check payment record
+            if(selectedPayment == null){
+                JOptionPane.showMessageDialog(null, "Payment record not found.");
+                loadPayment();
+                return;
+            }
             
             PaymentDetails paymentDetails = new PaymentDetails(paymentId);
             if(paymentDetails.isDetailsLoaded()){

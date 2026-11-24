@@ -71,63 +71,7 @@ public class MyRatings extends javax.swing.JFrame {
                 }
             }
             
-            // get current student id
-            String studentId = "010";
-            
-            // variable for calculete average score
-            double totalScore = 0;
-            int ratedCount = 0;
-            
-            // check each rating record
-            for(Rating r : ratingList){
-                // only display current student Rated rating record
-                if(!r.getStudentId().equals(studentId)){
-                    continue;
-                }
-                
-                if(r.getStatus() != Rating.RatingStatus.Rated){
-                    continue;
-                }
-                
-                // find class information
-                ClassSession selectedClass = null;
-                for(ClassSession cs : classList){
-                    if(cs.getClassId().equals(r.getClassId())){
-                        selectedClass = cs;
-                        break;
-                    }
-                }
-                
-                if(selectedClass == null){
-                    continue;
-                }
-                
-                // find instructor name
-                String instructorName = "";
-                for(Instructor i : instructorList){
-                    if(i.getId().equals(selectedClass.getInstructorId())){
-                        instructorName = i.getName();
-                        break;
-                    }
-                }
-                
-                // add information to table
-                model.addRow(new Object[]{
-                    r.getRatingId(), selectedClass.getClassName(), instructorName, r.getScore(), r.getComment(), r.getRatingDate()
-                });
-                
-                // calculate average score
-                totalScore += r.getScore();
-                ratedCount++;
-            }
-            
-            double averageScore = 0;
-            if(ratedCount > 0){
-                averageScore = totalScore / ratedCount;
-            }
-            
-            // show message
-            lblRatings.setText("Total Ratings: " + model.getRowCount() + " | " + String.format("Average Score Given: %.2f", averageScore));
+            filterMyRatings();
         } catch(Exception e){
             JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
@@ -138,11 +82,15 @@ public class MyRatings extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) tblRatings.getModel();
         model.setRowCount(0);
         
+        String studentId = LoggedIn.getId();
+        if(studentId == null || studentId.trim().isEmpty()){
+            JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+            return;
+        }
+        
         // get filter values
         String search = txtSearchRatings.getText().trim().toLowerCase();
         String score = String.valueOf(cmbScore.getSelectedItem());
-        
-        String studentId = "010";
         
         // variable for calculete average score
         double totalScore = 0;
@@ -192,11 +140,12 @@ public class MyRatings extends javax.swing.JFrame {
                 });
             }
                 
-            // calculate average score
+            // calculate average score of displayed records
             totalScore += r.getScore();
             ratedCount++;
         }
         
+        // calculate average score
         double averageScore = 0;
         if(ratedCount > 0){
             averageScore = totalScore / ratedCount;

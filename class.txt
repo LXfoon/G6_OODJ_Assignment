@@ -1,5 +1,5 @@
 C001|Beginner Karate|Karate|007|2027-04-10|18:00|19:30|50.0|Full|0|5
-C002|Beginner Judo|Judo|006|2027-03-02|10:00|11:30|40.0|Available|4|5
+C002|Beginner Judo|Judo|006|2027-03-02|10:00|11:30|40.0|Available|5|5
 C003|Taekwondo Basics|Taekwondo|008|2026-11-10|19:00|20:30|45.0|Completed|2|5
 C004|Beginner Karate|Karate|007|2027-03-22|14:00|15:30|50.0|Full|0|5
 C005|MMA Basics|MMA|009|2027-03-15|09:00|10:30|35.0|Full|0|5
