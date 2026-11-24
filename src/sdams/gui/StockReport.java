@@ -4,6 +4,12 @@
  */
 package sdams.gui;
 
+import java.util.ArrayList;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.table.DefaultTableModel;
+import sdams.model.Equipment;
+import sdams.util.FileUtil;
+
 /**
  *
  * @author User
@@ -15,9 +21,80 @@ public class StockReport extends javax.swing.JFrame {
     /**
      * Creates new form InventoryReport
      */
+    private ArrayList<Equipment> list = new ArrayList<>();
+    private static final String FILE = "equipment.txt";
+    private static final int LOW_STOCK_LIMIT = 5;
     public StockReport() {
         initComponents();
         setLocationRelativeTo(null);
+        
+        tableReport.setModel(new DefaultTableModel(
+            new Object[]{"Equipment ID", "Name","Category", "Quantity", "Stock Status"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        });
+        
+        cmbSearch.setModel(new DefaultComboBoxModel<>(
+            new String[]{"Equipment ID", "Equipment Name", "Category"}));
+        cmbStatus.setModel(new DefaultComboBoxModel<>(
+            new String[]{"Status: All", "In Stock", "Low Stock", "Out of Stock"}));
+
+        txfSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { applyFilters(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { applyFilters(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { applyFilters(); }
+        });
+        
+        cmbSearch.addActionListener(e -> applyFilters()); 
+        cmbStatus.addActionListener(e -> applyFilters());
+        
+        loadReport();
+    }
+    
+    public void loadReport(){
+        FileUtil.read(FILE, list, Equipment::fromLine);
+        applyFilters();
+    }
+    
+    private String getStockStatus(int qty) {
+        if (qty == 0) 
+            return "Out of Stock";
+        if (qty <= LOW_STOCK_LIMIT) 
+            return "Low Stock";
+        return "In Stock";
+    }
+    
+    private void applyFilters(){
+        String key = txfSearch.getText().trim().toLowerCase();
+        boolean byId = cmbSearch.getSelectedIndex() == 0;
+        int searchBy = cmbSearch.getSelectedIndex();
+        String status = String.valueOf(cmbStatus.getSelectedItem());
+        
+        DefaultTableModel model = (DefaultTableModel) tableReport.getModel();
+        model.setRowCount(0);
+        
+        for (Equipment e : list){
+            String s = getStockStatus(e.getQuantity());
+            
+            String field;
+            switch(searchBy){
+                case 0: field = e.getEquipmentId();
+                break;
+                case 1: field = e.getName();
+                break;
+                default: field = e.getCategory();
+                break;
+            }
+            boolean matchSearch = key.isEmpty() || field.toLowerCase().contains(key);
+            boolean matchStatus = status.endsWith("All") || s.equalsIgnoreCase(status);
+            
+            if (matchSearch && matchStatus){
+                model.addRow(new Object[]{e.getEquipmentId(), e.getName(),
+                                         e.getCategory(), e.getQuantity(), s});
+            }
+        }
     }
 
     /**
@@ -32,45 +109,31 @@ public class StockReport extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         btnBack = new javax.swing.JButton();
         cmbSearch = new javax.swing.JComboBox<>();
-        jTextField1 = new javax.swing.JTextField();
+        txfSearch = new javax.swing.JTextField();
         btnReset = new javax.swing.JButton();
         btnSearch = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tableReport = new javax.swing.JTable();
+        cmbStatus = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(650, 400));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         jLabel1.setText("Equipment Stock Report");
 
         btnBack.setText("Back");
-
-        cmbSearch.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Search by: ID", "Name" }));
+        btnBack.addActionListener(this::btnBackActionPerformed);
 
         btnReset.setText("Reset");
+        btnReset.addActionListener(this::btnResetActionPerformed);
 
         btnSearch.setText("Search");
+        btnSearch.addActionListener(this::btnSearchActionPerformed);
 
-        tableReport.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null}
-            },
-            new String [] {
-                "ID", "Name", "Category", "Qty", "Stock Status"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-        });
         jScrollPane1.setViewportView(tableReport);
+
+        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "In Stock", "Low Stock", "Out of Stock" }));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -79,14 +142,16 @@ public class StockReport extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 488, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(cmbSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jTextField1)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnSearch)
+                        .addComponent(cmbSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txfSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnSearch)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 154, Short.MAX_VALUE)
                         .addComponent(btnReset))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -104,9 +169,10 @@ public class StockReport extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmbSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txfSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnReset)
-                    .addComponent(btnSearch))
+                    .addComponent(btnSearch)
+                    .addComponent(cmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -114,6 +180,22 @@ public class StockReport extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        applyFilters();
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+        txfSearch.setText("");
+        cmbSearch.setSelectedIndex(0);
+        cmbStatus.setSelectedIndex(0);
+        applyFilters();
+    }//GEN-LAST:event_btnResetActionPerformed
+
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        new FacilitiesOfficerHome().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnBackActionPerformed
 
     /**
      * @param args the command line arguments
@@ -145,9 +227,10 @@ public class StockReport extends javax.swing.JFrame {
     private javax.swing.JButton btnReset;
     private javax.swing.JButton btnSearch;
     private javax.swing.JComboBox<String> cmbSearch;
+    private javax.swing.JComboBox<String> cmbStatus;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JTable tableReport;
+    private javax.swing.JTextField txfSearch;
     // End of variables declaration//GEN-END:variables
 }

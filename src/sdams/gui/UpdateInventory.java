@@ -86,7 +86,7 @@ public class UpdateInventory extends javax.swing.JFrame {
 
         jLabel4.setText("Category:");
 
-        cmbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Training", "Storage", "Mats", "Protective" }));
+        cmbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Training Mats", "Storage", "Protective Equipment", "Uniforms & Clothing", "Training Equipment", "Fitness Equipment", "Training Accessories" }));
 
         jLabel5.setText("Quantity:");
 

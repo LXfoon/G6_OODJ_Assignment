@@ -4,8 +4,12 @@
  */
 package sdams.util;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 import sdams.exception.ValidationException;
+//import sdams.model.Admin;
+import sdams.model.User;
 
 /**
  *
@@ -37,6 +41,40 @@ public class Validator {
             throw new ValidationException(
                 "Invaild phone number."
             );
+        }
+    }
+    
+    public static void dupEmailChecker(String email, List<? extends User> allUser){        
+        dupEmailChecker(email, null, allUser);
+    }
+    
+    public static void dupEmailChecker(String email, String currentId, List<? extends User> allUser){        
+        for(User u : allUser){
+            if(u.getId() == null || u.getEmail() == null) continue;
+            if(currentId != null && u.getId().equalsIgnoreCase(currentId)) continue;
+            String existingEmail = u.getEmail();
+            
+            if(existingEmail.equalsIgnoreCase(email)){
+                throw new ValidationException(
+                    "Same email cannot be used."
+                );
+            }
+        }
+    }
+    
+    public static void inputFieldChecker(List<String> inputs){
+        for(String input : inputs){
+            if(input.equals("")){
+                throw new ValidationException(
+                    "Input field cannot be empty."
+                );
+            }
+            
+            if(input.contains("|")){
+                throw new ValidationException(
+                    "Invalid character is found (|)."
+                );
+            }
         }
     }
 }

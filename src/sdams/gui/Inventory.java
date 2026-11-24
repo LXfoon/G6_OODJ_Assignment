@@ -44,7 +44,7 @@ public class Inventory extends javax.swing.JFrame {
             @Override
             public void changedUpdate(javax.swing.event.DocumentEvent e) { applyFilters(); }
         });
-        txfSearch.addActionListener(e -> applyFilters());   // Enter key
+        txfSearch.addActionListener(e -> applyFilters());
         loadTable();
     }
     
@@ -107,8 +107,15 @@ public class Inventory extends javax.swing.JFrame {
         btnSearch = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(500, 400));
 
+        tableInventory.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
         jScrollPane1.setViewportView(tableInventory);
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
@@ -131,7 +138,7 @@ public class Inventory extends javax.swing.JFrame {
         btnBack.setText("Back");
         btnBack.addActionListener(this::btnBackActionPerformed);
 
-        cmbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Category: All", "Training", "Storage", "Mats", "Protective", " " }));
+        cmbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Category: All", "Training Mats", "Storage", "Protective Equipment", "Uniforms & Clothing", "Training Equipment", "Fitness Equipment", "Training Accessories" }));
         cmbCategory.addActionListener(this::cmbCategoryActionPerformed);
 
         cmbCondition.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Condition: All", "Good", "Needs repair", "Damaged" }));
@@ -147,7 +154,6 @@ public class Inventory extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 488, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -157,8 +163,7 @@ public class Inventory extends javax.swing.JFrame {
                         .addGap(30, 30, 30)
                         .addComponent(btnUpdate)
                         .addGap(30, 30, 30)
-                        .addComponent(btnDelete)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addComponent(btnDelete))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txfSearch)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -168,7 +173,8 @@ public class Inventory extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(cmbCondition, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnReset)))
+                        .addComponent(btnReset))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 681, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -179,12 +185,13 @@ public class Inventory extends javax.swing.JFrame {
                     .addComponent(jLabel1)
                     .addComponent(btnBack))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txfSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbCondition, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnReset)
-                    .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnSearch, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txfSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cmbCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cmbCondition, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnReset)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)

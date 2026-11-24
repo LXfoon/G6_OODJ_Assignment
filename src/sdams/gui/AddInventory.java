@@ -36,7 +36,8 @@ public class AddInventory extends javax.swing.JFrame {
         setLocationRelativeTo(parent);
         
         cmbCategory.setModel(new DefaultComboBoxModel<>(
-            new String []{"Training", "Protective", "Mats","Storage"}));
+            new String []{"Training Mats", "Protective Equipment", "Uniforms & Clothing","Storage", 
+                          "Training Equipment", "Fitness Equipment", "Training Accessories"}));
         cmbCondition.setModel(new DefaultComboBoxModel<>(
             new String []{"Good","Needs repair", "Damaged"}));
         
@@ -84,7 +85,7 @@ public class AddInventory extends javax.swing.JFrame {
 
         jLabel4.setText("Category:");
 
-        cmbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Training", "Storage", "Mats", "Protective" }));
+        cmbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Training Mats", "Storage", "Protective Equipment", "Uniforms & Clothing", "Training Equipment", "Fitness Equipment", "Training Accessories" }));
 
         jLabel5.setText("Quantity:");
 

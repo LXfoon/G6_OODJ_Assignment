@@ -4,6 +4,8 @@
  */
 package sdams.gui;
 
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author User
@@ -18,6 +20,12 @@ public class FacilitiesOfficerHome extends javax.swing.JFrame {
     public FacilitiesOfficerHome() {
         initComponents();
         setLocationRelativeTo(null);
+        
+        String name = LoggedIn.getUsername();
+        if (name == null || name.isEmpty()){
+            name = "Facilities Officer";
+        }
+        lblName.setText("Welcome, " + name + "!");
     }
 
     /**
@@ -34,6 +42,8 @@ public class FacilitiesOfficerHome extends javax.swing.JFrame {
         btnFacilityProblemManagement = new javax.swing.JButton();
         btnStockReports = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
+        btnEditProfile = new javax.swing.JButton();
+        lblName = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(500, 330));
@@ -56,6 +66,22 @@ public class FacilitiesOfficerHome extends javax.swing.JFrame {
         btnLogout.setText("Log Out");
         btnLogout.addActionListener(this::btnLogoutActionPerformed);
 
+        btnEditProfile.setText("Edit Profile");
+        btnEditProfile.addAncestorListener(new javax.swing.event.AncestorListener() {
+            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
+                btnEditProfileAncestorAdded(evt);
+            }
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
+            }
+            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
+                btnEditProfileAncestorRemoved(evt);
+            }
+        });
+        btnEditProfile.addActionListener(this::btnEditProfileActionPerformed);
+
+        lblName.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
+        lblName.setText("Welcome, xxx!");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -70,7 +96,11 @@ public class FacilitiesOfficerHome extends javax.swing.JFrame {
                     .addComponent(jLabel1))
                 .addContainerGap(99, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(lblName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnEditProfile)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnLogout)
                 .addContainerGap())
         );
@@ -78,10 +108,13 @@ public class FacilitiesOfficerHome extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnLogout)
-                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnLogout)
+                    .addComponent(btnEditProfile)
+                    .addComponent(lblName))
+                .addGap(26, 26, 26)
                 .addComponent(jLabel1)
-                .addGap(38, 38, 38)
+                .addGap(30, 30, 30)
                 .addComponent(btnEquipmentInventoryManagement, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnFacilityProblemManagement, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -100,7 +133,16 @@ public class FacilitiesOfficerHome extends javax.swing.JFrame {
     }//GEN-LAST:event_btnFacilityProblemManagementActionPerformed
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
-        // TODO add your handling code here:
+        String name = LoggedIn.getUsername();
+        if (name == null || name.isEmpty()){
+            name = "Facilities Officer";
+        }
+        JOptionPane.showMessageDialog(null, name + ", log out successful");
+        Login logout = new Login();
+        logout.setVisible(true);
+        this.dispose();
+        
+        
     }//GEN-LAST:event_btnLogoutActionPerformed
 
     private void btnEquipmentInventoryManagementActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEquipmentInventoryManagementActionPerformed
@@ -114,6 +156,19 @@ public class FacilitiesOfficerHome extends javax.swing.JFrame {
         rep.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnStockReportsActionPerformed
+
+    private void btnEditProfileAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_btnEditProfileAncestorAdded
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnEditProfileAncestorAdded
+
+    private void btnEditProfileAncestorRemoved(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_btnEditProfileAncestorRemoved
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnEditProfileAncestorRemoved
+
+    private void btnEditProfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditProfileActionPerformed
+        new EditProfile(LoggedIn.getId(), this).setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnEditProfileActionPerformed
 
     /**
      * @param args the command line arguments
@@ -141,10 +196,12 @@ public class FacilitiesOfficerHome extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnEditProfile;
     private javax.swing.JButton btnEquipmentInventoryManagement;
     private javax.swing.JButton btnFacilityProblemManagement;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnStockReports;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel lblName;
     // End of variables declaration//GEN-END:variables
 }
