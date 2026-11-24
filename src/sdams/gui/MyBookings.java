@@ -53,11 +53,28 @@ public class MyBookings extends javax.swing.JFrame {
         });
     }
     
+    /*
+    private String getCurrentStudentId(){
+        String studentId = LoggedIn.getId();
+        if(studentId == null || studentId.trim().isEmpty()){
+            JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+        }
+        return studentId;
+    }
+    */
+    
     private void loadBooking(){
         try{
             DefaultTableModel model = (DefaultTableModel) tblBooking.getModel();
             model.setRowCount(0);
             
+            // get current student id
+            String studentId = LoggedIn.getId();
+            if(studentId == null || studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+                return;
+            }
+        
             // get information from booking records and other records
             FileUtil.read("booking.txt", bookingList, Booking::fromLine);
             FileUtil.read("class.txt", classList, ClassSession::fromLine);
@@ -76,8 +93,13 @@ public class MyBookings extends javax.swing.JFrame {
                 }
             }
             
-            // display booking information
+            // display current student's booking information only
             for(Booking b: bookingList){
+                // check student id
+                if(!b.getStudentId().equals(studentId)){
+                    continue;
+                }
+                
                 // find matching class
                 ClassSession cs = null;
                 for(ClassSession c : classList){
@@ -93,7 +115,7 @@ public class MyBookings extends javax.swing.JFrame {
                 }
                 
                 // find instructor name
-                String instructorName = "";
+                String instructorName = "Unknown";
                 for(Instructor i : instructorList){
                     if(i.getId().equals(cs.getInstructorId())){
                         instructorName = i.getName();
@@ -128,6 +150,13 @@ public class MyBookings extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) tblBooking.getModel();
         model.setRowCount(0);
         
+        // get current student id
+        String studentId = LoggedIn.getId();
+        if(studentId == null || studentId.trim().isEmpty()){
+            JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+            return;
+        }
+        
         // get filter values
         String search = txtSearchBooking.getText().trim().toLowerCase();
         String status = String.valueOf(cmbStatus.getSelectedItem());
@@ -135,6 +164,11 @@ public class MyBookings extends javax.swing.JFrame {
         
         // check each booking
         for(Booking b: bookingList){
+            // display current student's bookings only
+            if(!b.getStudentId().equals(studentId)){
+                continue;
+            }
+            
             ClassSession cs = null;
             for(ClassSession c : classList){
                 if(c.getClassId().equals(b.getClassId())){
@@ -358,7 +392,14 @@ public class MyBookings extends javax.swing.JFrame {
 
             // get selected Booking ID
             int modelRow = tblBooking.convertRowIndexToModel(selectedRow);
-            String bookingId = tblBooking.getValueAt(modelRow, 0).toString();
+            String bookingId = tblBooking.getModel().getValueAt(modelRow, 0).toString();
+            
+            // get current student id
+            String studentId = LoggedIn.getId();
+            if(studentId == null || studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
+                return;
+            }
 
             // reload latest records
             FileUtil.read("booking.txt", bookingList, Booking::fromLine);
@@ -385,6 +426,11 @@ public class MyBookings extends javax.swing.JFrame {
             // Completed + Paid = Cannot cancel
             // Instructor cancel class + Paid = Refund
 
+            // check booking ownership
+            if(!selectedBooking.getStudentId().equals(studentId)){
+                JOptionPane.showMessageDialog(null, "You are not allowed to cancel another student's booking!");
+            }
+            
             // check booking status
             if(selectedBooking.getStatus() != Booking.BookingStatus.Booked){
                 JOptionPane.showMessageDialog(null, "Only Booked class can be cancelled. Please choose Booked class.");
@@ -392,15 +438,15 @@ public class MyBookings extends javax.swing.JFrame {
             }
 
             // check payment status
-            boolean isPaid = false;
+            Payment selectedPayment = null;
             for(Payment p : paymentList){
                 if(p.getBookingId().equals(bookingId) && p.getStatus() == Payment.PaymentStatus.Paid){
-                    isPaid = true;
+                    selectedPayment = p;
                     break;
                 }
             }
 
-            if(!isPaid){
+            if(selectedPayment == null || selectedPayment.getStatus() != Payment.PaymentStatus.Paid){
                 JOptionPane.showMessageDialog(null, "Please make payment before cancelling this booking!");
                 return;
             }
@@ -411,6 +457,7 @@ public class MyBookings extends javax.swing.JFrame {
                 return;
             }
 
+            // find class record
             ClassSession selectedClass = null;
             for(ClassSession cs : classList){
                 if(cs.getClassId().equals(selectedBooking.getClassId())){
@@ -424,8 +471,15 @@ public class MyBookings extends javax.swing.JFrame {
                 return;
             }
 
+            // check class status
             if(selectedClass.getStatus() == ClassSession.ClassStatus.Completed || selectedClass.getStatus() == ClassSession.ClassStatus.Cancelled){
                 JOptionPane.showMessageDialog(null, "This booking cannot be cancel because the class is already completed or cancelled.");
+                return;
+            }
+            
+            // validate available slots
+            if(selectedClass.getAvailableSlots() < 0 || selectedClass.getAvailableSlots() > selectedClass.getMaxSlots()){
+                JOptionPane.showMessageDialog(null, "Invalid class slot information. Please contact the Administrator.");
                 return;
             }
 
@@ -460,14 +514,60 @@ public class MyBookings extends javax.swing.JFrame {
             }
             
             int modelRow = tblBooking.convertRowIndexToModel(selectedRow);
-            String bookingId = tblBooking.getValueAt(modelRow, 0).toString();
-            String paymentStatus = tblBooking.getValueAt(modelRow, 7).toString();
+            String bookingId = tblBooking.getModel().getValueAt(modelRow, 0).toString();
             
-            if(!paymentStatus.equalsIgnoreCase("Unpaid")){
-                JOptionPane.showMessageDialog(null, "Only Unpaid booking can make payment. Please choose Unpaid booking.");
+            String studentId = LoggedIn.getId();
+            if(studentId == null || studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
                 return;
             }
             
+            FileUtil.read("booking.txt", bookingList, Booking::fromLine);
+            FileUtil.read("payment.txt", paymentList, Payment::fromLine);
+            
+            Booking selectedBooking = null;
+            for(Booking b : bookingList){
+                if(b.getBookingId().equals(bookingId)){
+                    selectedBooking = b;
+                    break;
+                }
+            }
+
+            if(selectedBooking == null){
+                JOptionPane.showMessageDialog(null, "Booking records not found.");
+                return;
+            }
+            
+            if(!selectedBooking.getStudentId().equals(studentId)){
+                JOptionPane.showMessageDialog(null, "You are not allowed to make payment another for student's booking!");
+            }
+            
+            // check booking status
+            if(selectedBooking.getStatus() != Booking.BookingStatus.Booked){
+                JOptionPane.showMessageDialog(null, "Only Booked bookings can make payment. Please choose Booked bookings.");
+                return;
+            }
+            
+            // check payment status
+            Payment selectedPayment = null;
+            for(Payment p : paymentList){
+                if(p.getBookingId().equals(bookingId)){
+                    selectedPayment = p;
+                    break;
+                }
+            }
+            
+            if(selectedPayment == null){
+                JOptionPane.showMessageDialog(null, "Payment records not found.");
+                return;
+            }
+            
+            if(selectedPayment.getStatus() != Payment.PaymentStatus.Unpaid){
+                JOptionPane.showMessageDialog(null, "Only Unpaid bookings can make payment. Please choose Unpaid bookings.");
+                return;
+            }
+            
+            // open MakePayment form
             MakePayment makePayment = new MakePayment(bookingId);
             if(makePayment.isPaymentInfoLoaded()){
                 makePayment.setVisible(true);
@@ -488,14 +588,40 @@ public class MyBookings extends javax.swing.JFrame {
             }
             
             int modelRow = tblBooking.convertRowIndexToModel(selectedRow);
-            String bookingId = tblBooking.getValueAt(modelRow, 0).toString();
-            String bookingStatus = tblBooking.getValueAt(modelRow, 6).toString();
+            String bookingId = tblBooking.getModel().getValueAt(modelRow, 0).toString();
             
-            if(!bookingStatus.equalsIgnoreCase("Booked")){
-                JOptionPane.showMessageDialog(null, "Only Booked booking can reschedule. Please choose Booked booking.");
+            String studentId = LoggedIn.getId();
+            if(studentId == null || studentId.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Unable to identify the logged-in student. Please log in again.");
                 return;
             }
             
+            FileUtil.read("booking.txt", bookingList, Booking::fromLine);
+            
+            Booking selectedBooking = null;
+            for(Booking b : bookingList){
+                if(b.getBookingId().equals(bookingId)){
+                    selectedBooking = b;
+                    break;
+                }
+            }
+
+            if(selectedBooking == null){
+                JOptionPane.showMessageDialog(null, "Booking records not found.");
+                return;
+            }
+            
+            if(!selectedBooking.getStudentId().equals(studentId)){
+                JOptionPane.showMessageDialog(null, "You are not allowed to reschedule another for student's booking!");
+            }
+            
+            // check booking status
+            if(selectedBooking.getStatus() != Booking.BookingStatus.Booked){
+                JOptionPane.showMessageDialog(null, "Only Booked bookings can reschedule. Please choose Booked bookings.");
+                return;
+            }
+            
+            // open Reshedule form
             Reschedule reschedule = new Reschedule(bookingId);
             if(reschedule.isRescheduleLoaded()){
                 reschedule.setVisible(true);

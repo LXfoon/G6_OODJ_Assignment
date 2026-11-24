@@ -86,7 +86,7 @@ public class Reschedule extends javax.swing.JFrame {
                 return;
             }
             
-            rescheduleLoaded = true;
+            //rescheduleLoaded = true;
             
             // display selected booking information
             lblBookingClassInfo.setText(selectedBooking.getBookingId() + "|" + selectedClass.getClassName());
@@ -106,7 +106,7 @@ public class Reschedule extends javax.swing.JFrame {
             }
         }
         
-        return "Unknown Instructor.";
+        return "Unknown";
     }
     
     private void loadAvailableClasses(){
@@ -232,7 +232,6 @@ public class Reschedule extends javax.swing.JFrame {
         btnConfirm.addActionListener(this::btnConfirmActionPerformed);
 
         lblBookingClassInfo.setBackground(java.awt.Color.white);
-        lblBookingClassInfo.setForeground(new java.awt.Color(255, 255, 255));
         lblBookingClassInfo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         lblDateTimeInfo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));

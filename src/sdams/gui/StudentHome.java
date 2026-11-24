@@ -4,6 +4,8 @@
  */
 package sdams.gui;
 
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Mei Shi
@@ -133,6 +135,7 @@ public class StudentHome extends javax.swing.JFrame {
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
         LoggedIn.setId("");
         LoggedIn.setUsername("");
+        JOptionPane.showMessageDialog(null, "Logout successful!");
         
         Login login = new Login();
         login.setVisible(true);

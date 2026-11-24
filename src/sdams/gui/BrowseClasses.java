@@ -11,6 +11,7 @@ import javax.swing.table.DefaultTableModel;
 import sdams.model.Booking;
 import sdams.model.ClassSession;
 import sdams.model.Instructor;
+import sdams.model.Payment;
 import sdams.model.Staff;
 import sdams.util.FileUtil;
 import sdams.util.Generator;
@@ -365,6 +366,14 @@ public class BrowseClasses extends javax.swing.JFrame {
         ArrayList<Booking> bookingList = new ArrayList<>();
         FileUtil.read("booking.txt", bookingList, Booking::fromLine);
         
+        // check whether the student has already booked this class
+        for(Booking b : bookingList){
+            if(b.getStudentId().equals(studentId) && b.getClassId().equals(classId) && b.getStatus() == Booking.BookingStatus.Booked){
+            JOptionPane.showMessageDialog(null, "You have already booked this class. Please select another class.");
+            return;
+            }
+        }
+        
         // create new booking
         String bookingId = Generator.idGenerator("B", "booking.txt");
         if(bookingId == null || bookingId.trim().isEmpty()){
@@ -374,6 +383,19 @@ public class BrowseClasses extends javax.swing.JFrame {
         
         Booking newBooking = new Booking(bookingId, studentId, classId, Booking.BookingStatus.Booked, java.time.LocalDate.now());
         bookingList.add(newBooking);
+        
+        // create unpaid payment record
+        ArrayList<Payment> paymentList = new ArrayList<>();
+        FileUtil.read("payment.txt", paymentList, Payment::fromLine);
+        
+        String paymentId = Generator.idGenerator("P", "payment.txt");
+        if(paymentId == null || paymentId.trim().isEmpty()){
+            JOptionPane.showMessageDialog(null, "Unable to generate payment ID. Please try again.");
+            return;
+        }
+        
+        Payment newPayment = new Payment(paymentId, bookingId, studentId, "-", selectedClass.getFee(), null, Payment.PaymentStatus.Unpaid);
+        paymentList.add(newPayment);
         
         // minus 1 available slots
         selectedClass.setAvailableSlots(selectedClass.getAvailableSlots() - 1);
@@ -386,6 +408,7 @@ public class BrowseClasses extends javax.swing.JFrame {
         // save booking and class records
         FileUtil.write("booking.txt", bookingList, Booking::toLine);
         FileUtil.write("class.txt", classList, ClassSession::toLine);
+        FileUtil.write("payment.txt", paymentList, Payment::toLine);
         
         // refresh table
         loadClass();
