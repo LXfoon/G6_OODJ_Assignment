@@ -359,7 +359,7 @@ public class StaffReport extends javax.swing.JFrame implements ReportGenerator<S
         
         for(Staff st : allStaff){
             String role = st.getRole();
-            if(st.getId() == null || st.getRole() == null) continue;
+            if(st.getId() == null || st.getRole() == null || !st.getStatus().equalsIgnoreCase("Active")) continue;
             if(st.getRole().equalsIgnoreCase("Student") || st.getRole().equalsIgnoreCase("Manager")) continue;
 
             String name = st.getName() == null ? "" : st.getName().toLowerCase();

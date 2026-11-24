@@ -4,12 +4,21 @@
  */
 package sdams.gui;
 
+import sdams.util.LoggedInChecker;
+
 /**
  *
  * @author Foon
  */
 public class ManagerHome extends javax.swing.JFrame {
-
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     /**
      * Creates new form ManagerHome
      */

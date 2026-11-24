@@ -18,6 +18,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import sdams.model.Payment;
 import sdams.model.Payment.PaymentStatus;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 import sdams.util.ReportGenerator;
 
 /**
@@ -25,6 +26,14 @@ import sdams.util.ReportGenerator;
  * @author Foon
  */
 public class RevenueReport extends javax.swing.JFrame implements ReportGenerator<Payment>{
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     ArrayList<Payment> allPayment = new ArrayList<>();
     TreeSet<Integer> paymentYears = new TreeSet<>();
     DecimalFormat df = new DecimalFormat("#0.00");

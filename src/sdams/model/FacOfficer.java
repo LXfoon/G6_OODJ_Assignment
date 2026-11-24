@@ -14,7 +14,7 @@ public class FacOfficer extends Staff {
         super(); 
     }
     
-    public FacOfficer(String id, String name, String email, String password,String phoneNum, double salary) {
-        super(id, name, email, password, phoneNum, "Facilities", salary);
+    public FacOfficer(String id, String name, String email, String password,String phoneNum, String status, double salary) {
+        super(id, name, email, password, phoneNum, "Facilities", status, salary);
     }
 }

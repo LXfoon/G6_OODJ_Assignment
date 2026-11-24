@@ -9,18 +9,18 @@ package sdams.model;
  * @author Foon
  */
 public abstract class User {    
-    private String id, name, email, password, role;
-    private String phoneNum;
+    private String id, name, email, password, phoneNum, role, status;
     
     public User(){};
     
-    public User(String id, String name, String email, String password, String phoneNum, String role){
+    public User(String id, String name, String email, String password, String phoneNum, String role, String status){
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.phoneNum = phoneNum;
         this.role = role;
+        this.status = status;
     }
     
     public String getId(){
@@ -47,6 +47,10 @@ public abstract class User {
         return this.role;
     }
     
+    public String getStatus(){
+        return this.status;
+    }
+    
     public void setId(String id){
         this.id = id;
     }
@@ -71,7 +75,16 @@ public abstract class User {
         this.role = role;
     }
     
+    public void setStatus(String status){
+        this.status = status;
+    }
+    
+    
+    public boolean isActive() {
+        return "Active".equalsIgnoreCase(status);
+    }
+    
     public String toLine(){
-        return this.id + "|" + this.name + "|" + this.email + "|" + this.password + "|" + this.phoneNum+ "|" + this.role;
+        return this.id + "|" + this.name + "|" + this.email + "|" + this.password + "|" + this.phoneNum + "|" + this.role + "|" + this.status;
     }
 }

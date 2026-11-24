@@ -13,12 +13,21 @@ import sdams.model.Booking.BookingStatus;
 import sdams.model.ClassSession;
 import sdams.model.ClassSession.ClassStatus;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 
 /**
  *
  * @author Foon
  */
 public class ManageAtt extends javax.swing.JFrame {
+@Override
+public void setVisible(boolean b){
+    if(b && !LoggedInChecker.loginChecker(this)){
+        return;
+    }
+
+    super.setVisible(b);
+}
 ArrayList<ClassSession> allClass = new ArrayList<>();
 ArrayList<AttendanceRecord> allAtt = new ArrayList<>();
 ArrayList<Booking> allBooking = new ArrayList<>();

@@ -21,8 +21,8 @@ public abstract class Staff extends User {
     }
 
     public Staff(String id, String name, String email, String password,
-                 String phoneNum, String role, double salary) {
-        super(id, name, email, password, phoneNum, role);
+                 String phoneNum, String role, String status, double salary) {
+        super(id, name, email, password, phoneNum, role, status);
         this.salary = salary;
     }
 
@@ -41,7 +41,7 @@ public abstract class Staff extends User {
     
     public static Staff fromUserLine(String line) {
         String[] parts = line.split("\\|", -1);
-        if (parts.length < 6) return null;
+        if (parts.length < 7) return null;
 
         String id = parts[0].trim();
         String name = parts[1];
@@ -49,16 +49,17 @@ public abstract class Staff extends User {
         String pw = parts[3];
         String phone = parts[4];
         String role = parts[5].trim().toLowerCase();
+        String status = parts[6].trim();
         
         switch (role) {
             case "instructor": 
-                return new Instructor(id, name, email, pw, phone, 0.0);
+                return new Instructor(id, name, email, pw, phone, status, 0.0);
             case "facilities": 
-                return new FacOfficer(id, name, email, pw, phone, 0.0);
+                return new FacOfficer(id, name, email, pw, phone, status, 0.0);
             case "attendance": 
-                return new AttOfficer(id, name, email, pw, phone, 0.0);
+                return new AttOfficer(id, name, email, pw, phone, status, 0.0);
             case "admin":
-                return new Admin(id, name, email, pw, phone, 0.0);
+                return new Admin(id, name, email, pw, phone, status, 0.0);
             // placeholder for salary, set in fromLines
                 
             default: return null; // not staff

@@ -4,11 +4,11 @@
  */
 package sdams.gui;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import sdams.exception.ValidationException;
 import sdams.model.ManageStaffServices;
+import sdams.util.LoggedInChecker;
 import sdams.util.Validator;
 
 /**
@@ -16,6 +16,14 @@ import sdams.util.Validator;
  * @author Foon
  */
 public class AddAdmin extends javax.swing.JFrame {
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     ManageStaffServices admService = new ManageStaffServices();
     /**
      * Creates new form AddAdmin

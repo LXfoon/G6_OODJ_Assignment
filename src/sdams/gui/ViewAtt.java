@@ -13,12 +13,21 @@ import sdams.model.ClassSession;
 import sdams.model.Staff;
 import sdams.model.Student;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 
 /**
  *
  * @author Foon
  */
 public class ViewAtt extends javax.swing.JFrame {
+@Override
+public void setVisible(boolean b){
+    if(b && !LoggedInChecker.loginChecker(this)){
+        return;
+    }
+
+    super.setVisible(b);
+}
 ArrayList<AttendanceRecord> allAtt = new ArrayList<>();
 ArrayList<Student> allStudent = new ArrayList<>();
 ArrayList<Staff> allStaff = new ArrayList<>();

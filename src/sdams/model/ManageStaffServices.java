@@ -22,6 +22,7 @@ public class ManageStaffServices implements UserManager {
 
     private static final String USER_FILE  = "user.txt";
     private static final String STAFF_FILE = "staff.txt";
+    private static final String CLASS_FILE = "class.txt";
 
     private final ArrayList<Staff> allStaff = new ArrayList<>();
     private final ArrayList<User> allUser = new ArrayList<>();
@@ -42,12 +43,14 @@ public class ManageStaffServices implements UserManager {
         
         for (String line : allUserLines) {
             Staff s = Staff.fromLines(line, salaryLines);
+            
             if (s != null) {
+                if (!s.isActive()) continue; // exclude deactivated users
                 allStaff.add(s);  
                 allUser.add(s);
             } else {
                 Manager m = Manager.fromLine(line);
-                allUser.add(m);
+                if (m != null) allUser.add(m); // <- XW CHANGED
             }
         }
         
@@ -59,7 +62,7 @@ public class ManageStaffServices implements UserManager {
         String password = Generator.passwordGenerator();
         Validator.userValidator(name, email, password, phoneNum);
         Validator.dupEmailChecker(email, null, allUser); 
-        Validator.inputFieldChecker(new ArrayList<>(List.of(name, email, password))); 
+        Validator.inputFieldChecker(new ArrayList<>(List.of(name, email, password)));
         String id = Generator.idGenerator("", USER_FILE);
 
         this.pendingId = id;
@@ -93,11 +96,11 @@ public class ManageStaffServices implements UserManager {
 
         String shortRole = normalizeRole(role);
         Staff staff = switch (shortRole) {
-            case "Instructor" ->  new Instructor(id, name, email, password, phone, salary);
-            case "Facilities" -> new FacOfficer(id, name, email, password, phone, salary);
-            case "Attendance" -> new AttOfficer(id, name, email, password, phone, salary);
-            case "Admin" -> new Admin(id, name, email, password, phone, salary); //CHANGED
-            default -> new Instructor(id, name, email, password, phone, salary);
+            case "Instructor" ->  new Instructor(id, name, email, password, phone, "Active", salary);
+            case "Facilities" -> new FacOfficer(id, name, email, password, phone, "Active", salary);
+            case "Attendance" -> new AttOfficer(id, name, email, password, phone, "Active", salary);
+            case "Admin" -> new Admin(id, name, email, password, phone, "Active", salary); //CHANGED
+            default -> new Instructor(id, name, email, password, phone, "Active", salary);
         };
 
         allStaff.add(staff);
@@ -156,21 +159,54 @@ public class ManageStaffServices implements UserManager {
     @Override
     public void deleteUser(String id) {
         loadUser();
-        if (findById(id) == null) {
+        Staff staff = findById(id);
+        if (staff == null) {
             JOptionPane.showMessageDialog(null, "Staff not found: " + id);
             return;
         }
 
-        allUserLines.removeIf(line -> {
-            String[] parts = line.split("\\|", -1);
-            return parts.length >= 1 && parts[0].trim().equals(id);
-        });
-        allStaff.removeIf(s -> s.getId().equals(id));
+        if (!staff.isActive()) {
+            JOptionPane.showMessageDialog(null, "Staff is already inactive: " + id);
+            return;
+        }
 
+        // cannot deactivate if instructor has upcoming classes
+        if (staff instanceof Instructor && hasActiveClasses(id)) {
+            JOptionPane.showMessageDialog(null,
+                    "Cannot deactivate this instructor.\n\n"
+                    + "They still have upcoming classes scheduled.\n"
+                    + "Complete or cancel those classes first.",
+                    "Active Classes", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(null,
+                "Deactivate staff " + id + "?\n\n"
+                + "The account will be marked Inactive and cannot log in.",
+                "Confirm Deactivate", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        staff.setStatus("Inactive");
+        replaceUserLine(id, staff.toLine());
         FileUtil.write(USER_FILE, allUserLines, s -> s);
-        
-        writeSalaryFile();
-        JOptionPane.showMessageDialog(null, "Staff deleted successfully!");
+
+        JOptionPane.showMessageDialog(null, "Staff account deactivated: " + id);
+    }
+
+    private boolean hasActiveClasses(String instructorId) {
+        ArrayList<String> lines = new ArrayList<>();
+        FileUtil.read(CLASS_FILE, lines, s -> s);
+
+        for (String l : lines) {
+            String[] p = l.split("\\|", -1);
+            if (p.length < 9) continue;
+            if (!p[3].trim().equals(instructorId)) continue;
+
+            String status = p[8].trim();
+            if (status.equalsIgnoreCase("Completed") || status.equalsIgnoreCase("Cancelled")) continue;
+            return true;
+        }
+        return false;
     }
 
     public ArrayList<Staff> getAllStaff() {
@@ -218,7 +254,7 @@ public class ManageStaffServices implements UserManager {
     private void replaceUserLine(String id, String newLine) {
         for (int i = 0; i < allUserLines.size(); i++) {
             String[] parts = allUserLines.get(i).split("\\|", -1);
-            if (parts.length >= 6 && parts[0].trim().equals(id)) {
+            if (parts.length >= 7 && parts[0].trim().equals(id)) {
                 allUserLines.set(i, newLine);
                 return;
             }

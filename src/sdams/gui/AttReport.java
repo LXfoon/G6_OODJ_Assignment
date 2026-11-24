@@ -18,6 +18,7 @@ import sdams.model.AttendanceRecord.AttStatus;
 import sdams.model.ClassSession;
 import sdams.model.Student;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 import sdams.util.ReportGenerator;
 
 /**
@@ -25,6 +26,14 @@ import sdams.util.ReportGenerator;
  * @author Foon
  */
 public class AttReport extends javax.swing.JFrame implements ReportGenerator<AttendanceRecord>{
+@Override
+public void setVisible(boolean b){
+    if(b && !LoggedInChecker.loginChecker(this)){
+        return;
+    }
+
+    super.setVisible(b);
+}
 ArrayList<AttendanceRecord> allAtt = new ArrayList<>();
 ArrayList<Student> allStudent = new ArrayList<>();
 ArrayList<ClassSession> allClasses = new ArrayList<>();

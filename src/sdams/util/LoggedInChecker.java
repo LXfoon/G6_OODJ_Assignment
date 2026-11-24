@@ -4,19 +4,27 @@
  */
 package sdams.util;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import sdams.gui.LoggedIn;
+import sdams.gui.Login;
 
 /**
  *
  * @author Foon
  */
 public class LoggedInChecker {
-    public static void LoginChecker(){
+    public static boolean loginChecker(java.awt.Window caller){
         if(LoggedIn.getId() == null){
             JOptionPane.showMessageDialog(null, "Please log in!");
-            System.exit(0);
+            Login login = new Login();
+            login.setVisible(true);
+            if(caller != null){
+                caller.dispose();
+            }
+            return false;
         }
+        return true;
     }
 
 }

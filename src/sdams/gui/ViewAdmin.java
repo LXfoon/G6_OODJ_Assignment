@@ -44,6 +44,10 @@ public class ViewAdmin extends javax.swing.JFrame {
             FileUtil.read("user.txt", allAdmin, Staff::fromUserLine);
             FileUtil.read("staff.txt", allSalary, line -> line);
             for(Staff s : allAdmin){
+                if(s.getId().equalsIgnoreCase(SelectedAdmin.getId()) && !s.getStatus().equalsIgnoreCase("Active")){
+                    valid = false;
+                    return;
+                }
                 for(String salaryLine : allSalary){
                     Map.Entry<String, Double> e = Staff.fromSalaryLine(salaryLine);
                     if(e != null && e.getKey().equals(s.getId())){

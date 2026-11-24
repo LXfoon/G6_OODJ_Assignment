@@ -6,15 +6,23 @@ package sdams.gui;
 
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
-import sdams.model.Admin;
 import sdams.model.Staff;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 
 /**
  *
  * @author Foon
  */
 public class ManageAdmin extends javax.swing.JFrame {
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     ArrayList<Staff> allAdmin = new ArrayList<>();
 
     /**
@@ -36,7 +44,7 @@ public class ManageAdmin extends javax.swing.JFrame {
             model.setRowCount(0);
             
             for(int i=0; i<allAdmin.size(); i++){
-                if(allAdmin.get(i).getId() == null){
+                if(allAdmin.get(i).getId() == null || !allAdmin.get(i).getStatus().equalsIgnoreCase("Active")){
                     continue;
                 }else if(allAdmin.get(i).getRole().equalsIgnoreCase("Admin")){
                     model.addRow(new Object[]{
@@ -57,7 +65,7 @@ public class ManageAdmin extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) adminTable.getModel();
         model.setRowCount(0);
         for(Staff a : allAdmin){
-                if(a.getId() == null){
+                if(a.getId() == null || !a.getStatus().equalsIgnoreCase("Active")){
                     continue;
                 }else if(a.getRole().equalsIgnoreCase("Admin")){
                     model.addRow(new Object[]{

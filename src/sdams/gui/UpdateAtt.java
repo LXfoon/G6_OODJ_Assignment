@@ -14,6 +14,7 @@ import sdams.model.AttendanceRecord;
 import sdams.model.AttendanceRecord.AttStatus;
 import sdams.model.Student;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 
 /**
  *
@@ -226,6 +227,9 @@ ArrayList<Student> allStudent = new ArrayList<>();
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
+            if(!LoggedInChecker.loginChecker(null)){
+                return;
+            }
             UpdateAtt update = new UpdateAtt();
             if(update.getValid()){
                 update.setVisible(true);
