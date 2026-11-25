@@ -15,6 +15,7 @@ import sdams.model.Payment;
 import sdams.model.Staff;
 import sdams.util.FileUtil;
 import sdams.util.Generator;
+import sdams.util.LoggedInChecker;
 
 /**
  *
@@ -24,6 +25,15 @@ public class BrowseClasses extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(BrowseClasses.class.getName());
 
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
+    
     private ArrayList<ClassSession> classList = new ArrayList<>();
     private ArrayList<Instructor> instructorList = new ArrayList<>();
     private DefaultTableModel tableModel;

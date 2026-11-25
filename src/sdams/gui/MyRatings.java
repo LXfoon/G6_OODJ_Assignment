@@ -12,6 +12,7 @@ import sdams.model.Instructor;
 import sdams.model.Rating;
 import sdams.model.Staff;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 
 /**
  *
@@ -21,6 +22,15 @@ public class MyRatings extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MyRatings.class.getName());
 
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
+    
     private ArrayList<Rating> ratingList = new ArrayList<>();
     private ArrayList<ClassSession> classList = new ArrayList<>();
     private ArrayList<Instructor> instructorList = new ArrayList<>();

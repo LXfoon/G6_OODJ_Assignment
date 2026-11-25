@@ -14,6 +14,7 @@ import sdams.model.Instructor;
 import sdams.model.Payment;
 import sdams.model.Staff;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 
 /**
  *
@@ -23,6 +24,15 @@ public class MyBookings extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MyBookings.class.getName());
 
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
+    
     private ArrayList<Booking> bookingList = new ArrayList<>();
     private ArrayList<ClassSession> classList = new ArrayList<>();
     private ArrayList<Instructor> instructorList = new ArrayList<>();

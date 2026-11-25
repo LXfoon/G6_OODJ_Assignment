@@ -10,7 +10,7 @@ import sdams.model.Booking;
 import sdams.model.ClassSession;
 import sdams.model.Payment;
 import sdams.util.FileUtil;
-import sdams.util.Generator;
+import sdams.util.LoggedInChecker;
 
 /**
  *
@@ -19,6 +19,15 @@ import sdams.util.Generator;
 public class MakePayment extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MakePayment.class.getName());
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     
     private String bookingId;
     private boolean paymentInfoLoaded = false;

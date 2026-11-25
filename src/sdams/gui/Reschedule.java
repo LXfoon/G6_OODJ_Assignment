@@ -12,6 +12,7 @@ import sdams.model.ClassSession;
 import sdams.model.Instructor;
 import sdams.model.Staff;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 
 /**
  *
@@ -21,6 +22,15 @@ public class Reschedule extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Reschedule.class.getName());
 
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
+    
     private String bookingId;
     private boolean rescheduleLoaded = false;
     

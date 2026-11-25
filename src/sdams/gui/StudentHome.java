@@ -5,6 +5,7 @@
 package sdams.gui;
 
 import javax.swing.JOptionPane;
+import sdams.util.LoggedInChecker;
 
 /**
  *
@@ -14,6 +15,15 @@ public class StudentHome extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(StudentHome.class.getName());
 
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
+    
     /**
      * Creates new form StudentHome
      */
