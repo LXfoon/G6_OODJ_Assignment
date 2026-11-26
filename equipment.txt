@@ -5,6 +5,6 @@ E004|Cabinet|Storage|4|Damaged|Classroom
 E005|Safety Goggles|Protective Equipment|20|Good|Cabinet 1
 E006|White Belts|Uniforms & Clothing|30|Good|Store room
 E007|Skipping Ropes|Fitness Equipment|20|Good|Training Room A
-E008|Dumbells|Training Mats|12|Needs repair|Fitness Room
+E008|Dumbells|Training Mats|12|Damaged|Fitness Room
 E009|Training Whistles|Training Accessories|4|Good|Instructor Office
 E010|Martial Arts Uniforms|Uniforms & Clothing|25|Good|Store room
