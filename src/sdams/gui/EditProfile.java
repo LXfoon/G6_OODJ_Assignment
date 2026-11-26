@@ -16,6 +16,7 @@ import sdams.model.Manager;
 import sdams.model.Student;
 import sdams.model.User;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 import sdams.util.Validator;
 
 /**
@@ -23,6 +24,15 @@ import sdams.util.Validator;
  * @author xiaow
  */
 public class EditProfile extends javax.swing.JFrame {
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(EditProfile.class.getName());
     

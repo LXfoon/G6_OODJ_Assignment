@@ -15,12 +15,22 @@ import javax.swing.table.TableRowSorter;
 
 import sdams.model.Payment;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 
 /**
  *
  * @author xiaow
  */
 public class ViewPayment extends javax.swing.JFrame {
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ViewPayment.class.getName());
 

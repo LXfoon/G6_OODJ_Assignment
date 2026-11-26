@@ -13,8 +13,18 @@ import java.text.DecimalFormat;
 import javax.swing.JOptionPane;
 import sdams.model.ManageStaffServices;
 import sdams.model.Staff;
+import sdams.util.LoggedInChecker;
 
 public class EditStaff extends javax.swing.JFrame {
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(EditStaff.class.getName());
     

@@ -8,12 +8,22 @@ import java.text.DecimalFormat;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import sdams.model.PaymentDetailsManager;
+import sdams.util.LoggedInChecker;
 
 /**
  *
  * @author xiaow
  */
 public class ViewPaymentDetails extends javax.swing.JFrame {
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ViewPaymentDetails.class.getName());
 

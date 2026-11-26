@@ -12,12 +12,22 @@ import javax.swing.table.TableRowSorter;
 
 import sdams.model.ManageStudentServices;
 import sdams.model.Student;
+import sdams.util.LoggedInChecker;
 
 /**
  *
  * @author xiaow
  */
 public class ManageStudent extends javax.swing.JFrame {
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ManageStudent.class.getName());
     

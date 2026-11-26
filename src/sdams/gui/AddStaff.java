@@ -12,8 +12,18 @@ package sdams.gui;
 import javax.swing.JOptionPane;
 import sdams.exception.ValidationException;
 import sdams.model.ManageStaffServices;
+import sdams.util.LoggedInChecker;
 
 public class AddStaff extends javax.swing.JFrame {
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AddStaff.class.getName());
 

@@ -19,6 +19,7 @@ import sdams.model.ManageStaffServices;
 import sdams.model.AttOfficer;
 import sdams.model.FacOfficer;
 import sdams.model.Instructor;
+import sdams.util.LoggedInChecker;
 
 /**
  *
@@ -28,6 +29,15 @@ import sdams.model.Instructor;
 // for admin use: cannot manage other admin
 // only manage Instructor/AttOfficer/FacOfficer
 public class ManageStaff extends javax.swing.JFrame {
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ManageStaff.class.getName());
         

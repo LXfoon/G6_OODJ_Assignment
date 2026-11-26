@@ -4,11 +4,22 @@
  */
 package sdams.gui;
 
+import sdams.util.LoggedInChecker;
+
 /**
  *
  * @author xiaow
  */
 public class AdminHome extends javax.swing.JFrame {
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AdminHome.class.getName());
     
@@ -125,6 +136,7 @@ public class AdminHome extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void logOutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logOutBtnActionPerformed
+        LoggedIn.setId("");
         LoggedIn.setUsername("");
         Login login = new Login();
         login.setVisible(true);
