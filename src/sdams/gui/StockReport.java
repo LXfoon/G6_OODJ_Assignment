@@ -9,6 +9,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.table.DefaultTableModel;
 import sdams.model.Equipment;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 
 /**
  *
@@ -17,6 +18,15 @@ import sdams.util.FileUtil;
 public class StockReport extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(StockReport.class.getName());
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
 
     /**
      * Creates new form InventoryReport

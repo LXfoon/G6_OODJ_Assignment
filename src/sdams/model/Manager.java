@@ -9,13 +9,13 @@ package sdams.model;
  * @author Foon
  */
 public class Manager extends User{
-    public Manager(String id, String name, String email, String password, String phoneNum, String role) {
-        super(id, name, email, password, phoneNum, role);
+    public Manager(String id, String name, String email, String password, String phoneNum, String role, String status) {
+        super(id, name, email, password, phoneNum, role, status);
     }
 
     public static Manager fromLine(String line) {
         String parts[] = line.split("\\|");
-        if(parts.length < 6) return null;
+        if(parts.length < 7) return null;
         
         String id = parts[0].trim();
         String name = parts[1].trim();
@@ -23,7 +23,8 @@ public class Manager extends User{
         String password = parts[3].trim();
         String phoneNum = parts[4].trim();
         String role = parts[5].trim();
+        String status = parts[6].trim();
         
-        return new Manager(id, name, email, password, phoneNum, role);    
+        return new Manager(id, name, email, password, phoneNum, role, status);    
     }
 }

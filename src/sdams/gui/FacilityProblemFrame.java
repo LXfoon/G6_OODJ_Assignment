@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import sdams.model.FacilityProblem;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 
 /**
  *
@@ -21,6 +22,15 @@ import sdams.util.FileUtil;
 public class FacilityProblemFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FacilityProblemFrame.class.getName());
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     
     private ArrayList<FacilityProblem> list = new ArrayList<>();
     private static final String FILE = "facility_problem.txt";

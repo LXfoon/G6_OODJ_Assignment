@@ -8,7 +8,7 @@ import java.awt.Window;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
-//import sdams.model.Admin;
+import sdams.model.Admin;
 import sdams.model.AttOfficer;
 import sdams.model.FacOfficer;
 import sdams.model.Instructor;
@@ -47,6 +47,12 @@ public class EditProfile extends javax.swing.JFrame {
         
         if (user == null) {
             JOptionPane.showMessageDialog(this, "User not found: " + userId);
+            return;
+        }
+        
+        //safety guard
+        if (!user.isActive()){
+            JOptionPane.showMessageDialog(this, "Account deactivated: " + userId);
             return;
         }
                 
@@ -99,8 +105,6 @@ public class EditProfile extends javax.swing.JFrame {
         pswLabel.setText("Password:");
 
         phoneLabel.setText("Phone Number:");
-
-        pswTxt.setText("jPasswordField1");
 
         showPswCheck.setText("show password");
         showPswCheck.setFocusable(false);
@@ -274,23 +278,24 @@ public class EditProfile extends javax.swing.JFrame {
         ArrayList<String> lines = new ArrayList<>();
         FileUtil.read(USER_FILE, lines, s -> s);
 
-        for (String line : lines) {
+         for (String line : lines) {
             String[] parts = line.split("\\|", -1);
-            if (parts.length < 6 || !parts[0].trim().equals(userId)) continue;
+            if (parts.length < 7 || !parts[0].trim().equals(userId)) continue;
 
             String name = parts[1];
             String email = parts[2];
             String psw = parts[3];
             String phone = parts[4];
             String role = parts[5].trim().toLowerCase();
+            String status = parts[6].trim();
 
             return switch (role) {
-                case "student" -> new Student (userId, name, email, psw, phone);
-                case "manager" -> new Manager (userId, name, email, psw, phone, "Manager");
-                //case "admin" -> new Admin (userId, name, email, psw, phone, 0.0);
-                case "instructor" -> new Instructor(userId, name, email, psw, phone, 0.0);
-                case "facilities" -> new FacOfficer(userId, name, email, psw, phone, 0.0);
-                case "attendance" -> new AttOfficer(userId, name, email, psw, phone, 0.0);
+                case "student" -> new Student (userId, name, email, psw, phone, status);
+                case "manager" -> new Manager (userId, name, email, psw, phone, "Manager", status);
+                case "admin" -> new Admin (userId, name, email, psw, phone, status, 0.0);
+                case "instructor" -> new Instructor(userId, name, email, psw, phone, status, 0.0);
+                case "facilities" -> new FacOfficer(userId, name, email, psw, phone, status, 0.0);
+                case "attendance" -> new AttOfficer(userId, name, email, psw, phone, status, 0.0);
                     //salary cannot be edited by ownself, placeholder for now
                 default -> null;
             };
@@ -307,14 +312,15 @@ public class EditProfile extends javax.swing.JFrame {
         String psw = parts[3];
         String phone = parts[4];
         String role = parts[5].trim().toLowerCase();
+        String status = parts[6].trim();
 
         return switch (role) {
-            case "student" -> new Student (id, name, email, psw, phone);
-            case "manager" -> new Manager (id, name, email, psw, phone, "Manager");
-            //case "admin" -> new Admin (id, name, email, psw, phone, 0.0);
-            case "instructor" -> new Instructor(id, name, email, psw, phone, 0.0);
-            case "facilities" -> new FacOfficer(id, name, email, psw, phone, 0.0);
-            case "attendance" -> new AttOfficer(id, name, email, psw, phone, 0.0);
+            case "student" -> new Student (id, name, email, psw, phone, status);
+            case "manager" -> new Manager (id, name, email, psw, phone, "Manager", status);
+            case "admin" -> new Admin (id, name, email, psw, phone, status, 0.0);
+            case "instructor" -> new Instructor(id, name, email, psw, phone, status, 0.0);
+            case "facilities" -> new FacOfficer(id, name, email, psw, phone, status, 0.0);
+            case "attendance" -> new AttOfficer(id, name, email, psw, phone, status, 0.0);
             default -> null;
         };
     }

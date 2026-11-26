@@ -11,6 +11,7 @@ import sdams.exception.FacilityValidator;
 import sdams.exception.ValidationException;
 import sdams.model.Equipment;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 
 /**
  *
@@ -19,6 +20,15 @@ import sdams.util.FileUtil;
 public class UpdateInventory extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UpdateInventory.class.getName());
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     
     private static final String FILE = "equipment.txt";
     private final Inventory parent;

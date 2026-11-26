@@ -11,6 +11,7 @@ import sdams.exception.FacilityValidator;
 import sdams.exception.ValidationException;
 import sdams.model.FacilityProblem;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 
 /**
  *
@@ -19,6 +20,15 @@ import sdams.util.FileUtil;
 public class UpdateProblem extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UpdateProblem.class.getName());
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
 
     /**
      * Creates new form UpdateProblem
