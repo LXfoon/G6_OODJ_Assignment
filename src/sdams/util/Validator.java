@@ -52,7 +52,7 @@ public class Validator {
             if(currentId != null && u.getId().equalsIgnoreCase(currentId)) continue;
             String existingEmail = u.getEmail();
             
-            if(existingEmail.equalsIgnoreCase(email)){
+            if(existingEmail.equalsIgnoreCase(email) && !u.getStatus().equalsIgnoreCase("Inactive")){
                 throw new ValidationException(
                     "Same email cannot be used."
                 );
