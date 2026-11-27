@@ -151,14 +151,14 @@ public class ViewPayment extends javax.swing.JFrame {
                 {null, null, null, null, null, null}
             },
             new String [] {
-                "Payment ID", "Booking ID", "Student ID", "Amount", "Date", "Status"
+                "Payment ID", "Booking ID", "Student ID", "Amount (RM)", "Date", "Status"
             }
         ) {
             Class[] types = new Class [] {
                 java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, true, true
+                false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -171,6 +171,14 @@ public class ViewPayment extends javax.swing.JFrame {
         });
         paymentTable.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(paymentTable);
+        if (paymentTable.getColumnModel().getColumnCount() > 0) {
+            paymentTable.getColumnModel().getColumn(0).setResizable(false);
+            paymentTable.getColumnModel().getColumn(1).setResizable(false);
+            paymentTable.getColumnModel().getColumn(2).setResizable(false);
+            paymentTable.getColumnModel().getColumn(3).setResizable(false);
+            paymentTable.getColumnModel().getColumn(4).setResizable(false);
+            paymentTable.getColumnModel().getColumn(5).setResizable(false);
+        }
 
         backBtn.setText("Back to Main Menu");
         backBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
