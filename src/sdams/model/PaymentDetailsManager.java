@@ -86,7 +86,7 @@ public class PaymentDetailsManager {
     private double parseDouble(String s) {
         try { 
             return Double.parseDouble(s.trim()); 
-        } catch (Exception e) { 
+        } catch (NumberFormatException e) { 
             return 0.0;
         }
     }

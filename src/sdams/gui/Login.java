@@ -130,7 +130,6 @@ public class Login extends javax.swing.JFrame {
                     found = true;
                     LoggedIn.setId(parts[0]);
                     LoggedIn.setUsername(parts[1]);
-                    LoggedIn.setId(parts[0]);
                     JOptionPane.showMessageDialog(null, "Login Successful");
                     break;
                 }
@@ -141,11 +140,11 @@ public class Login extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Invalid Login");
             } else {
                 if(role.equalsIgnoreCase("Manager")){
-                    //ManagerHome mHome = new ManagerHome();
-                    //mHome.setVisible(true);
+                    ManagerHome mHome = new ManagerHome();
+                    mHome.setVisible(true);
                 }else if (role.equalsIgnoreCase("Attendance")){
-                    //AttendanceHome attHome = new AttendanceHome();
-                    //attHome.setVisible(true);
+                    AttendanceHome attHome = new AttendanceHome();
+                    attHome.setVisible(true);
                 }else if (role.equalsIgnoreCase("Admin")){
                     AdminHome adminHome = new AdminHome();
                     adminHome.setVisible(true);
