@@ -33,7 +33,9 @@ public class ViewPayment extends javax.swing.JFrame {
     }
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ViewPayment.class.getName());
-
+    
+    private static final String PAYMENT_FILE = "payment.txt";
+    
     private final ArrayList<Payment> allPayment = new ArrayList<>();
     private final DecimalFormat df = new DecimalFormat("0.00");
     
@@ -65,7 +67,7 @@ public class ViewPayment extends javax.swing.JFrame {
         allPayment.clear();
         tableModel.setRowCount(0);
 
-        FileUtil.read("payment.txt", allPayment, Payment::fromLine);
+        FileUtil.read(PAYMENT_FILE, allPayment, Payment::fromLine);
 
         for (Payment p : allPayment) {
             if (p == null || p.getPaymentId() == null) continue;

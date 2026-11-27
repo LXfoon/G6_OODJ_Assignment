@@ -25,12 +25,11 @@ public class ViewPaymentDetails extends javax.swing.JFrame {
         super.setVisible(b);
     }
     
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ViewPaymentDetails.class.getName());
-
     private final DecimalFormat moneyFmt = new DecimalFormat("0.00");
     
     /**
-     * Creates new form VIewPaymentDetails
+     * Creates new form ViewPaymentDetails
+     * @param paymentId
      */
     public ViewPaymentDetails(String paymentId) {
         initComponents();
@@ -43,7 +42,6 @@ public class ViewPaymentDetails extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this,
                     "Payment not found: " + paymentId,
                     "Not Found", JOptionPane.WARNING_MESSAGE);
-            // Defer dispose so the dialog is visible before the frame closes
             SwingUtilities.invokeLater(this::dispose);
             return;
         }
@@ -195,12 +193,13 @@ public class ViewPaymentDetails extends javax.swing.JFrame {
             paymentTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(paymentTabLayout.createSequentialGroup()
                 .addGap(21, 21, 21)
-                .addGroup(paymentTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(paymentID)
+                .addGroup(paymentTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(paymentTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel12)
-                        .addComponent(paymentMethod)))
+                        .addComponent(paymentMethod))
+                    .addGroup(paymentTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel1)
+                        .addComponent(paymentID)))
                 .addGap(18, 18, 18)
                 .addGroup(paymentTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
