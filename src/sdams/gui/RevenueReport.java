@@ -96,6 +96,7 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
             if(p.getPaymentId() == null) continue;
             if(p.getStatus() == PaymentStatus.Refunded) continue;
             
+            if(p.getPaymentDate() == null || String.valueOf(p.getPaymentDate()).equals("-")) continue;
             int paymentYear = p.getPaymentDate().getYear();
             if(!revenuePerYear.containsKey(paymentYear)){
                 revenuePerYear.put(paymentYear, p.getAmount());
@@ -369,8 +370,9 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
             
         for(Payment p : allPayment){
             if(p.getPaymentId() == null) continue;
+            if(p.getPaymentDate() == null || String.valueOf(p.getPaymentDate()).equals("-")) continue;
             LocalDate dateVal = p.getPaymentDate();
-            if(dateVal == null) continue;
+            if(dateVal == null || String.valueOf(dateVal).equals("-")) continue;
             String monthVal = getMonthStr(dateVal.getMonthValue());
             String yearVal = String.valueOf(dateVal.getYear());
 
@@ -404,6 +406,7 @@ public class RevenueReport extends javax.swing.JFrame implements ReportGenerator
             if(p.getPaymentId() == null) continue;
             if(p.getStatus() == PaymentStatus.Refunded) continue;
 
+            if(p.getPaymentDate() == null || String.valueOf(p.getPaymentDate()).equals("-")) continue;
             LocalDate paymentDate = p.getPaymentDate();
             paymentYears.add(paymentDate.getYear());
         }
