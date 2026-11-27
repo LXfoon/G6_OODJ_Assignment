@@ -5,10 +5,8 @@
 package sdams.util;
 
 import java.util.List;
-import java.util.ArrayList;
 import java.util.regex.Pattern;
 import sdams.exception.ValidationException;
-import sdams.model.Admin;
 import sdams.model.User;
 
 /**

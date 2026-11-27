@@ -16,6 +16,7 @@ import sdams.model.Manager;
 import sdams.model.Student;
 import sdams.model.User;
 import sdams.util.FileUtil;
+import sdams.util.LoggedInChecker;
 import sdams.util.Validator;
 
 /**
@@ -23,6 +24,15 @@ import sdams.util.Validator;
  * @author xiaow
  */
 public class EditProfile extends javax.swing.JFrame {
+    
+    @Override
+    public void setVisible(boolean b){
+        if(b && !LoggedInChecker.loginChecker(this)){
+            return;
+        }
+        
+        super.setVisible(b);
+    }
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(EditProfile.class.getName());
     
@@ -32,7 +42,7 @@ public class EditProfile extends javax.swing.JFrame {
     private final Window parent;
     
     private User user;
-    
+        
     /**
      * Creates new form NewJFrame
      */
@@ -207,7 +217,7 @@ public class EditProfile extends javax.swing.JFrame {
         
         for (int i = 0; i < lines.size(); i++) {
             String[] parts = lines.get(i).split("\\|", -1);
-            if (parts.length < 6) {
+            if (parts.length < 7) {
                 continue;
             }
 
@@ -278,7 +288,7 @@ public class EditProfile extends javax.swing.JFrame {
         ArrayList<String> lines = new ArrayList<>();
         FileUtil.read(USER_FILE, lines, s -> s);
 
-         for (String line : lines) {
+        for (String line : lines) {
             String[] parts = line.split("\\|", -1);
             if (parts.length < 7 || !parts[0].trim().equals(userId)) continue;
 
@@ -304,7 +314,7 @@ public class EditProfile extends javax.swing.JFrame {
     }
     
     private User buildUser(String[] parts) {
-        if (parts.length < 6) return null;
+        if (parts.length < 7) return null;
 
         String id = parts[0].trim();
         String name = parts[1];

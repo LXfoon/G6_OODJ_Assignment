@@ -13,7 +13,6 @@ import sdams.util.FileUtil;
  * @author xiaow
  */
 
-// can be deleted if not used
 public class StaffRepo {
 
     private static final String USER_FILE  = "user.txt";
