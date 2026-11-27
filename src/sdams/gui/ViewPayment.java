@@ -33,7 +33,9 @@ public class ViewPayment extends javax.swing.JFrame {
     }
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ViewPayment.class.getName());
-
+    
+    private static final String PAYMENT_FILE = "payment.txt";
+    
     private final ArrayList<Payment> allPayment = new ArrayList<>();
     private final DecimalFormat df = new DecimalFormat("0.00");
     
@@ -65,19 +67,21 @@ public class ViewPayment extends javax.swing.JFrame {
         allPayment.clear();
         tableModel.setRowCount(0);
 
-        FileUtil.read("payment.txt", allPayment, Payment::fromLine);
+        FileUtil.read(PAYMENT_FILE, allPayment, Payment::fromLine);
 
         for (Payment p : allPayment) {
             if (p == null || p.getPaymentId() == null) continue;
-            if (p.getPaymentDate() == null) continue;
+
+            String dateStr = (p.getPaymentDate() == null) ? "-" : p.getPaymentDate().toString();
+            String statusStr = (p.getStatus()      == null) ? "-" : p.getStatus().name();
 
             tableModel.addRow(new Object[]{
                 p.getPaymentId(),
                 p.getBookingId(),
                 p.getStudentId(),
                 df.format(p.getAmount()),
-                p.getPaymentDate(),
-                p.getStatus() == null ? "" : p.getStatus().name()
+                dateStr,
+                statusStr
             });
         }
     }
@@ -101,7 +105,7 @@ public class ViewPayment extends javax.swing.JFrame {
     
     private void updateSummary() {
         int visibleRows = paymentTable.getRowCount();
-        paymentSummary.setText("Total Payment Records: " + visibleRows);
+        paymentSummary.setText("Payment Records: " + visibleRows);
     }
 
     /**
@@ -151,7 +155,7 @@ public class ViewPayment extends javax.swing.JFrame {
                 {null, null, null, null, null, null}
             },
             new String [] {
-                "Payment ID", "Booking ID", "Student ID", "Amount (RM)", "Date", "Status"
+                "Payment ID", "Booking ID", "Student ID", "Amount(RM)", "Date", "Status"
             }
         ) {
             Class[] types = new Class [] {
@@ -187,7 +191,7 @@ public class ViewPayment extends javax.swing.JFrame {
 
         searchLabel.setText("Search :");
 
-        statusCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Payment", "Paid", "Refunded" }));
+        statusCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Payment", "Paid", "Unpaid", "Refunded" }));
         statusCombo.addActionListener(this::statusComboActionPerformed);
 
         viewDetailsBtn.setText("View Details");
