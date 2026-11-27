@@ -19,7 +19,7 @@ public class PaymentDetailsManager {
     private static final String CLASS_FILE = "class.txt";
     
     public record PaymentDetails(
-        String paymentId, double amount, String paymentDate, String paymentStatus,
+        String paymentId, double amount, String paymentDate, String paymentStatus, String paymentMethod,
         String studentId, String studentName,
         String bookingId, String bookingStatus, String bookingDate,
         String classId, String className,
@@ -30,34 +30,43 @@ public class PaymentDetailsManager {
     public PaymentDetails getPaymentDetails(String paymentId) {
         if (paymentId == null || paymentId.isBlank()) return null;
 
-        String[] pay = findLine(PAYMENT_FILE, paymentId);
-        if (pay == null || pay.length < 6) return null;
+        // Payment
+        String payLine = findRawLine(PAYMENT_FILE, paymentId);
+        if (payLine == null) return null;
+        Payment pay = Payment.fromLine(payLine);
+        if (pay == null) return null;
 
-        String bookingId = pay[1].trim();
-        String studentId = pay[2].trim();
-        double amount = parseDouble(pay[3]);
-        String paymentDate = pay[4].trim();
-        String paymentStatus = pay[5].trim();
-
+        String bookingId = pay.getBookingId();
+        String studentId = pay.getStudentId();
+        double amount = pay.getAmount();
+        String paymentDate = pay.getPaymentDate() == null ? "-" : pay.getPaymentDate().toString();
+        String paymentStatus = pay.getStatus() == null ? "-" : pay.getStatus().name();
+        String paymentMethod = pay.getPaymentMethod();
         String studentName = findUserName(studentId);
 
-        String[] booking = findLine(BOOKING_FILE, bookingId);
-        String classId = booking != null && booking.length > 2 ? booking[2].trim() : "";
-        String bookingStatus = booking != null && booking.length > 3 ? booking[3].trim() : "";
-        String bookingDate = booking != null && booking.length > 4 ? booking[4].trim() : "";
+        // Booking
+        String bookingLine = findRawLine(BOOKING_FILE, bookingId);
+        Booking booking = (bookingLine == null) ? null : Booking.fromLine(bookingLine);
 
-        String[] cls = findLine(CLASS_FILE, classId);
-        String className = cls != null && cls.length > 1 ? cls[1].trim() : "";
-        String instructorId = cls != null && cls.length > 3 ? cls[3].trim() : "";
-        String classDate = cls != null && cls.length > 4 ? cls[4].trim() : "";
-        String startTime = cls != null && cls.length > 5 ? cls[5].trim() : "";
-        String endTime = cls != null && cls.length > 6 ? cls[6].trim() : "";
-        double classPrice = cls != null && cls.length > 7 ? parseDouble(cls[7]) : 0.0;
+        String classId = (booking == null) ? "" : booking.getClassId();
+        String bookingStatus = (booking == null || booking.getStatus() == null) ? "-" : booking.getStatus().name();
+        String bookingDate = (booking == null || booking.getBookingDate() == null) ? "-" : booking.getBookingDate().toString();
+
+        // ClassSession
+        String classLine = findRawLine(CLASS_FILE, classId);
+        ClassSession cls = (classLine == null) ? null : ClassSession.fromLine(classLine);
+
+        String className = (cls == null) ? ""  : cls.getClassName();
+        String instructorId = (cls == null) ? ""  : cls.getInstructorId();
+        String classDate = (cls == null || cls.getDate() == null) ? "-" : cls.getDate().toString();
+        String startTime = (cls == null || cls.getStartTime() == null) ? "-" : cls.getStartTime().toString();
+        String endTime = (cls == null || cls.getEndTime()   == null) ? "-" : cls.getEndTime().toString();
+        double classPrice = (cls == null) ? 0.0 : cls.getFee();
 
         String instructorName = findUserName(instructorId);
 
         return new PaymentDetails(
-            paymentId, amount, paymentDate, paymentStatus,
+            paymentId, amount, paymentDate, paymentStatus, paymentMethod,
             studentId, studentName,
             bookingId, bookingStatus, bookingDate,
             classId, className,
@@ -66,28 +75,23 @@ public class PaymentDetailsManager {
         );
     }
 
-    private String[] findLine(String file, String id) {
+    private String findRawLine(String file, String id) {
         if (id == null || id.isBlank()) return null;
         ArrayList<String> lines = new ArrayList<>();
         FileUtil.read(file, lines, s -> s);
         for (String line : lines) {
             if (line.isBlank()) continue;
             String[] p = line.split("\\|", -1);
-            if (p.length >= 1 && p[0].trim().equals(id)) return p;
+            if (p.length >= 1 && p[0].trim().equals(id)) return line;
         }
         return null;
     }
 
     private String findUserName(String userId) {
-        String[] line = findLine(USER_FILE, userId);
-        return (line != null && line.length > 1) ? line[1].trim() : "(unknown)";
-    }
-
-    private double parseDouble(String s) {
-        try { 
-            return Double.parseDouble(s.trim()); 
-        } catch (NumberFormatException e) { 
-            return 0.0;
-        }
+        if (userId == null || userId.isBlank()) return "(unknown)";
+        String line = findRawLine(USER_FILE, userId);
+        if (line == null) return "(unknown)";
+        String[] p = line.split("\\|", -1);
+        return (p.length > 1) ? p[1].trim() : "(unknown)";
     }
 }

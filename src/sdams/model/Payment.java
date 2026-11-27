@@ -12,15 +12,16 @@ import static sdams.model.ClassSession.formatter;
  * @author Foon
  */
 public class Payment {
-    private String paymentId, bookingId, studentId;
+    private String paymentId, bookingId, studentId, paymentMethod;
     private PaymentStatus status;
     private double amount;
     private LocalDate paymentDate;
     
-    public Payment(String paymentId, String bookingId, String studentId, double amount, LocalDate paymentDate, PaymentStatus status){
+    public Payment(String paymentId, String bookingId, String studentId, String paymentMethod, double amount, LocalDate paymentDate, PaymentStatus status){
         this.paymentId = paymentId;
         this.bookingId = bookingId;
         this.studentId = studentId;
+        this.paymentMethod = paymentMethod;
         this.amount = amount;
         this.paymentDate = paymentDate;
         this.status = status;
@@ -28,7 +29,8 @@ public class Payment {
     
     public enum PaymentStatus{
         Paid,
-        Refunded;
+        Refunded,
+        Unpaid;
         
         public static PaymentStatus fromString(String s){
             if(s == null) return null;
@@ -51,6 +53,10 @@ public class Payment {
     
     public String getStudentId(){
         return this.studentId;
+    }
+    
+    public String getPaymentMethod(){
+        return this.paymentMethod;
     }
     
     public double getAmount(){
@@ -77,6 +83,10 @@ public class Payment {
         this.studentId = studentId;
     }
     
+    public void setPaymentMethod(String paymentMethod){
+        this.paymentMethod = paymentMethod;
+    }
+    
     public void setAmount(double amount){
         this.amount = amount;
     }
@@ -90,20 +100,25 @@ public class Payment {
     }
     
     public static Payment fromLine(String line) {
-        String parts[] = line.split("\\|");
-        if(parts.length < 6) return null;
+        LocalDate paymentDate = null;
+        String parts[] = line.split("\\|", -1);
+        if(parts.length < 7) return null;
         
         String paymentId = parts[0].trim();
         String bookingId = parts[1].trim();
         String studentId = parts[2].trim();
+        String paymentMethod = parts[6].trim();
         double amount = Double.parseDouble(parts[3].trim());
-        LocalDate paymentDate = LocalDate.parse(parts[4].trim(), formatter);
+        if(!parts[4].trim().equals("-") && !parts[4].trim().isEmpty()){
+            paymentDate = LocalDate.parse(parts[4].trim(), formatter);
+        }
         PaymentStatus status = PaymentStatus.fromString(parts[5].trim());
         
-        return new Payment(paymentId, bookingId, studentId, amount, paymentDate, status);
+        return new Payment(paymentId, bookingId, studentId, paymentMethod, amount, paymentDate, status);
     }
     
     public String toLine(){
-        return this.paymentId + "|" + this.bookingId + "|" + this.studentId + "|" + this.amount + "|" + this.paymentDate+ "|" + this.status;
+        String Date = (this.paymentDate == null) ? "-" : this.paymentDate.toString();
+        return this.paymentId + "|" + this.bookingId + "|" + this.studentId + "|" + this.amount + "|" + Date+ "|" + this.status + "|" + this.paymentMethod;
     }
 }

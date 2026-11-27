@@ -51,12 +51,13 @@ public class ViewPaymentDetails extends javax.swing.JFrame {
     }
     
     private void populate(PaymentDetailsManager.PaymentDetails d) {
-        pageTitle.setText("Payment Details — " + d.paymentId());
+        pageTitle.setText("Payment Details - " + d.paymentId());
 
         paymentID.setText(orDash(d.paymentId()));
         amount.setText("RM " + moneyFmt.format(d.amount()));
         paymentDate.setText(orDash(d.paymentDate()));
         paymentStatus.setText(orDash(d.paymentStatus()));
+        paymentMethod.setText(orDash(d.paymentMethod())); 
 
         studentID.setText(orDash(d.studentId()));
         studentName.setText(orDash(d.studentName()));
@@ -68,9 +69,10 @@ public class ViewPaymentDetails extends javax.swing.JFrame {
         classID.setText(orDash(d.classId()));
         className.setText(orDash(d.className()));
 
-        String insName = orDash(d.instructorName());
-        String insId = orDash(d.instructorId());
-        instructor.setText(insName + " (" + insId + ")");
+        String instructorName = d.instructorName() == null ? "" : d.instructorName().trim();
+        String instructorId = d.instructorId() == null ? "" : d.instructorId().trim();
+        instructor.setText(instructorName.isEmpty() ? "-" : 
+                instructorName + (instructorId.isEmpty() ? "" : " (" + instructorId + ")"));
 
         classDate.setText(orDash(d.classDate()));
         classTime.setText(orDash(d.classStartTime()) + " – " + orDash(d.classEndTime()));
@@ -78,13 +80,9 @@ public class ViewPaymentDetails extends javax.swing.JFrame {
     }
 
     private String orDash(String s) {
-        if (s == null) {
-            return "-";
-        } else {
-            return s;
-        }
+        return (s == null || s.isBlank()) ? "-" : s;
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -104,6 +102,8 @@ public class ViewPaymentDetails extends javax.swing.JFrame {
         amount = new javax.swing.JLabel();
         paymentDate = new javax.swing.JLabel();
         paymentStatus = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
+        paymentMethod = new javax.swing.JLabel();
         studentTab = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
@@ -159,6 +159,11 @@ public class ViewPaymentDetails extends javax.swing.JFrame {
 
         paymentStatus.setText("Paid");
 
+        jLabel12.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel12.setText("Payment Method:");
+
+        paymentMethod.setText("Card");
+
         javax.swing.GroupLayout paymentTabLayout = new javax.swing.GroupLayout(paymentTab);
         paymentTab.setLayout(paymentTabLayout);
         paymentTabLayout.setHorizontalGroup(
@@ -172,11 +177,19 @@ public class ViewPaymentDetails extends javax.swing.JFrame {
                     .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addGap(18, 18, 18)
                 .addGroup(paymentTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(paymentID)
-                    .addComponent(amount)
-                    .addComponent(paymentDate)
-                    .addComponent(paymentStatus))
-                .addContainerGap(286, Short.MAX_VALUE))
+                    .addGroup(paymentTabLayout.createSequentialGroup()
+                        .addGroup(paymentTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(amount)
+                            .addComponent(paymentDate)
+                            .addComponent(paymentStatus))
+                        .addContainerGap(286, Short.MAX_VALUE))
+                    .addGroup(paymentTabLayout.createSequentialGroup()
+                        .addComponent(paymentID)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel12)
+                        .addGap(18, 18, 18)
+                        .addComponent(paymentMethod)
+                        .addGap(94, 94, 94))))
         );
         paymentTabLayout.setVerticalGroup(
             paymentTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -184,7 +197,10 @@ public class ViewPaymentDetails extends javax.swing.JFrame {
                 .addGap(21, 21, 21)
                 .addGroup(paymentTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(paymentID))
+                    .addComponent(paymentID)
+                    .addGroup(paymentTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel12)
+                        .addComponent(paymentMethod)))
                 .addGap(18, 18, 18)
                 .addGroup(paymentTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
@@ -447,6 +463,7 @@ public class ViewPaymentDetails extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
@@ -462,6 +479,7 @@ public class ViewPaymentDetails extends javax.swing.JFrame {
     private javax.swing.JLabel pageTitle;
     private javax.swing.JLabel paymentDate;
     private javax.swing.JLabel paymentID;
+    private javax.swing.JLabel paymentMethod;
     private javax.swing.JLabel paymentStatus;
     private javax.swing.JPanel paymentTab;
     private javax.swing.JLabel price;
