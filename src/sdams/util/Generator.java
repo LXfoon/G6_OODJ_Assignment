@@ -37,7 +37,7 @@ public class Generator {
             
             maxId += 1;
             newId = prefix + String.format("%0" + padLength + "d", maxId);
-            System.out.println(newId);
+            //System.out.println(newId);
             
         }catch (Exception e){
             System.out.println(e.getMessage());
