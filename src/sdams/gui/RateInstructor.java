@@ -7,7 +7,7 @@ package sdams.gui;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
-import sdams.model.Attendance;
+import sdams.model.AttendanceRecord;
 import sdams.model.ClassSession;
 import sdams.model.Instructor;
 import sdams.model.Rating;
@@ -39,7 +39,7 @@ public class RateInstructor extends javax.swing.JFrame {
     private Rating selectedRating = null;
     private Instructor selectedInstructor = null;
     
-    private ArrayList<Attendance> attendanceList = new ArrayList<>();
+    private ArrayList<AttendanceRecord> attendanceList = new ArrayList<>();
     private ArrayList<Rating> ratingList = new ArrayList<>();
     private ArrayList<ClassSession> classList = new ArrayList<>();
     private ArrayList<Staff> staffList = new ArrayList<>();
@@ -75,7 +75,7 @@ public class RateInstructor extends javax.swing.JFrame {
                 return;
             }
             
-            FileUtil.read("attendance.txt", attendanceList, Attendance::fromLine);
+            FileUtil.read("attendance.txt", attendanceList, AttendanceRecord::fromLine);
             FileUtil.read("rating.txt", ratingList, Rating::fromLine);
             FileUtil.read("class.txt", classList, ClassSession::fromLine);
             FileUtil.read("user.txt", staffList, Staff::fromUserLine);
@@ -91,8 +91,8 @@ public class RateInstructor extends javax.swing.JFrame {
             
             // check student's attendance
             boolean hasAttended = false;
-            for(Attendance a : attendanceList){
-                if(a.getStudentId().equals(studentId) && a.getClassId().equals(classId) && (a.getStatus() == Attendance.AttStatus.Present || a.getStatus() == Attendance.AttStatus.Late)){
+            for(AttendanceRecord a : attendanceList){
+                if(a.getStudentId().equals(studentId) && a.getClassId().equals(classId) && (a.getStatus() == AttendanceRecord.AttStatus.Present || a.getStatus() == AttendanceRecord.AttStatus.Late)){
                     hasAttended = true;
                     break;
                 }

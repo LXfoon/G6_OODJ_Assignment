@@ -120,7 +120,7 @@ public class ManagePayment extends javax.swing.JFrame {
             
             boolean matchSearch = search.isEmpty() || paymentId.contains(search) || bookingId.contains(search) || paymentMethod.contains(search);
             boolean matchStatus = status.equals("All Status") || (p.getStatus() != null && p.getStatus().toString().equalsIgnoreCase(status));
-            boolean matchDate = date == null || p.getPaymentDate().equals(date);
+            boolean matchDate = date == null || (p.getPaymentDate() != null && p.getPaymentDate().equals(date));
             
             if(matchSearch && matchStatus && matchDate){
                 model.addRow(new Object[]{
