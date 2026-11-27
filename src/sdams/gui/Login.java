@@ -148,7 +148,7 @@ public class Login extends javax.swing.JFrame {
                 }else if (role.equalsIgnoreCase("Student")){
                     StudentHome studentHome = new StudentHome();
                     studentHome.setVisible(true);
-                if(role.equalsIgnoreCase("Facilities")){
+                }else if(role.equalsIgnoreCase("Facilities")){
                     FacilitiesOfficerHome mHome = new FacilitiesOfficerHome();
                     mHome.setVisible(true);
                 }
