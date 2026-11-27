@@ -1,0 +1,5 @@
+FP001|E003|Floor mat has a torn corner and slips on the floor|006|2026-11-12|Pending|
+FP002|E001|Punching bag chain is loose|007|2026-11-10|In Progress|Technician booked for 20 Nov
+FP003|E004|Cabinet door will not close|007|2026-11-02|Resolved|Hinge replaced on 5 Nov
+FP004|E002|Sparring gloves have split seams|006|2026-11-15|Pending|
+FP005|E005|Goggle straps are overstretched|007|2026-11-16|In Progress|Replacement goggle straps have been ordered from supplier

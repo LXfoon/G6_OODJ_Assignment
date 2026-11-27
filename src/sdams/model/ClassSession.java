@@ -20,8 +20,9 @@ public class ClassSession {
     private LocalDate date;
     private LocalTime startTime, endTime;
     private double fee;
+    private int availableSlots, maxSlots;
 
-    public ClassSession(String classId, String className, String discipline, String instructorId, LocalDate date, LocalTime startTime, LocalTime endTime, double fee, ClassStatus status) {
+    public ClassSession(String classId, String className, String discipline, String instructorId, LocalDate date, LocalTime startTime, LocalTime endTime, double fee, ClassStatus status, int availableSlots, int maxSlots) {
         this.classId = classId;
         this.className = className;
         this.discipline = discipline;
@@ -31,8 +32,10 @@ public class ClassSession {
         this.endTime = endTime;
         this.fee = fee;
         this.status = status;
+        this.availableSlots = availableSlots;
+        this.maxSlots = maxSlots;
     }
-
+    
     public enum ClassStatus{
         Available,
         Full,
@@ -86,6 +89,14 @@ public class ClassSession {
         return this.status;
     }
     
+    public int getAvailableSlots(){
+        return this.availableSlots;
+    }
+    
+    public int getMaxSlots(){
+        return this.maxSlots;
+    }
+    
     public void setClassId(String classId){
         this.classId = classId;
     }
@@ -122,9 +133,17 @@ public class ClassSession {
         this.status = status;
     }
     
+    public void setAvailableSlots(int availableSlots){
+        this.availableSlots = availableSlots;
+    }
+    
+    public void setMaxSlots(int maxSlots){
+        this.maxSlots = maxSlots;
+    }
+    
     public static ClassSession fromLine(String line) {
-        String parts[] = line.split("\\|");
-        if(parts.length < 9) return null;
+        String parts[] = line.split("\\|", -1);
+        if(parts.length < 11) return null;
         
         String classId = parts[0].trim();
         String className = parts[1].trim();
@@ -135,11 +154,13 @@ public class ClassSession {
         LocalTime endTime = LocalTime.parse(parts[6].trim());
         double fee = Double.parseDouble(parts[7].trim());
         ClassStatus status = ClassStatus.fromString(parts[8].trim());
+        int availableSlots = Integer.parseInt(parts[9].trim());
+        int maxSlots = Integer.parseInt(parts[10].trim());
         
-        return new ClassSession(classId, className, discipline, instructorId, date, startTime, endTime, fee, status);    
+        return new ClassSession(classId, className, discipline, instructorId, date, startTime, endTime, fee, status, availableSlots, maxSlots);    
     }
     
     public String toLine(){
-        return this.classId + "|" + this.className + "|" + this.discipline + "|" + this.instructorId + "|" + this.date+ "|" + this.startTime+ "|" + this.endTime+ "|" + this.fee+ "|" + this.status;
+        return this.classId + "|" + this.className + "|" + this.discipline + "|" + this.instructorId + "|" + this.date+ "|" + this.startTime+ "|" + this.endTime+ "|" + this.fee+ "|" + this.status + "|" + this.availableSlots + "|" + this.maxSlots;
     }
 }

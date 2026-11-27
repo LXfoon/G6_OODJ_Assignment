@@ -4,8 +4,12 @@
 005|Liam Lian|liamll@gmail.com|0987|0144567888|Facilities|Active
 006|Ariana Tan|ariana@gmail.com|123|0187736654|Instructor|Active
 007|Gan|gan@gmail.com|anbd213|0193325321|Instructor|Active
-008|Jane|jane@yahoo.com|E!0@#ih9|0176654321|Admin|Active
-009|William|ww@gmail.com|AWh9x)l_|01644322198|Admin|Active
-010|Bryan|bryan@gmail.com|bryan123|0125548765|Student|Active
-011|Sarah|sarah@gmail.com|sarah123|0123456789|Student|Active
-012|Daniel|daniel@gmail.com|daniel123|0198765432|Student|Active
+008|Sabrina|sabrina@gmail.com|Sab008|0129987765|Instructor|Active
+009|Jonathan|jon@gmail.com|jojo|0158804432|Instructor|Active
+010|Jane|jane@yahoo.com|E!0@#ih9|0176654321|Admin|Active
+011|William|ww@gmail.com|AWh9x)l_|01644322198|Admin|Active
+012|Bryan|bryan@gmail.com|bryan123|0125548765|Student|Active
+013|Sarah|sarah@gmail.com|sarah123|0123456789|Student|Active
+014|Daniel|daniel@gmail.com|daniel123|0198765432|Student|Active
+015|Ching Ching|chingching@gmail.com|ching$$$|01155667788|Student|Active
+016|Alian|alian@gmail.com|alian123|0102894736|Student|Active

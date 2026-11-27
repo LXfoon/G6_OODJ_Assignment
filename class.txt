@@ -1,5 +1,8 @@
-C001|Beginner Karate|Karate|007|2026-11-10|18:00|19:30|50.0|Available
-C002|June Karate|Karate|006|2026-11-12|18:00|19:30|50.0|Completed
-C003|Intermediate Karate|Karate|007|2026-11-10|18:00|19:30|50.0|Completed
-C004|Beginner Judo|Judo|007|2026-11-15|17:00|18:30|55.0|Completed
-C005|Intermediate Judo|Judo|006|2026-11-15|17:00|18:30|55.0|Completed
+C001|Beginner Karate|Karate|007|2027-04-10|18:00|19:30|50.0|Full|0|5
+C002|Beginner Judo|Judo|006|2027-03-02|10:00|11:30|40.0|Available|5|5
+C003|Taekwondo Basics|Taekwondo|008|2026-11-10|19:00|20:30|45.0|Completed|2|5
+C004|Beginner Karate|Karate|007|2027-03-22|14:00|15:30|50.0|Full|0|5
+C005|MMA Basics|MMA|009|2027-03-15|09:00|10:30|35.0|Full|0|5
+C006|Taekwondo Basics|Taekwondo|008|2027-02-18|16:00|17:30|45.0|Available|5|5
+C007|Beginner Judo|Judo|006|2027-01-10|11:00|12:30|40.0|Full|0|5
+C008|MMA Basics|MMA|009|2026-11-15|18:00|19:30|35.0|Cancelled|5|5
