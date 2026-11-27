@@ -7,7 +7,7 @@ package sdams.gui;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import sdams.model.Attendance;
+import sdams.model.AttendanceRecord;
 import sdams.model.ClassSession;
 import sdams.model.Instructor;
 import sdams.model.Rating;
@@ -32,7 +32,7 @@ public class InstructorRating extends javax.swing.JFrame {
         super.setVisible(b);
     }
     
-    private ArrayList<Attendance> attendanceList = new ArrayList<>();
+    private ArrayList<AttendanceRecord> attendanceList = new ArrayList<>();
     private ArrayList<Rating> ratingList = new ArrayList<>();
     private ArrayList<ClassSession> classList = new ArrayList<>();
     private ArrayList<Instructor> instructorList = new ArrayList<>();
@@ -67,7 +67,7 @@ public class InstructorRating extends javax.swing.JFrame {
             DefaultTableModel model = (DefaultTableModel) tblRate.getModel();
             model.setRowCount(0);
             
-            FileUtil.read("attendance.txt", attendanceList, Attendance::fromLine);
+            FileUtil.read("attendance.txt", attendanceList, AttendanceRecord::fromLine);
             FileUtil.read("rating.txt", ratingList, Rating::fromLine);
             FileUtil.read("class.txt", classList, ClassSession::fromLine);
             
@@ -109,7 +109,7 @@ public class InstructorRating extends javax.swing.JFrame {
         String status = String.valueOf(cmbStatus.getSelectedItem());
         
         // Check each attendance record
-        for(Attendance a : attendanceList){
+        for(AttendanceRecord a : attendanceList){
 
             // Only display current student's attendance
             if(!a.getStudentId().equals(studentId)){
@@ -117,7 +117,7 @@ public class InstructorRating extends javax.swing.JFrame {
             }
 
             // Only display Present or Late attendance
-            if(a.getStatus() == Attendance.AttStatus.Absent){
+            if(a.getStatus() == AttendanceRecord.AttStatus.Absent){
                 continue;
             }
 
